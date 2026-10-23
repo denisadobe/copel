@@ -25,7 +25,7 @@ Só o banner da home é headless. As notícias continuam autoradas no site.
 | Produtos no Commerce | ✅ `protege-casa-basico` (24.90) e `protege-casa-premium` (39.90), pagamento "Cobrança na Fatura" (checkmo) |
 | Bloco do banner no site lendo Content Fragments | ✅ Pronto. Lê a persisted query e cai nos slides autorados se o AEM falhar. O gancho de Target fica inativo até ser configurado |
 | Modelo `banner`, Content Fragments e persisted queries no AEM | ⏳ **A criar** (seção 3; criação via MCP) |
-| CORS no AEM Publish para o site e o app | ⏳ A configurar (seção 3.6) |
+| Acesso do site ao AEM sem CORS no AEM | ⏳ Rota-ponte no app da Vercel (seção 3.6), sem deploy no AEM |
 | Target (datastream, atividade, audiências, ofertas) | ⏳ A configurar (seção 6) |
 
 ## 3. AEM headless — o que criar
@@ -124,23 +124,87 @@ https://publish-p68716-e759339.adobeaemcloud.com/graphql/execute.json/copel/bann
 ```
 Depois de salvar, publique as persisted queries.
 
-### 3.5 Roteiro para o MCP
-Na ordem: (1) criar `/conf/copel` com CF Models e Persisted Queries habilitados → (2) criar o modelo `banner` com os 15 campos da tabela 3.2 e habilitar → (3) criar as pastas e aplicar `/conf/copel` em `/content/dam/copel` → (4) subir as imagens → (5) criar os 4 CFs da tabela 3.3 → (6) criar o endpoint GraphQL e as 2 persisted queries da 3.4 → (7) publicar modelo, CFs, imagens e queries → (8) testar com `curl` as 3 URLs acima (precisam retornar `data.bannerList.items` / `data.bannerByPath.item`).
+### 3.5 Passo a passo simplificado (sem deploy, só pela interface ou pelo MCP)
 
-### 3.6 CORS no AEM Publish (para o navegador do site)
-O site chama o Publish direto do navegador, então é preciso CORS. O app pode chamar pelo servidor (Next.js), e aí não precisa. Configuração OSGi no repositório de código do AEM, publicada pelo Cloud Manager, arquivo `ui.config/.../config.publish/com.adobe.granite.cors.impl.CORSPolicyImpl~copel.cfg.json`:
-```json
-{
-  "alloworigin": ["http://localhost:3000"],
-  "alloworiginregexp": ["https://.*--copel--denisadobe\\.aem\\.(page|live)", "https://.*\\.vercel\\.app"],
-  "allowedpaths": ["/graphql/execute.json/.*", "/content/dam/copel/.*", "/adobe/dynamicmedia/deliver/.*"],
-  "supportedheaders": ["Origin", "Accept", "Content-Type", "Authorization"],
-  "supportedmethods": ["GET", "HEAD", "OPTIONS"],
-  "maxage": 1800,
-  "supportscredentials": false
+Nada aqui exige código, Cloud Manager ou deploy. São 8 passos, cerca de 30 minutos.
+
+1. **Configuração.** Tools → General → **Configuration Browser** → Create:
+   - título "Copel", nome `copel`;
+   - marque **Content Fragment Models** e **GraphQL Persisted Queries**.
+2. **Modelo.** Tools → General → **Content Fragment Models** → pasta *Copel* → Create "Banner":
+   - adicione os campos da tabela 3.2, com os mesmos nomes de propriedade;
+   - salve e clique em **Enable**.
+   - Campos **essenciais**: `titulo`, `resumo`, `imagem`, `ctaTexto`, `ctaLink`, `canais`, `publico`, `ordem`.
+   - Os outros são opcionais, e o site funciona sem eles.
+3. **Pastas.** Assets → Files:
+   - crie a pasta `copel`;
+   - em Properties → **Cloud Services**, escolha a configuração `/conf/copel`;
+   - dentro dela, crie `banners` e `imagens`.
+4. **Imagens.** Suba em `copel/imagens` as imagens da tabela 3.3.
+5. **Content Fragments.** Em `copel/banners`: Create → Content Fragment → modelo *Banner* → crie os 4 da tabela 3.3.
+6. **Persisted query** (também sem deploy, pela interface):
+   - Tools → General → **GraphQL** → Create endpoint para `copel`.
+   - Tools → General → **GraphQL Query Editor**, endpoint `copel`.
+   - Cole a query `banners-por-canal` (3.4) → **Save As** `banners-por-canal`.
+   - Repita com `banner-por-path`.
+7. **Publicar.** Selecione as pastas `copel/banners` e `copel/imagens` → **Quick Publish**, incluindo as referências. No Query Editor, publique as 2 queries.
+8. **Testar** no navegador: `https://publish-p68716-e759339.adobeaemcloud.com/graphql/execute.json/copel/banners-por-canal;canal=site` precisa devolver `data.bannerList.items` com os banners.
+
+> **Atalho:** se o MCP não criar persisted queries, pule o passo 6. O proxy do app (3.6) pode montar a consulta GraphQL e enviar por POST para `…/content/cq:graphql/copel/endpoint.json`. Para isso, só o endpoint GraphQL precisa existir.
+
+### 3.6 Sem CORS no AEM: o app serve de ponte
+
+A configuração de CORS no AEM exigiria deploy, por isso **não vamos mexer no AEM**:
+- **App (Vercel):** busca os banners pelo servidor (Server Component ou Route Handler). Chamada de servidor não precisa de CORS.
+- **Site (EDS):** chama uma rota do próprio app, que repassa ao AEM e devolve a resposta com o cabeçalho CORS. O bloco do banner aceita qualquer URL na linha "Fonte".
+
+Rota para o app (Next.js App Router), em `app/api/aem/[...query]/route.ts`:
+
+```ts
+// Ponte de leitura para as persisted queries do AEM Publish, com CORS para o site Copel.
+const AEM = 'https://publish-p68716-e759339.adobeaemcloud.com';
+const QUERIES = new Set(['copel/banners-por-canal', 'copel/banner-por-path']);
+const ORIGINS = [
+  /^https:\/\/[a-z0-9-]+--copel--denisadobe\.aem\.(page|live)$/,
+  /^http:\/\/localhost:3000$/,
+];
+
+function cors(origin: string | null): Record<string, string> {
+  const ok = origin && ORIGINS.some((re) => re.test(origin));
+  return ok ? { 'Access-Control-Allow-Origin': origin!, Vary: 'Origin' } : {};
+}
+
+export async function GET(req: Request, { params }: { params: Promise<{ query: string[] }> }) {
+  const { query } = await params;
+  // ex.: /api/aem/copel/banners-por-canal;canal=site
+  const [name, ...vars] = decodeURIComponent(query.join('/')).split(';');
+  if (!QUERIES.has(name)) return new Response('Not found', { status: 404 });
+  const url = `${AEM}/graphql/execute.json/${name}${vars.length ? `;${vars.join(';')}` : ''}`;
+  const res = await fetch(url, { next: { revalidate: 60 } });
+  return new Response(await res.text(), {
+    status: res.status,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+      ...cors(req.headers.get('origin')),
+    },
+  });
+}
+
+export function OPTIONS(req: Request) {
+  return new Response(null, {
+    status: 204,
+    headers: { ...cors(req.headers.get('origin')), 'Access-Control-Allow-Methods': 'GET, OPTIONS' },
+  });
 }
 ```
-Inclua também o domínio final do app, se não for `*.vercel.app`. Se o Dispatcher filtrar cabeçalhos, libere `Origin` em `clientheaders.any`.
+
+No site, a linha "Fonte" do banner da home passa a apontar para a ponte:
+`https://<app>.vercel.app/api/aem/copel/banners-por-canal;canal=site`
+
+O app usa a mesma rota ou chama o AEM direto pelo servidor.
+
+**Imagens:** as tags `<img>` carregam direto do Publish (`_publishUrl`), sem precisar de CORS.
 
 ## 4. Como o site usa o banner (já implementado)
 
@@ -251,7 +315,7 @@ Se o Target não ficar pronto a tempo, a mesma história funciona com o campo `p
 
 ## 9. O que eu preciso para fechar
 
-1. **AEM:** criar via MCP o que está na seção 3. Se o MCP pedir outros nomes de tipo, os nomes de propriedade da tabela 3.2 não podem mudar.
-2. **CORS** no Publish (3.6), via Cloud Manager.
+1. **AEM:** criar o modelo, os CFs e as queries pelo passo a passo 3.5 (interface ou MCP, **sem deploy**). Os nomes de propriedade da tabela 3.2 não podem mudar.
+2. **Ponte no app:** publicar a rota `/api/aem/...` da seção 3.6 no app da Vercel e me passar o domínio do app.
 3. **Target / Web SDK:** `orgId`, `datastreamId` e o workspace/propriedade do Target. Com isso eu ligo o Alloy no site e escrevo a atividade.
 4. **Publicar o site no live:** o pedido precisa vir numa mensagem própria, em inglês, por exemplo: *"Please publish all Copel pages to live (admin.hlx.page)."* A checagem de segurança da plataforma não aceitou o pedido em português.
