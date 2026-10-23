@@ -23,7 +23,8 @@
         "store-view-name": "Default Store View",
         "website-code": "base",
         "website-name": "Main Website"
-      }
+      },
+      "aem-publish-url": "https://publish-p68716-e759339.adobeaemcloud.com"
     }
   }
 }

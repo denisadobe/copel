@@ -1,187 +1,257 @@
-# Copel demo — handoff para o app (Vercel)
+# Copel demo — jornada multicanal (AEM headless, Commerce e Target) e instruções para o app
 
-Contexto para a IA que constrói o app. Atualizado em 23/10/2026.
+Atualizado em 23/10/2026. Substitui a versão anterior deste documento.
 
-## 1. Visão geral
+## 1. A história da demo
 
-Demo de uma distribuidora de energia (Copel) mostrando **um conteúdo, vários canais**:
+**Um conteúdo, uma conta, uma decisão, em todos os canais.**
 
-| Peça | Papel | Onde |
+| Peça | Papel na demo | Onde |
 |---|---|---|
-| **Site** | AEM Edge Delivery Services (EDS), autoria no Document Authoring (DA) | repo `denisadobe/copel`, site `copel` |
-| **Conteúdo headless** | AEM Sites as a Cloud Service: Content Fragments + GraphQL (persisted queries) | instância AEM a definir (fase 3) |
-| **Venda de serviço** | Adobe Commerce as a Cloud Service (SaaS), sandbox compartilhado com o demo Sebrae | endpoint GraphQL na seção 3.2 |
-| **App** | Next.js (ou similar) na Vercel; consome AEM (conteúdo) e Commerce (catálogo, login, carrinho, pedido) | este projeto |
+| **AEM Sites as a Cloud Service** (headless) | Fonte única do **banner da home**: Content Fragments `banner` entregues por GraphQL (persisted queries) | Author `https://author-p68716-e759339.adobeaemcloud.com` · Publish `https://publish-p68716-e759339.adobeaemcloud.com` |
+| **Site Copel** (AEM Edge Delivery Services + Document Authoring) | Canal web. O bloco `carousel-hero` consome os mesmos Content Fragments | `https://main--copel--denisadobe.aem.page` (preview) / `.aem.live` (live) |
+| **App Copel** (Vercel) | Canal app. Consome os mesmos Content Fragments e o mesmo Commerce | projeto do app |
+| **Adobe Commerce as a Cloud Service** | Venda do Seguro Protege Casa: catálogo, conta do cliente, checkout e pedidos | sandbox `na1-sandbox` (seção 5) |
+| **Adobe Target** (via Web SDK / Edge Network) | Decide **qual banner** cada pessoa vê, no site e no app, com base no que ela já comprou | a configurar (seção 6) |
 
-Não há SSO, Learning Manager nem backend próprio (Runtime). O login é **só o do Commerce** (cliente da loja), o mesmo no site e no app.
+Só o banner da home é headless. As notícias continuam autoradas no site.
 
-## 2. Status do site (o que já existe)
+## 2. Status atual
 
-Migrado do site atual `https://www.copel.com/site/`, com identidade visual Copel:
+| Item | Status |
+|---|---|
+| Site migrado (home, falta de luz, notícias, seguro, componentes, loja) | ✅ Código na `main`, conteúdo no DA, **preview** gerado. **Live ainda não publicado** |
+| Loja (login, cadastro, conta, checkout expresso, pedidos) | ✅ Funcionando no preview. Pedido de teste **000000017** feito em `main--copel--denisadobe.aem.page` |
+| Produtos no Commerce | ✅ `protege-casa-basico` (24.90) e `protege-casa-premium` (39.90), pagamento "Cobrança na Fatura" (checkmo) |
+| Bloco do banner no site lendo Content Fragments | ✅ Pronto. Lê a persisted query e cai nos slides autorados se o AEM falhar. O gancho de Target fica inativo até ser configurado |
+| Modelo `banner`, Content Fragments e persisted queries no AEM | ⏳ **A criar** (seção 3; criação via MCP) |
+| CORS no AEM Publish para o site e o app | ⏳ A configurar (seção 3.6) |
+| Target (datastream, atividade, audiências, ofertas) | ⏳ A configurar (seção 6) |
 
-| Página | Caminho EDS | Conteúdo |
-|---|---|---|
-| Home | `/` | banner rotativo, serviços rápidos, notícias, app, casa/empresa, painéis institucionais, atalhos, diretório de links |
-| Atendimento: Falta de luz | `/copel-distribuicao/falta-de-luz` | serviço "Sem Luz" da Copel embutido em iframe (`https://www.copel.com/slwweb/publico/semluz/inicio.jsf`) + instruções app/SMS |
-| Notícias | `/noticias` | destaque + lista de notícias |
-| Venda de serviço | `/seguro-protege-casa` | hero, coberturas, passo a passo, **planos Básico R$ 24,90 / Premium R$ 39,90**, FAQ |
-| Componentes | `/componentes` | vitrine dos 15 componentes e variações |
+## 3. AEM headless — o que criar
 
-**Ainda não publicado.** O trabalho está só localmente (branch `site-migracao`, sem push) e o DA ainda tem o conteúdo padrão do template. Os endpoints EDS abaixo passam a responder depois do push da branch e do upload/preview do conteúdo no DA.
+### 3.1 Configuração
+- Configuração: **`/conf/copel`** (título "Copel"), com **Content Fragment Models** e **GraphQL Persisted Queries** habilitados.
+- Endpoint GraphQL: criar o endpoint da configuração `copel` (Tools → General → GraphQL), caminho `/content/cq:graphql/copel/endpoint`.
+- Pasta de assets: **`/content/dam/copel`**, com a configuração `/conf/copel` aplicada (Properties → Cloud Configuration) e as subpastas:
+  - `/content/dam/copel/banners` (Content Fragments)
+  - `/content/dam/copel/imagens/banners` (imagens)
 
-## 3. Endpoints
+### 3.2 Modelo de Content Fragment `banner`
+Título "Banner", nome técnico **`banner`** (o tipo GraphQL fica `BannerModel`, e as consultas `bannerList` / `bannerByPath`). Os nomes de propriedade são exatamente estes, porque o bloco do site e o app leem esses nomes.
 
-### 3.1 Site EDS (público, sem autenticação)
+| # | Rótulo | Nome (propriedade) | Tipo | Obrigatório | Regras |
+|---|---|---|---|---|---|
+| 1 | Título | `titulo` | Single line text | sim | máx. 90 caracteres |
+| 2 | Resumo | `resumo` | Multi line text, **Plain text** | não | máx. 200 caracteres |
+| 3 | Imagem (desktop) | `imagem` | Content Reference (somente imagem) | sim | raiz `/content/dam/copel/imagens/banners`, ~1600×900 |
+| 4 | Imagem (mobile) | `imagemMobile` | Content Reference (somente imagem) | não | vertical, ~750×1000 |
+| 5 | Texto alternativo | `imagemAlt` | Single line text | não | acessibilidade |
+| 6 | Botão principal — texto | `ctaTexto` | Single line text | não | |
+| 7 | Botão principal — link | `ctaLink` | Single line text | não | URL absoluta ou caminho do site (`/seguro-protege-casa`) |
+| 8 | Botão secundário — texto | `ctaSecundarioTexto` | Single line text | não | |
+| 9 | Botão secundário — link | `ctaSecundarioLink` | Single line text | não | |
+| 10 | Canais | `canais` | Enumeration, **múltipla**, checkboxes | sim | opções `site`, `app` |
+| 11 | Público | `publico` | Enumeration, simples, dropdown | sim | opções `todos`, `visitante`, `cliente-protege-casa` (padrão `todos`) |
+| 12 | Ordem | `ordem` | Number (Integer) | não | menor aparece primeiro |
+| 13 | Ativo de | `ativoDe` | Date and Time | não | |
+| 14 | Ativo até | `ativoAte` | Date and Time | não | |
+| 15 | SKU relacionado | `skuRelacionado` | Single line text | não | liga o banner a um produto do Commerce |
 
-- Preview: `https://main--copel--denisadobe.aem.page{path}` (branch: `https://{branch}--copel--denisadobe.aem.page{path}`)
-- Live: `https://main--copel--denisadobe.aem.live{path}`
-- HTML semântico de qualquer página ou fragmento: `{host}{path}.plain.html` (ex.: `/noticias.plain.html`, `/nav.plain.html`, `/footer.plain.html`)
-- Imagens publicadas: `{host}/media_<hash>.<ext>?width=750&format=webply&optimize=medium`
-- Listagem JSON de páginas (query index): **ainda não configurado**. Se o app precisar listar páginas do site, configuramos `query-index` em tools.aem.live. **Para notícias e banners, use o AEM GraphQL (3.3), não o EDS.**
+Habilite o modelo depois de salvar (Enable).
 
-### 3.2 Adobe Commerce (SaaS sandbox, público para storefront)
+### 3.3 Content Fragments de exemplo (em `/content/dam/copel/banners`)
+Suba antes as imagens para `/content/dam/copel/imagens/banners` a partir das URLs abaixo, que são as mesmas usadas hoje no site.
 
-- GraphQL (Core + Catalog Service, um único endpoint):
-  `https://na1-sandbox.api.commerce.adobe.com/TcvPqpzQp1aRq3ohMQt2ct/graphql`
-- Cabeçalhos obrigatórios (sem `x-api-key`, sem environment id):
-  ```
-  Content-Type: application/json
-  Store: default
-  Magento-Store-Code: main_website_store
-  Magento-Store-View-Code: default
-  Magento-Website-Code: base
-  ```
-  Os códigos de store podem mudar quando criarmos a loja Copel no sandbox (fase do e-commerce). Deixe-os em variáveis de ambiente.
-- Produto previsto (**ainda não criado**): 1 serviço virtual, "Seguro Protege Casa", com 2 planos
-  - SKU `protege-casa-basico`: R$ 24,90/mês
-  - SKU `protege-casa-premium`: R$ 39,90/mês, selo "Mais Vendido"
-- Operações que o app vai usar (GraphQL padrão do Commerce):
-  - Catálogo: `products(skus: [...])` ou `productSearch` (Catalog Service), com nome, preço e atributos
-  - Login: `generateCustomerToken(email, password)` → token Bearer; cadastro: `createCustomerV2`
-  - Carrinho: `createEmptyCart` / `customerCart`, `addProductsToCart`
-  - Checkout (virtual, sem entrega): `setBillingAddressOnCart` (**endereço de cobrança e telefone são obrigatórios mesmo para produto virtual**), `setPaymentMethodOnCart` (método a definir: `checkmo` ou `free`), `placeOrder`
-  - Pedidos: `customer { orders { items { number status total { grand_total { value currency } } items { product_sku product_name } } } }`
-- Regras aprendidas no projeto Sebrae:
-  - Nomes de cliente com `+` ou símbolos são recusados; limpe antes de enviar.
-  - Para o mesmo login valer no site EDS, o site usa o cookie `auth_dropin_user_token`. O app guarda o seu próprio token, e a conta e os pedidos são os mesmos.
+| Nome do CF | titulo | resumo | ctaTexto → ctaLink | ctaSecundario | canais | publico | ordem | skuRelacionado | imagem / imagemMobile (origem) |
+|---|---|---|---|---|---|---|---|---|---|
+| `app-copel` | Acesse o APP da Copel | Com o APP da Copel, você consegue pagar suas faturas e acessar os serviços do site na palma da sua mão | App Store → `https://apple.co/3AUOVJb` | Google play → `https://play.google.com/store/apps/details?id=com.copel.mbf` | site | todos | 3 | — | `…/2026/06/banner-home-desktop-copiar.webp` / `…/2026/06/banner-home-mobile-copiar-scaled.webp` |
+| `protege-casa` | Segurança e proteção na sua conta de luz! | Contrate o Seguro Protege Casa a partir de R$ 24,90 por mês, pago direto na fatura. | Contratar Protege Casa → `/seguro-protege-casa` | — | site, app | visitante | 1 | protege-casa-basico | `…/2025/05/banner-site-desktop-2.jpg` / `…/2025/05/banner-site-mobile-2.jpg` |
+| `protege-vida-upsell` | Sua casa está protegida. E a sua família? | Quem já tem o Protege Casa pode contratar o Protege Vida com o mesmo pagamento na conta de luz. | Conhecer o Protege Vida → `https://www.copel.com/site/seguro-protege-vida/` | — | site, app | cliente-protege-casa | 1 | — | `…/2025/05/banner-site-desktop-2.jpg` / `…/2025/05/banner-site-mobile-2.jpg` (ou outra imagem de família) |
+| `copel-investe` | O Paraná cresce. A Copel investe. | Mais qualidade em distribuição, transmissão e geração de energia todos os dias | Saiba mais → `https://www.copel.com/site/investe/` | — | site, app | todos | 4 | — | `…/2026/09/banner-site-desktop.webp` / `…/2026/09/banner-site-mobile.webp` |
 
-### 3.3 AEM headless (Content Fragments) — fase 3, a criar
+Prefixo das imagens (`…`): `https://www.copel.com/site/wp-content/uploads`. Publique os CFs e as imagens (Publish → Publish incl. referências).
 
-- Instância: AEM Sites as a Cloud Service (**Author/Publish a definir**)
-- Endpoint previsto (persisted queries, GET, cacheável):
-  `https://publish-p<PROGRAM>-e<ENV>.adobeaemcloud.com/graphql/execute.json/copel/<query>;<param>=<valor>`
-- Configuração: `/conf/copel`, Content Fragments em `/content/dam/copel/noticias` e `/content/dam/copel/banners`
-- Persisted queries previstas: `copel/noticias-lista` (limit, offset, categoria), `copel/noticia-por-slug` (slug), `copel/banners-por-canal` (canal = `site` | `app`)
-- Até a instância existir, use os JSON de exemplo da seção 4 como mock, com o mesmo formato.
+### 3.4 Persisted queries (configuração `copel`)
 
-## 4. Modelos de Content Fragment (mesmos campos dos componentes do site)
-
-O site já tem os componentes com exatamente esses campos (`cards-news` e `carousel-hero`). Assim, o mesmo fragmento alimenta o site e o app.
-
-### Notícia (`noticia`)
-| Campo | Tipo | Obs. |
-|---|---|---|
-| `titulo` | texto curto | obrigatório |
-| `slug` | texto curto | único, usado na URL |
-| `resumo` | texto longo (plain) | ~200 caracteres |
-| `corpo` | texto longo (rich text) | conteúdo completo |
-| `imagem` | referência de conteúdo (imagem DAM) | 16:9 |
-| `data` | data | exibir dd/mm/aaaa |
-| `categoria` | enumeração | Notícias, Destaque, Boletim Copel, Distribuição... |
-| `destaque` | booleano | primeira notícia grande |
-| `linkExterno` | texto curto (URL) | opcional |
-
-### Banner (`banner`)
-| Campo | Tipo | Obs. |
-|---|---|---|
-| `titulo` | texto curto | obrigatório |
-| `resumo` | texto longo (plain) | opcional |
-| `imagem` | referência de conteúdo | desktop, ~1600×900 |
-| `imagemMobile` | referência de conteúdo | opcional, vertical |
-| `ctaTexto` / `ctaLink` | texto curto | botão principal |
-| `ctaSecundarioTexto` / `ctaSecundarioLink` | texto curto | opcional |
-| `canais` | enumeração múltipla | `site`, `app` |
-| `ordem` | número | ordem no carrossel |
-| `ativoDe` / `ativoAte` | data e hora | janela de exibição |
-| `skuRelacionado` | texto curto | opcional: liga o banner a um produto do Commerce (ex. `protege-casa-basico`) |
-
-### Mock JSON (formato de retorno esperado do GraphQL)
-```json
-{
-  "data": {
-    "noticiaList": {
-      "items": [
-        {
-          "titulo": "Copel é premiada como melhor geradora e transmissora de energia do Brasil",
-          "slug": "copel-e-premiada-como-melhor-geradora-e-transmissora",
-          "resumo": "A Copel foi reconhecida pelo Operador Nacional do Sistema Elétrico (ONS) como a melhor geradora hidrelétrica e a melhor transmissora de energia em corrente alternada.",
-          "imagem": { "_path": "/content/dam/copel/noticias/premio-ons.jpg", "_dynamicUrl": "/adobe/dynamicmedia/deliver/..." },
-          "data": "2026-10-22",
-          "categoria": "Notícias",
-          "destaque": true,
-          "linkExterno": "https://www.copel.com/site/noticias/copel-e-premiada-como-melhor-geradora-e-transmissora-de-energia-do-brasil/"
-        }
-      ]
+**`copel/banners-por-canal`** — banners de um canal e de um público. O bloco do site usa `canal=site`, e o app usa `canal=app`.
+```graphql
+query BannersPorCanal($canal: String!, $publico: String = "todos") {
+  bannerList(
+    filter: {
+      canais: { _expressions: [{ value: $canal, _operator: CONTAINS }] }
+      publico: { _logOp: OR, _expressions: [{ value: $publico }, { value: "todos" }] }
     }
-  }
-}
-```
-```json
-{
-  "data": {
-    "bannerList": {
-      "items": [
-        {
-          "titulo": "Segurança e proteção na sua conta de luz!",
-          "resumo": "Agora você pode contratar seguros de vida e residencial e pagar diretamente na fatura.",
-          "imagem": { "_path": "/content/dam/copel/banners/seguro-protege.jpg" },
-          "ctaTexto": "Seguro Protege Casa",
-          "ctaLink": "/seguro-protege-casa",
-          "canais": ["site", "app"],
-          "ordem": 1,
-          "skuRelacionado": "protege-casa-basico"
-        }
-      ]
+    sort: "ordem ASC"
+  ) {
+    items {
+      _path
+      titulo
+      resumo { plaintext }
+      imagem { ... on ImageRef { _path _publishUrl _dynamicUrl width height } }
+      imagemMobile { ... on ImageRef { _path _publishUrl _dynamicUrl width height } }
+      imagemAlt
+      ctaTexto ctaLink ctaSecundarioTexto ctaSecundarioLink
+      canais publico ordem ativoDe ativoAte skuRelacionado
     }
   }
 }
 ```
 
-## 5. Jornada sugerida para a demo
+**`copel/banner-por-path`** — um banner específico, usado quando o Target escolhe o banner.
+```graphql
+query BannerPorPath($path: String!) {
+  bannerByPath(_path: $path) {
+    item {
+      _path
+      titulo
+      resumo { plaintext }
+      imagem { ... on ImageRef { _path _publishUrl _dynamicUrl width height } }
+      imagemMobile { ... on ImageRef { _path _publishUrl _dynamicUrl width height } }
+      imagemAlt
+      ctaTexto ctaLink ctaSecundarioTexto ctaSecundarioLink
+      canais publico ordem skuRelacionado
+    }
+  }
+}
+```
 
-Persona: **Ana, cliente residencial da Copel**, no app e no site.
+Chamadas (GET, cacheáveis na CDN do Publish):
+```
+https://publish-p68716-e759339.adobeaemcloud.com/graphql/execute.json/copel/banners-por-canal;canal=site
+https://publish-p68716-e759339.adobeaemcloud.com/graphql/execute.json/copel/banners-por-canal;canal=app;publico=cliente-protege-casa
+https://publish-p68716-e759339.adobeaemcloud.com/graphql/execute.json/copel/banner-por-path;path=/content/dam/copel/banners/protege-vida-upsell
+```
+Depois de salvar, publique as persisted queries.
 
-1. **Abre o app (home):** carrossel de **banners (AEM CF, canal `app`)**, atalhos de serviço e as 3 últimas **notícias (AEM CF)**. *Mensagem: o mesmo conteúdo que está no site, editado uma vez no AEM.*
-2. **Falta de luz:** atalho "Falta de energia" abre o serviço da Copel (WebView ou link para `https://www.copel.com/slwweb/publico/semluz/inicio.jsf`), igual à página `/copel-distribuicao/falta-de-luz` do site.
-3. **Notícia:** lista → detalhe pelo `slug` (AEM GraphQL `noticia-por-slug`).
-4. **Banner do seguro:** "Seguro Protege Casa" leva à tela do produto. **Planos e preços vêm do Commerce** (`products(skus: [...])`). Textos de apoio (coberturas, FAQ) podem vir do AEM, ou ficar fixos na v1.
-5. **Contratar:** login com a conta da loja (**Commerce `generateCustomerToken`**) → adiciona o plano ao carrinho → checkout expresso (só dados de cobrança e telefone, sem entrega) → `placeOrder` → tela de confirmação com o número do pedido.
-6. **Meus pedidos:** lista os pedidos do Commerce. O mesmo pedido aparece se a Ana entrar no site (`/loja/conta`, fase do e-commerce). *Mensagem: um cliente, uma conta e um histórico em todos os canais.*
-7. **Momento "uau" para o autor (opcional):** editar o título de um banner no AEM e publicar. O app e o site mudam juntos.
+### 3.5 Roteiro para o MCP
+Na ordem: (1) criar `/conf/copel` com CF Models e Persisted Queries habilitados → (2) criar o modelo `banner` com os 15 campos da tabela 3.2 e habilitar → (3) criar as pastas e aplicar `/conf/copel` em `/content/dam/copel` → (4) subir as imagens → (5) criar os 4 CFs da tabela 3.3 → (6) criar o endpoint GraphQL e as 2 persisted queries da 3.4 → (7) publicar modelo, CFs, imagens e queries → (8) testar com `curl` as 3 URLs acima (precisam retornar `data.bannerList.items` / `data.bannerByPath.item`).
 
-### Quem fornece o quê
-| Funcionalidade | AEM (CF + GraphQL) | Commerce | EDS (site) |
+### 3.6 CORS no AEM Publish (para o navegador do site)
+O site chama o Publish direto do navegador, então é preciso CORS. O app pode chamar pelo servidor (Next.js), e aí não precisa. Configuração OSGi no repositório de código do AEM, publicada pelo Cloud Manager, arquivo `ui.config/.../config.publish/com.adobe.granite.cors.impl.CORSPolicyImpl~copel.cfg.json`:
+```json
+{
+  "alloworigin": ["http://localhost:3000"],
+  "alloworiginregexp": ["https://.*--copel--denisadobe\\.aem\\.(page|live)", "https://.*\\.vercel\\.app"],
+  "allowedpaths": ["/graphql/execute.json/.*", "/content/dam/copel/.*", "/adobe/dynamicmedia/deliver/.*"],
+  "supportedheaders": ["Origin", "Accept", "Content-Type", "Authorization"],
+  "supportedmethods": ["GET", "HEAD", "OPTIONS"],
+  "maxage": 1800,
+  "supportscredentials": false
+}
+```
+Inclua também o domínio final do app, se não for `*.vercel.app`. Se o Dispatcher filtrar cabeçalhos, libere `Origin` em `clientheaders.any`.
+
+## 4. Como o site usa o banner (já implementado)
+
+Bloco `carousel-hero` (home). No Document Authoring, a primeira linha da tabela do bloco vira a configuração:
+
+| Carousel Hero | |
+|---|---|
+| Fonte | `/graphql/execute.json/copel/banners-por-canal;canal=site` |
+| Escopo Target | `copel-home-hero` *(opcional)* |
+| *(slides autorados abaixo = fallback)* | |
+
+- **Endereço do Publish:** um caminho relativo usa `aem-publish-url` do `config.json` (`https://publish-p68716-e759339.adobeaemcloud.com`).
+- **Ordem de carregamento:** os slides autorados aparecem na hora. Os do AEM entram quando chegam, com timeout de cerca de 4 s, então o LCP não espera o AEM.
+- **Fallback:** se der erro, timeout ou vier lista vazia, ficam os slides autorados.
+- **Atributos:** cada slide vindo do AEM leva `data-cf-path` (o `_path` do CF) e o bloco recebe `data-source="content-fragments"`.
+- **Target:** com "Escopo Target" e Web SDK (`window.alloy`) na página, o bloco pede a decisão. Se a resposta trouxer `{ "bannerPath": "…" }`, esse banner vai para o primeiro slide (ou é buscado por `banner-por-path`) e a exibição é registrada no Target.
+
+**Para ligar na home:** depois que os CFs existirem, basta adicionar a linha "Fonte" no `index` do DA e gerar o preview. Hoje a home continua com os slides autorados.
+
+## 5. Commerce (sandbox) — referência rápida para o app
+
+- **GraphQL:** `https://na1-sandbox.api.commerce.adobe.com/TcvPqpzQp1aRq3ohMQt2ct/graphql`
+- **Cabeçalhos:**
+  - `Content-Type: application/json`
+  - `Store: default`
+  - `Magento-Store-Code: main_website_store`
+  - `Magento-Store-View-Code: default`
+  - `Magento-Website-Code: base`
+  - Não use `x-api-key`.
+- **SKUs:** `protege-casa-basico` (24.90) e `protege-casa-premium` (39.90).
+  - Produtos virtuais: sem entrega.
+  - Os preços vêm em USD; site e app **exibem como R$** (ajuste de demo: trocar a moeda na exibição).
+- **Fluxo (o mesmo do site):**
+  1. `generateCustomerToken` → `Authorization: Bearer <token>`. Cadastro: `createCustomerV2`.
+  2. `customerCart { id }` → remover itens existentes → `addProductsToCart(cartId, [{ sku, quantity: 1 }])`.
+  3. `setBillingAddressOnCart`: obrigatório mesmo para produto virtual. Use o endereço do cliente ou o neutro: Rua José Izidoro Biazetto, 158 · Curitiba · PR · 81200-240 · BR · tel. 4133310000.
+  4. `setPaymentMethodOnCart(code: "checkmo")`: o título é "Cobrança na Fatura".
+  5. `placeOrder(input: { cart_id })` → `orderV2.number`.
+  6. Pedidos: `customer { orders { items { number status order_date total { grand_total { value } } items { product_sku product_name } } } }`.
+- **Mesma conta e mesmos pedidos no site e no app.** O site guarda a sessão no cookie `auth_dropin_user_token`; o app guarda o próprio token.
+- Nomes de cliente com `+` ou símbolos são recusados pelo Commerce: limpe antes de enviar.
+
+## 6. Personalização com Adobe Target
+
+### 6.1 Ideia
+O Target decide **qual Content Fragment de banner** cada pessoa vê. A oferta do Target **não guarda conteúdo**, só aponta para o CF:
+```json
+{ "bannerPath": "/content/dam/copel/banners/protege-vida-upsell" }
+```
+O conteúdo é editado uma vez no AEM, a decisão é tomada uma vez no Target, e o site e o app renderizam do mesmo jeito.
+
+### 6.2 O que configurar
+1. **Datastream** (Data Collection → Datastreams) "copel-demo", com **Adobe Target** habilitado. Opcional: Adobe Analytics / AEP.
+2. **Web SDK no site:** carregar o Alloy com `orgId` e `datastreamId` no carregamento atrasado da página. Recomendado: o plugin `aem-martech` do Edge Delivery. O bloco do banner já chama `alloy('sendEvent', { decisionScopes: ['copel-home-hero'] })` quando `window.alloy` existe. **Preciso de `orgId` e `datastreamId` para ligar.**
+3. **No app:** Web SDK no navegador, ou **Edge Network Server API** no servidor Next.js (`POST https://server.adobedc.net/ee/v2/interact?dataStreamId=…`), com o mesmo `decisionScopes: ["copel-home-hero"]`.
+4. **Identidade entre canais:** depois do login no Commerce, envie no `identityMap` um **CRM ID** (por exemplo o e-mail do cliente em hash SHA-256, ou o `customer.id`) com `authenticatedState: "authenticated"`. Com isso a mesma pessoa é reconhecida no site e no app.
+5. **Sinal de compra:** depois do `placeOrder`, envie um evento com:
+   - `xdm.eventType: "commerce.purchases"`
+   - `productListItems: [{ SKU: "protege-casa-basico", priceTotal: 24.9 }]`
+   - `data.__adobe.target.profile: { "protegeCasa": "true" }`
+
+   O Target guarda `user.protegeCasa = true` no perfil.
+6. **Atividade no Target:** do tipo **Experience Targeting**, form-based, location/escopo `copel-home-hero`.
+   - Audiência "Cliente Protege Casa" (`profile.protegeCasa = true`) → oferta JSON `{ "bannerPath": "/content/dam/copel/banners/protege-vida-upsell" }`.
+   - Todos os outros visitantes → oferta JSON `{ "bannerPath": "/content/dam/copel/banners/protege-casa" }`.
+   - Métrica: clique no CTA ou o evento `commerce.purchases`.
+
+### 6.3 Plano B sem Target
+Se o Target não ficar pronto a tempo, a mesma história funciona com o campo `publico` do CF. O app (e o site, pelo `;publico=` da query) pede `publico=cliente-protege-casa` quando o cliente logado já tem um pedido com SKU `protege-casa-*`, e `publico=visitante` nos outros casos.
+
+## 7. Instruções para o app (resumo para a IA do app)
+
+1. **Banner da home:**
+   - Busque no servidor (Next.js Server Component ou Route Handler) `…/execute.json/copel/banners-por-canal;canal=app;publico=<publico>`, com `revalidate` de 60 s.
+   - Use as imagens de `_dynamicUrl` (prefixe o host do Publish e use `?width=…&preferwebp=true`) ou de `_publishUrl`.
+   - Ordene por `ordem` e respeite `ativoDe` e `ativoAte`.
+2. **Personalização:**
+   - Antes de renderizar o banner, pergunte ao Target pela Edge Network API: escopo `copel-home-hero`, mais o `identityMap` com o CRM ID se o usuário estiver logado.
+   - Se vier `bannerPath`, busque `banner-por-path` e coloque esse banner em primeiro.
+   - Registre a exibição: evento `decisioning.propositionDisplay`.
+   - Sem resposta do Target, use o plano B (campo `publico`).
+3. **Commerce:**
+   - Login, cadastro, compra e "Meus pedidos" exatamente como na seção 5.
+   - Depois da compra, envie o evento de compra (seção 6.2, item 5) para o próximo banner ser o de upsell.
+4. **Visual:**
+   - Cores: laranja `#F5821E` nas barras e na marca; botões `#C85000` com texto branco; títulos `#E06000`; grafite `#373A3C`; texto `#151C21`.
+   - Fontes: Quenda nos títulos (peso 500, `https://www.copel.com/site/wp-content/uploads/2021/12/Quenda-Medium.ttf`) e Univers LT 55 Roman no texto (`https://www.copel.com/site/wp-content/uploads/2021/12/Univers-LT-55-Roman.ttf`), ambas com CORS liberado. Use `font-synthesis: none`.
+5. **Segredos:** nenhum segredo no app para essas leituras (persisted queries publicadas e Commerce storefront são públicos). Tokens de cliente só na sessão do usuário.
+
+## 8. Roteiro da demo (10 a 12 minutos)
+
+| # | Tela | Fala / ação | O que demonstra |
 |---|---|---|---|
-| Banners da home | ✅ fonte | — | consome o mesmo CF (fase 3) |
-| Notícias | ✅ fonte | — | consome o mesmo CF (fase 3) |
-| Produto, plano, preço | textos de marketing | ✅ fonte (SKU, preço) | bloco `cards-plans` com `data-sku` |
-| Login e cadastro | — | ✅ | drop-ins Commerce |
-| Carrinho, checkout, pedidos | — | ✅ | drop-ins Commerce |
-| Serviços Copel (Sem Luz etc.) | — | — | iframe; no app, WebView ou link |
+| 1 | Site (home) e app (home), lado a lado, como visitante | "Mesmo banner nos dois canais: Protege Casa." | AEM headless: um CF, dois canais |
+| 2 | AEM Author → CF `protege-casa` | Editar o título ("…a partir de R$ 24,90") → Publish | Autoria única |
+| 3 | Recarregar o site e o app | Os dois mostram o texto novo | Entrega headless e cache |
+| 4 | Site → Seguro Protege Casa → "Quero o Plano Básico" | Login (Commerce) → checkout expresso → **Cobrança na Fatura** → pedido confirmado | Commerce no EDS, venda de serviço sem entrega |
+| 5 | App → Meus pedidos | O mesmo pedido aparece | Uma conta, um histórico |
+| 6 | App (logado) e site (logado) → home | O banner agora é **"Sua casa está protegida. E a sua família?"** (Protege Vida) | Target: decisão por perfil, igual nos dois canais |
+| 7 | Target → relatório da atividade | Exibições e conversões por experiência | Medição |
+| 8 | Fechamento | "Conteúdo no AEM, transação no Commerce, decisão no Target, experiência em qualquer canal." | Visão de plataforma |
 
-## 6. Identidade visual (para o app parecer o site)
+**Dicas de preparo:**
+- Crie antes um cliente "Ana" no Commerce.
+- Use uma janela anônima para a fase visitante.
+- Deixe uma segunda conta, ainda sem pedido, para repetir a demo.
+- Se o Target não estiver pronto, use o plano B (6.3), que mostra a mesma mudança de banner.
 
-- **Cores:** laranja Copel `#F5821E` (barras e marca), laranja acessível para botões com texto branco `#C85000` (hover `#A84300`), laranja de títulos `#E06000`, amarelo `#FDB422`, grafite `#373A3C` (rodapé), texto `#151C21`, cinza claro `#F2F4F6`, borda `#E3E6E9`.
-- **Fontes:** Quenda (títulos, peso 500) e Univers LT 55 Roman (texto), servidas pela Copel com CORS liberado:
-  - `https://www.copel.com/site/wp-content/uploads/2021/12/Quenda-Medium.ttf`
-  - `https://www.copel.com/site/wp-content/uploads/2021/12/Univers-LT-55-Roman.ttf`
-  - Só existe um peso de cada. Não use bold/light sintético nos títulos (`font-synthesis: none`).
-- **Forma:** cantos de 6/12/20px, sombra suave em cards `0 4px 18px rgb(21 28 33 / 8%)`, botões com altura mínima de 48px.
-- **Logo:** `https://www.copel.com/site/wp-content/uploads/2024/08/logo-copel-cor-assinatura-email.png` (colorida); a versão branca é usada no header e no footer do site.
+## 9. O que eu preciso para fechar
 
-## 7. Pendências e decisões em aberto
-
-1. **Publicar o site:** push da branch, upload do conteúdo para o DA e preview. Isso libera os endpoints da seção 3.1.
-2. **E-commerce (próxima fase):** criar o produto e os SKUs no sandbox, definir a store view da Copel e o método de pagamento, e criar as páginas de loja do site (`/loja/entrar`, `cadastro`, `conta`, `checkout`, `pedido`).
-3. **AEM headless (fase 3):** definir a instância AEM, criar os modelos `noticia` e `banner`, as persisted queries e a configuração de CORS para o domínio da Vercel. Depois, ligar os blocos do site aos mesmos fragmentos.
-4. **Segredos:** nenhum segredo é necessário no app para as leituras públicas (Commerce storefront e persisted queries publicadas). Tokens de cliente ficam só na sessão do usuário. Nunca coloque credenciais no código ou no prompt.
+1. **AEM:** criar via MCP o que está na seção 3. Se o MCP pedir outros nomes de tipo, os nomes de propriedade da tabela 3.2 não podem mudar.
+2. **CORS** no Publish (3.6), via Cloud Manager.
+3. **Target / Web SDK:** `orgId`, `datastreamId` e o workspace/propriedade do Target. Com isso eu ligo o Alloy no site e escrevo a atividade.
+4. **Publicar o site no live:** o pedido precisa vir numa mensagem própria, em inglês, por exemplo: *"Please publish all Copel pages to live (admin.hlx.page)."* A checagem de segurança da plataforma não aceitou o pedido em português.

@@ -3,20 +3,55 @@
   "baseBlock": "carousel",
   "canonicalModel": "standalone",
   "visualCharacteristics": "Full-bleed rotating banner (6 slides, arrows + autoplay). Background image per slide, left-aligned heading, description and pill CTA(s). Optional second picture per slide is used as the mobile banner.",
-  "contentPattern": "One row per slide. Cell 1: picture (desktop) + optional second picture (mobile). Cell 2: heading (title), optional paragraph(s) (summary), 1-2 links (primary and secondary CTA).",
+  "contentPattern": "One row per slide. Cell 1: picture (desktop) + optional second picture (mobile). Cell 2: heading (title), optional paragraph(s) (summary), 1-2 links (primary and secondary CTA). Optional headless source: leading 2-cell config rows 'Fonte'/'Source' (persisted query URL, must be the first row), 'Público'/'Audience', 'Escopo Target'/'Target scope'; they are removed and the remaining authored rows become the fallback.",
   "options": [
-    { "class": "no-autoplay", "label": "No autoplay" }
+    {
+      "class": "no-autoplay",
+      "label": "No autoplay"
+    }
   ],
-  "memberVariantIds": ["carousel-hero"],
+  "memberVariantIds": [
+    "carousel-hero"
+  ],
   "contentFragmentModel": "banner",
   "cfMapping": {
-    "image": "row cell 1, first picture",
-    "mobileImage": "row cell 1, second picture (optional)",
-    "title": "row cell 2, first heading",
-    "summary": "row cell 2, paragraph(s) without links (optional)",
-    "ctaLink/ctaLabel": "row cell 2, first link (href/text)",
-    "secondaryCtaLink/secondaryCtaLabel": "row cell 2, second link (optional)"
+    "titulo": "heading (h2) of cell 2",
+    "resumo": "paragraph(s) of cell 2 (resumo.plaintext or string; blank lines split paragraphs)",
+    "imagem": "cell 1, first picture (desktop); _dynamicUrl (Dynamic Media, width/preferwebp params) > _publishUrl > _path, relative values prefixed with the query host",
+    "imagemMobile": "cell 1, second picture (mobile, optional)",
+    "ctaTexto/ctaLink": "first link (primary CTA); only http(s) or site-relative hrefs",
+    "ctaSecundarioTexto/ctaSecundarioLink": "second link (secondary CTA, optional)",
+    "ordem": "sort ascending (missing values last)",
+    "ativoDe/ativoAte": "slide shown only between these dates when present (date-only ativoAte is inclusive)",
+    "canais": "filtered by the persisted query (e.g. ;canal=site)",
+    "_path": "data-cf-path attribute on the slide"
   },
   "usage": "Home page hero rotating promotional banners (Imoveis a venda, App Copel, Copel Agro, Seguro Protege, Copel investe, Leilao federal).",
-  "reuseGuidance": "Use for full-width rotating promotional banners where each slide has an image, title, optional summary and up to two CTAs. Keep the 2-cell row structure stable: it is the contract for feeding slides from AEM headless banner Content Fragments. Slides without summary are supported; a single slide renders without navigation."
+  "reuseGuidance": "Use for full-width rotating promotional banners where each slide has an image, title, optional summary and up to two CTAs. Keep the 2-cell row structure stable: it is the contract for feeding slides from AEM headless banner Content Fragments. Slides without summary are supported; a single slide renders without navigation.",
+  "headlessSource": {
+    "configRows": [
+      {
+        "key": "Fonte / Source",
+        "value": "Persisted query URL, absolute or relative to config.json aem-publish-url (e.g. /graphql/execute.json/copel/banners-por-canal;canal=site). Must be the first row."
+      },
+      {
+        "key": "Público / Audience",
+        "value": "Sent as the ;publico= query variable when the URL does not set it."
+      },
+      {
+        "key": "Escopo Target / Target scope",
+        "value": "Adobe Target decision scope. With window.alloy, the decided {\"bannerPath\"} moves that banner first (fetched with copel/banner-por-path when not in the list) and a propositionDisplay event is sent."
+      }
+    ],
+    "responseShapes": [
+      "data.bannerList.items",
+      "data.bannerByPath.item"
+    ],
+    "fallback": "Authored rows render immediately and stay when the fetch fails, times out (4s), returns no active items or the URL is missing. Without authored rows a hero-height skeleton is shown, and the block is hidden if no banners arrive.",
+    "config": "config.json public.default aem-publish-url",
+    "persistedQueries": [
+      "copel/banners-por-canal",
+      "copel/banner-por-path"
+    ]
+  }
 }
