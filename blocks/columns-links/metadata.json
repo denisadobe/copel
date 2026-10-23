@@ -1,0 +1,11 @@
+{
+  "variantName": "columns-links",
+  "baseBlock": "columns",
+  "canonicalModel": "standalone",
+  "visualCharacteristics": "Light gray (#f2f4f6) band with a link directory: up to 5 equal columns on desktop (2 at tablet, 1 stacked on mobile). Each column has an ink-colored title (Quenda 500) with a short 2px orange divider underneath, followed by a plain vertical list of ink links that turn orange-brown on hover. Titles and dividers align across the row.",
+  "contentPattern": "One row, N cells (5 on the source). Each cell: a heading (H3 recommended; may be a link) followed by a bulleted list of links. A cell without a heading still renders its list; empty cells are ignored; links authored as paragraphs are collected into a list.",
+  "options": [],
+  "memberVariantIds": ["columns-links"],
+  "usage": "Home page link directory right above the global footer: Integridade, Fornecedores e parceiros, Investidores, Portal da Transparencia, Patrocinios.",
+  "reuseGuidance": "Use for multi-column link directories / sitemap-style link groups. Add or remove a cell to add or remove a column (more than 5 cells wrap to a new row on desktop). Put the block in a section with Style 'light' to get a full-width gray band instead of a rounded panel."
+}

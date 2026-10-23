@@ -1,0 +1,11 @@
+{
+  "variantName": "cards-audience",
+  "baseBlock": "cards",
+  "canonicalModel": "standalone",
+  "visualCharacteristics": "Two equal image tiles with background photo and large title; label box with CTA bottom-left; list of quick links per audience revealed on hover/focus (always visible on touch and mobile).",
+  "contentPattern": "One row per tile. Cell 1: background picture. Cell 2: H2 title, bullet list of links, CTA link paragraph.",
+  "options": [],
+  "memberVariantIds": ["cards-audience"],
+  "usage": "Home page 'Para sua casa' / 'Para sua empresa' audience entry tiles.",
+  "reuseGuidance": "Use for a small set of audience/segment entry tiles each with a photo, a title, a list of quick links and one CTA. Quick links are optional."
+}

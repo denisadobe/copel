@@ -1,0 +1,18 @@
+{
+  "variantName": "accordion-faq",
+  "baseBlock": "accordion",
+  "canonicalModel": "standalone",
+  "visualCharacteristics": "Stacked list of bold questions separated by rules, each with a chevron; clicking expands the answer below. One list per FAQ group, each preceded by an orange group heading. Option 'single-open': opening an item closes the others in the same block (native details name group).",
+  "contentPattern": "One row per question. Cell 1: question text. Cell 2: answer (paragraphs, lists, links). Group heading (H3) is default content placed before each block.",
+  "options": [
+    {
+      "class": "single-open",
+      "label": "Single open (one item at a time)"
+    }
+  ],
+  "memberVariantIds": [
+    "accordion-faq"
+  ],
+  "usage": "Seguro Protege Casa 'Ficou com alguma duvida?' FAQ: general (10), Coberturas (13), Atendimento (5), Assistencia (2), Assistencia Pet (4), Sorteios (4).",
+  "reuseGuidance": "Use for any Q&A list. Built on native details/summary, so it is keyboard and screen-reader accessible without extra script. Use one block per FAQ group with the group heading as default content before it. A URL hash matching an id inside an item opens that item."
+}

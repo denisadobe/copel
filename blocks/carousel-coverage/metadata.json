@@ -1,0 +1,11 @@
+{
+  "variantName": "carousel-coverage",
+  "baseBlock": "carousel",
+  "canonicalModel": "standalone",
+  "visualCharacteristics": "Scroll-snap row of photo cards (1 / 2 / 4 visible on mobile / tablet / desktop) with prev/next arrows and page dots. Each card: photo, Basico/Premium plan tags, bold title, short description.",
+  "contentPattern": "One row per card. Cell 1: photo. Cell 2: paragraph of plan tag links (e.g. Basico, Premium -> #planos), H3 title, description paragraph.",
+  "options": [],
+  "memberVariantIds": ["carousel-coverage"],
+  "usage": "Seguro Protege Casa 'O que o seguro Protege Casa cobre?' coverage cards (Ruptura de tubulacoes hidraulicas, Roubo e subtracao de bens com arrombamento, Vendaval/furacao/ciclone/tornado e granizo, Incendio...).",
+  "reuseGuidance": "Use for scrollable cards with a photo, optional tag links and a title/description. Tags get a slug class (carousel-coverage-tag-basico, carousel-coverage-tag-premium) for styling. Arrows and dots hide when all cards fit."
+}

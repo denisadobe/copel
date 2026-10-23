@@ -1,0 +1,106 @@
+/* cards-steps: numbered contracting steps (source: copel.com .elementor-element-2ee91eb) */
+
+.cards-steps {
+  /* thin right-pointing connector arrow drawn between steps on the source */
+  --cards-steps-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120.5 7.364'%3E%3Cpath transform='translate(0 -0.818)' d='M120.354,4.854a.5.5,0,0,0,0-.707L117.172.964a.5.5,0,0,0-.708.707L119.293,4.5l-2.829,2.828a.5.5,0,0,0,.708.707ZM0,5H120V4H0Z'/%3E%3C/svg%3E");
+
+  color: var(--text-color);
+  text-align: center;
+}
+
+.cards-steps .cards-steps-list {
+  list-style: none;
+  margin: 0;
+  padding: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.cards-steps .cards-steps-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+}
+
+/* connector arrow below each step (mobile) */
+.cards-steps .cards-steps-item:not(:last-child)::after {
+  content: '';
+  display: block;
+  width: 120px;
+  height: 7px;
+  margin: 25px auto;
+  background-color: currentcolor;
+  mask: var(--cards-steps-arrow) center / contain no-repeat;
+}
+
+/* icon: multicolor illustration rendered as-is */
+.cards-steps .cards-steps-icon {
+  line-height: 0;
+}
+
+.cards-steps .cards-steps-icon picture {
+  display: block;
+}
+
+.cards-steps .cards-steps-icon img,
+.cards-steps .cards-steps-icon .icon {
+  display: block;
+  width: 115px;
+  height: 115px;
+  margin-inline: auto;
+  object-fit: contain;
+}
+
+.cards-steps .cards-steps-body {
+  width: 100%;
+}
+
+.cards-steps .cards-steps-title {
+  margin: 6px 0 12px;
+  font-family: var(--heading-font-family);
+  font-size: var(--heading-font-size-l);
+  font-weight: var(--heading-font-weight);
+  line-height: 1.5;
+  color: var(--text-color);
+  text-wrap: balance;
+}
+
+.cards-steps .cards-steps-body p {
+  margin: 0;
+  font-size: 14.4px;
+  line-height: 21.6px;
+  color: var(--text-color);
+}
+
+@media (width >= 900px) {
+  .cards-steps {
+    /* space between step columns; the arrow sits centered in it */
+    --cards-steps-gap: clamp(120px, 17vw, 248px);
+  }
+
+  .cards-steps .cards-steps-list {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 208px);
+    justify-content: center;
+    align-items: center;
+    column-gap: var(--cards-steps-gap);
+  }
+
+  .cards-steps .cards-steps-item:not(:last-child)::after {
+    position: absolute;
+    top: 50%;
+    left: calc(100% + var(--cards-steps-gap) * 0.258);
+    width: calc(var(--cards-steps-gap) * 0.484);
+    margin: 0;
+    transform: translateY(-50%);
+  }
+
+  .cards-steps .cards-steps-title {
+    margin: 8px 0 16px;
+    font-size: 17.6px;
+    line-height: 26.4px;
+  }
+}

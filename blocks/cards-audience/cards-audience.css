@@ -1,0 +1,313 @@
+/* Cards (audience): two photo tiles ("Para sua casa" / "Para sua empresa").
+ * Source: .elementor-element-caea78d on https://www.copel.com/site/
+ * Tile 1 (odd) uses the orange label box, tile 2 (even) the light gray one.
+ */
+.cards-audience {
+  --cards-audience-overlay: var(--copel-ink);
+  --cards-audience-box-height: 208px;
+  --cards-audience-icon-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 11h12.17l-5.59-5.59L12 4l8 8-8 8-1.41-1.41L16.17 13H4z'/%3E%3C/svg%3E");
+  --cards-audience-icon-home: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.5 0.8 12.1l1.3 1.5 1.9-1.6V22h6.2v-6.2h3.6V22H20v-10l1.9 1.6 1.3-1.5z'/%3E%3C/svg%3E");
+  --cards-audience-icon-building: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' d='M4 1h16v21h2v1H2v-1h2zm3 3v2.5h2.5V4zm4.25 0v2.5h2.5V4zM15.5 4v2.5H18V4zM7 8.5V11h2.5V8.5zm4.25 0V11h2.5V8.5zm4.25 0V11H18V8.5zM7 13v2.5h2.5V13zm4.25 0v2.5h2.5V13zm4.25 0v2.5H18V13zM10 18v4h4v-4z'/%3E%3C/svg%3E");
+}
+
+.cards-audience > ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.cards-audience .cards-audience-card {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  overflow: hidden;
+  border-radius: var(--radius-m);
+  background-color: var(--cards-audience-overlay);
+  color: #fff;
+}
+
+/* background photo + dark overlay (rgb(21 28 33) at 0.7 on the source) */
+.cards-audience .cards-audience-card-image {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  line-height: 0;
+}
+
+.cards-audience .cards-audience-card-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--cards-audience-overlay);
+  opacity: 0.7;
+}
+
+.cards-audience .cards-audience-card-image picture,
+.cards-audience .cards-audience-card-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cards-audience .cards-audience-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px 24px 0;
+}
+
+.cards-audience .cards-audience-card-body > * {
+  margin: 0;
+}
+
+/* outlined display title */
+.cards-audience .cards-audience-title {
+  max-width: 400px;
+  color: transparent;
+  font-family: var(--heading-font-family);
+  font-size: 56px;
+  font-weight: var(--heading-font-weight);
+  line-height: 0.9;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 1px #fff;
+  text-wrap: balance;
+}
+
+/* quick links with arrow markers */
+.cards-audience .cards-audience-links {
+  list-style: none;
+  padding: 0;
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.cards-audience .cards-audience-links li {
+  display: flex;
+  align-items: center;
+  min-height: 30px;
+  margin: 0;
+}
+
+.cards-audience .cards-audience-links li::before {
+  content: '';
+  flex: 0 0 30px;
+  align-self: flex-start;
+  height: 24px;
+  margin-top: 3px;
+  background-color: currentcolor;
+  mask: var(--cards-audience-icon-arrow) left center / 16px no-repeat;
+}
+
+.cards-audience .cards-audience-links a:any-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.cards-audience .cards-audience-links a:hover {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+/* label box: icon + "Tudo para a sua ..." */
+.cards-audience .cards-audience-cta {
+  margin: auto -24px 0;
+  background-color: var(--copel-orange-ink);
+}
+
+.cards-audience .cards-audience-cta a:any-link {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 16px;
+  box-sizing: border-box;
+  padding: 24px;
+  color: #fff;
+  font-family: var(--heading-font-family);
+  font-size: 25px;
+  font-weight: var(--heading-font-weight);
+  line-height: 25px;
+  text-decoration: none;
+}
+
+.cards-audience .cards-audience-cta a::before {
+  content: '';
+  width: 30px;
+  height: 30px;
+  background-color: #fff;
+  mask: var(--cards-audience-icon-home) left center / contain no-repeat;
+}
+
+.cards-audience .cards-audience-cta a::after {
+  content: 'Veja as opções';
+  font-family: var(--body-font-family);
+  font-size: 14.4px;
+  line-height: 1.5;
+  color: #fff;
+}
+
+.cards-audience .cards-audience-cta a:hover::after {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.cards-audience .cards-audience-cta a:focus-visible {
+  border-radius: 0;
+  box-shadow: inset 0 0 0 3px currentcolor;
+}
+
+/* tile 2: light gray box with orange text */
+.cards-audience .cards-audience-card:nth-child(even) .cards-audience-cta {
+  background-color: var(--copel-gray-light);
+}
+
+.cards-audience .cards-audience-card:nth-child(even) .cards-audience-cta a:any-link {
+  color: var(--copel-orange-ink);
+}
+
+.cards-audience .cards-audience-card:nth-child(even) .cards-audience-cta a::before {
+  background-color: var(--copel-orange-ink);
+  mask-image: var(--cards-audience-icon-building);
+}
+
+.cards-audience .cards-audience-card:nth-child(even) .cards-audience-cta a::after {
+  color: var(--link-color);
+}
+
+@media (width >= 900px) {
+  .cards-audience > ul {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0;
+    overflow: hidden;
+    border-radius: var(--radius-m);
+  }
+
+  .cards-audience .cards-audience-card {
+    min-height: 608px;
+    border-radius: 0;
+  }
+
+  .cards-audience .cards-audience-card-body {
+    position: absolute;
+    inset: 0;
+    display: block;
+    padding: 0;
+  }
+
+  .cards-audience .cards-audience-title {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 3;
+    width: min(400px, calc(100% - 40px));
+    font-size: 80px;
+    line-height: 72px;
+    pointer-events: none;
+    transition: -webkit-text-stroke-color 0.3s;
+  }
+
+  .cards-audience .cards-audience-links {
+    position: absolute;
+    top: 220px;
+    left: 28%;
+    z-index: 2;
+    width: min(400px, 68%);
+    transition: opacity 0.3s;
+  }
+
+  /* expanded panel (hover, keyboard focus, touch): the box fills the tile */
+  .cards-audience .cards-audience-cta {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    transition: top 0.3s, left 0.3s, width 0.3s, height 0.3s;
+  }
+
+  .cards-audience .cards-audience-cta a:any-link {
+    position: absolute;
+    inset: 0;
+    padding: 16px 40% 16px 16px;
+    color: transparent;
+    transition: color 0.3s;
+  }
+
+  .cards-audience .cards-audience-cta a::before {
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .cards-audience .cards-audience-cta a::after {
+    content: 'Mais serviços \2192';
+    position: absolute;
+    right: 38px;
+    bottom: 36px;
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .cards-audience .cards-audience-card:nth-child(even) .cards-audience-cta a:any-link {
+    color: transparent;
+  }
+
+  .cards-audience .cards-audience-card:nth-child(even) .cards-audience-title {
+    -webkit-text-stroke-color: var(--copel-orange-ink);
+  }
+
+  .cards-audience .cards-audience-card:nth-child(even) .cards-audience-links {
+    color: var(--link-color);
+  }
+}
+
+/* resting state on pointer devices: photo visible, links hidden, label box bottom */
+@media (width >= 900px) and (hover: hover) {
+  .cards-audience .cards-audience-card:not(:hover, :focus-within) .cards-audience-links {
+    opacity: 0;
+  }
+
+  .cards-audience .cards-audience-card:not(:hover, :focus-within) .cards-audience-cta {
+    top: calc(100% - var(--cards-audience-box-height));
+    left: 50%;
+    width: 50%;
+    height: var(--cards-audience-box-height);
+  }
+
+  .cards-audience .cards-audience-card:nth-child(even):not(:hover, :focus-within) .cards-audience-cta {
+    left: 0;
+  }
+
+  .cards-audience .cards-audience-card:not(:hover, :focus-within) .cards-audience-cta a:any-link {
+    color: #fff;
+  }
+
+  .cards-audience .cards-audience-card:nth-child(even):not(:hover, :focus-within) .cards-audience-cta a:any-link {
+    color: var(--copel-orange-ink);
+  }
+
+  .cards-audience .cards-audience-card:not(:hover, :focus-within) .cards-audience-cta a::before {
+    opacity: 1;
+  }
+
+  .cards-audience .cards-audience-card:not(:hover, :focus-within) .cards-audience-cta a::after {
+    content: 'Veja as opções';
+    position: static;
+    font-size: 14.4px;
+    line-height: 1.5;
+  }
+
+  .cards-audience .cards-audience-card:nth-child(even):not(:hover, :focus-within) .cards-audience-title {
+    -webkit-text-stroke-color: #fff;
+  }
+}

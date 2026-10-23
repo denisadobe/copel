@@ -1,0 +1,191 @@
+/* hero-service: full-bleed photo hero (source: .elementor-element-b72699d over #topo background) */
+main .section > .hero-service-wrapper {
+  max-width: 100%;
+  padding: 0;
+}
+
+.hero-service {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 578px;
+  overflow: hidden;
+  isolation: isolate;
+  background-color: rgb(40 32 19);
+  color: #fff;
+}
+
+.hero-service .hero-service-background {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+}
+
+.hero-service .hero-service-background picture,
+.hero-service .hero-service-background img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 50%;
+}
+
+/* light modernization: scrim keeps white/orange copy readable over the photo */
+.hero-service:not(.hero-service-no-image)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(180deg, rgb(0 0 0 / 0%) 30%, rgb(0 0 0 / 55%) 100%);
+}
+
+.hero-service .hero-service-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.hero-service .hero-service-content {
+  min-width: 0;
+}
+
+.hero-service .hero-service-content h1,
+.hero-service .hero-service-content > p:not(.hero-service-cta) {
+  margin: 0;
+  font-family: var(--heading-font-family);
+  font-size: 32.4px;
+  font-weight: var(--heading-font-weight);
+  line-height: 1;
+  color: #fff;
+  text-shadow: 1px 3px 5px rgb(0 0 0 / 75%);
+}
+
+.hero-service .hero-service-content > p.hero-service-tagline {
+  color: rgb(255 142 10);
+}
+
+.hero-service .hero-service-content > p:not(.hero-service-cta, .hero-service-tagline) {
+  margin-top: 30px;
+}
+
+.hero-service .hero-service-content .hero-service-highlight {
+  color: rgb(255 186 0);
+}
+
+.hero-service .hero-service-content .hero-service-cta {
+  margin: 30px 0 0;
+}
+
+main .hero-service .hero-service-cta a:any-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  border-radius: 100px;
+  padding: 12px 24px;
+  background-color: var(--button-bg);
+  box-sizing: border-box;
+  font-family: var(--body-font-family);
+  font-size: 14.4px;
+  font-weight: 700;
+  line-height: 1.5;
+  color: var(--button-text);
+  text-decoration: none;
+  transition: background-color var(--transition);
+}
+
+main .hero-service .hero-service-cta a:any-link::after {
+  content: '\2192';
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+main .hero-service .hero-service-cta a:any-link:hover,
+main .hero-service .hero-service-cta a:any-link:focus-visible {
+  background-color: var(--button-bg-hover);
+  color: var(--button-text);
+  text-decoration: none;
+}
+
+/* mobile: product logo + price seal sit above the copy, overlapping */
+.hero-service .hero-service-aside {
+  order: -1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 80px 10px 0 0;
+}
+
+.hero-service .hero-service-aside-item {
+  flex: 0 0 auto;
+  width: 100px;
+}
+
+.hero-service .hero-service-aside-item + .hero-service-aside-item {
+  margin: 53px 0 0 -50px;
+}
+
+.hero-service .hero-service-aside picture,
+.hero-service .hero-service-aside img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+@media (width >= 900px) {
+  .hero-service {
+    min-height: 754px;
+  }
+
+  .hero-service:not(.hero-service-no-image)::after {
+    background: linear-gradient(90deg, rgb(0 0 0 / 45%) 0%, rgb(0 0 0 / 15%) 45%, rgb(0 0 0 / 0%) 70%);
+  }
+
+  .hero-service .hero-service-inner {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .hero-service .hero-service-content {
+    flex: 1 1 0;
+  }
+
+  .hero-service .hero-service-content h1,
+  .hero-service .hero-service-content > p:not(.hero-service-cta) {
+    font-size: 32px;
+  }
+
+  main .hero-service .hero-service-cta a:any-link {
+    min-height: 43px;
+    font-size: 12.8px;
+  }
+
+  .hero-service .hero-service-aside {
+    order: 0;
+    flex: 0 0 540px;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 0;
+  }
+
+  .hero-service .hero-service-aside-item {
+    width: auto;
+  }
+
+  .hero-service .hero-service-aside-item-1 {
+    flex: 0 0 268px;
+  }
+
+  .hero-service .hero-service-aside-item-2 {
+    flex: 0 0 272px;
+  }
+
+  .hero-service .hero-service-aside-item + .hero-service-aside-item {
+    margin: 0;
+  }
+}

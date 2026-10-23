@@ -1,0 +1,11 @@
+{
+  "variantName": "cards-plans",
+  "baseBlock": "cards",
+  "canonicalModel": "standalone",
+  "visualCharacteristics": "Side-by-side pricing cards (2-up on desktop, stacked on mobile). Each card: optional 'Mais Vendido' badge (marks the featured card), plan name, bold price with period, billing note, full-width CTA button, coverage checklist with excluded items greyed and struck through with an x marker, and small-print details.",
+  "contentPattern": "One row per plan. Cell 1: optional badge paragraph, H3 plan name, price paragraph ('<strong>R$ 24,90</strong> por mes'), note paragraph ('Na sua conta de luz'). Cell 2: CTA link. Cell 3: coverages list (struck-through items = not included). Cell 4 (optional): details/footnotes and links. Cell 5 (optional): SKU as plain text.",
+  "options": [],
+  "memberVariantIds": ["cards-plans"],
+  "usage": "Seguro Protege Casa '#planos' section (Plano Basico R$ 24,90, Plano Premium R$ 39,90 'Mais Vendido'). Future Adobe Commerce surface: one virtual product per plan with express checkout.",
+  "reuseGuidance": "Use for any plan/pricing comparison. Excluded coverages: strike through the item text in the authoring doc; the block adds an x marker and an accessible 'nao incluso' label. Commerce: author a SKU in cell 5; the card and CTA get data-sku and clicking the CTA dispatches a cancelable, bubbling 'cards-plans:select' CustomEvent ({ sku, plan, price, href, card, link }) on the card. A commerce script can listen on document, call preventDefault() and run add-to-cart/checkout; otherwise the link navigates."
+}

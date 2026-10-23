@@ -1,0 +1,11 @@
+{
+  "variantName": "hero-service",
+  "baseBlock": "hero",
+  "canonicalModel": "standalone",
+  "visualCharacteristics": "Full-bleed background photo with overlaid H1, short tagline lines and a CTA button on the left; product logo and price seal images on the right (stacked below on mobile).",
+  "contentPattern": "Row 1: background picture. Row 2: H1, paragraph lines, CTA link. Row 3 (optional): aside pictures (product logo, price seal).",
+  "options": [],
+  "memberVariantIds": ["hero-service"],
+  "usage": "Service sale page hero (Seguro Protege Casa: 'A chave quebrou? O cano vazou? ...', 'Ver planos' CTA, Protege Casa logo and 'A partir de R$ 24,90 por mes' seal).",
+  "reuseGuidance": "Use for product/service landing heroes with a background photo and brand/price artwork. Rows are detected by content: the first image-only cell is the background, text cells form the copy, remaining images become the aside. Omit row 3 for a text-only overlay."
+}

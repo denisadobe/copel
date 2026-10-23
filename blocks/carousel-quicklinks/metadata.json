@@ -1,0 +1,11 @@
+{
+  "variantName": "carousel-quicklinks",
+  "baseBlock": "carousel",
+  "canonicalModel": "standalone",
+  "visualCharacteristics": "Horizontal row of icon tiles (icon + label) in a scroll-snap carousel with prev/next arrows; 2/3/5 tiles visible on mobile/tablet/desktop. Each tile is a single link.",
+  "contentPattern": "One row per tile. Cell 1: icon (:icon-name: or SVG image). Cell 2: label as linked text.",
+  "options": [],
+  "memberVariantIds": ["carousel-quicklinks"],
+  "usage": "Home page quick links strip (Desinvestimento da UEGA, Eficiencia energetica, Direitos do consumidor, Canal de denuncias, Geracao distribuida, Rede eletrica inteligente, Atendimento, Venda de imoveis, Consulta previa).",
+  "reuseGuidance": "Use for a scrollable strip of icon shortcuts. Arrows hide automatically when all tiles fit. Tiles without a link render as plain (non-clickable) tiles."
+}

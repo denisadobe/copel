@@ -1,0 +1,49 @@
+.commerce-account {
+  color: var(--copel-ink);
+}
+
+.commerce-account .commerce-account-wrapper {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 32px;
+}
+
+.commerce-account .commerce-account-orders,
+.commerce-account .commerce-account-aside {
+  min-width: 0;
+}
+
+.commerce-account .commerce-account-aside {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+}
+
+.commerce-account .commerce-account-aside .button {
+  margin: 0;
+  white-space: normal;
+}
+
+.commerce-account .commerce-account-message {
+  margin: 0;
+  border-radius: var(--radius-s);
+  padding: 24px;
+  background-color: var(--light-color);
+}
+
+@media (width >= 900px) {
+  .commerce-account .commerce-account-wrapper {
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  }
+}
+
+/* screen-reader announcements of the drop-in ("Lista de pedidos atualizada"): never visible */
+.commerce-account .dropin-live-region {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

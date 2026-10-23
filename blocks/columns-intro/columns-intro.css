@@ -1,0 +1,109 @@
+/* columns-intro: intro text + logo | illustration | photo
+ * Source: copel.com/site/seguro-protege-casa (.elementor-element-7a475ea + 0a0a99f)
+ */
+
+.columns-intro .columns-intro-row {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.columns-intro .columns-intro-row + .columns-intro-row {
+  margin-top: 20px;
+}
+
+/* text cell */
+.columns-intro .columns-intro-text-col {
+  color: var(--text-color);
+}
+
+.columns-intro .columns-intro-text-col p {
+  margin: 0 0 14.4px;
+  font-size: 14.4px;
+  line-height: 1.4;
+}
+
+.columns-intro .columns-intro-text-col > :first-child {
+  margin-top: 0;
+}
+
+.columns-intro .columns-intro-text-col > :last-child {
+  margin-bottom: 0;
+}
+
+/* product logo, centered under the text */
+.columns-intro .columns-intro-text-col p.columns-intro-logo {
+  display: flex;
+  justify-content: center;
+  margin: 0;
+}
+
+.columns-intro .columns-intro-logo picture {
+  display: block;
+}
+
+.columns-intro .columns-intro-logo img {
+  display: block;
+  width: 200px;
+  max-width: 100%;
+  height: auto;
+}
+
+/* photo cells: corners and the orange accent are baked into the source PNGs */
+.columns-intro .columns-intro-img-col picture {
+  display: block;
+}
+
+.columns-intro .columns-intro-img-col img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* source hides the photos on phones */
+.columns-intro .columns-intro-img-col {
+  display: none;
+}
+
+@media (width >= 600px) {
+  .columns-intro .columns-intro-row {
+    flex-flow: row wrap;
+    align-items: flex-end;
+  }
+
+  .columns-intro .columns-intro-text-col {
+    flex: 1 1 100%;
+  }
+
+  .columns-intro .columns-intro-img-col {
+    display: block;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+}
+
+@media (width >= 900px) {
+  .columns-intro .columns-intro-row {
+    flex-wrap: nowrap;
+  }
+
+  .columns-intro .columns-intro-text-col {
+    flex: 354 1 0;
+    min-width: 0;
+    padding: 10px 10px 23px;
+  }
+
+  .columns-intro .columns-intro-text-col p {
+    font-size: 16px;
+  }
+
+  .columns-intro .columns-intro-img-col {
+    flex: 354 1 0;
+  }
+
+  /* the closing photo is the widest and sits a step further out */
+  .columns-intro.columns-intro-3-cols .columns-intro-img-col:last-child {
+    flex-grow: 392;
+    margin-inline-start: 20px;
+  }
+}

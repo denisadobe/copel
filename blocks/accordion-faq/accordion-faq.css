@@ -1,0 +1,128 @@
+/* accordion-faq: stacked native details/summary items (values from copel.com Elementor n-accordion) */
+.accordion-faq {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.accordion-faq .accordion-faq-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.accordion-faq .accordion-faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border-radius: 8px;
+  background-color: #f6f6f6;
+  color: #1f2124;
+  font-family: var(--heading-font-family);
+  font-size: 20.8px;
+  font-weight: var(--heading-font-weight);
+  line-height: 1.5;
+  cursor: pointer;
+  list-style: none;
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.accordion-faq .accordion-faq-question::-webkit-details-marker {
+  display: none;
+}
+
+.accordion-faq .accordion-faq-question::marker {
+  content: '';
+}
+
+/* chevron: orange "angle-down" when closed, dark "angle-up" when open */
+.accordion-faq .accordion-faq-question::after {
+  content: '';
+  flex: 0 0 auto;
+  width: 6px;
+  height: 6px;
+  margin: 0 4px 4px 0;
+  border: solid var(--copel-orange);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  transition: transform var(--transition), border-color var(--transition), margin var(--transition);
+}
+
+.accordion-faq .accordion-faq-empty > .accordion-faq-question {
+  cursor: default;
+}
+
+.accordion-faq .accordion-faq-empty > .accordion-faq-question::after {
+  display: none;
+}
+
+.accordion-faq .accordion-faq-item[open] > .accordion-faq-question::after {
+  margin: 4px 4px 0 0;
+  border-color: currentcolor;
+  transform: rotate(-135deg);
+}
+
+/* focus: global summary:focus-visible ring (var(--focus-ring)); the item radius above wins */
+.accordion-faq .accordion-faq-item:not(.accordion-faq-empty) > .accordion-faq-question:hover {
+  background-color: var(--copel-orange-soft);
+}
+
+.accordion-faq .accordion-faq-question-text {
+  min-width: 0;
+}
+
+.accordion-faq .accordion-faq-question-text p {
+  display: inline;
+  margin: 0;
+}
+
+.accordion-faq .accordion-faq-answer {
+  padding: 10px;
+  color: var(--text-color);
+  font-size: 19.2px;
+  line-height: 1.5;
+}
+
+.accordion-faq .accordion-faq-answer p {
+  margin: 0 0 0.9em;
+}
+
+.accordion-faq .accordion-faq-answer ul,
+.accordion-faq .accordion-faq-answer ol {
+  margin: 0 0 1em;
+  padding-inline-start: 16px;
+}
+
+.accordion-faq .accordion-faq-answer h4,
+.accordion-faq .accordion-faq-answer h5,
+.accordion-faq .accordion-faq-answer h6 {
+  margin: 0 0 0.25em;
+  font-size: 1em;
+  line-height: 1.5;
+}
+
+.accordion-faq .accordion-faq-answer > :first-child {
+  margin-top: 0;
+}
+
+.accordion-faq .accordion-faq-answer > :last-child {
+  margin-bottom: 0;
+}
+
+@media (width >= 900px) {
+  .accordion-faq .accordion-faq-question {
+    font-size: 17.6px;
+  }
+
+  .accordion-faq .accordion-faq-answer {
+    font-size: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .accordion-faq .accordion-faq-question,
+  .accordion-faq .accordion-faq-question::after {
+    transition: none;
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "variantName": "carousel-hero",
+  "baseBlock": "carousel",
+  "canonicalModel": "standalone",
+  "visualCharacteristics": "Full-bleed rotating banner (6 slides, arrows + autoplay). Background image per slide, left-aligned heading, description and pill CTA(s). Optional second picture per slide is used as the mobile banner.",
+  "contentPattern": "One row per slide. Cell 1: picture (desktop) + optional second picture (mobile). Cell 2: heading (title), optional paragraph(s) (summary), 1-2 links (primary and secondary CTA).",
+  "options": [
+    { "class": "no-autoplay", "label": "No autoplay" }
+  ],
+  "memberVariantIds": ["carousel-hero"],
+  "contentFragmentModel": "banner",
+  "cfMapping": {
+    "image": "row cell 1, first picture",
+    "mobileImage": "row cell 1, second picture (optional)",
+    "title": "row cell 2, first heading",
+    "summary": "row cell 2, paragraph(s) without links (optional)",
+    "ctaLink/ctaLabel": "row cell 2, first link (href/text)",
+    "secondaryCtaLink/secondaryCtaLabel": "row cell 2, second link (optional)"
+  },
+  "usage": "Home page hero rotating promotional banners (Imoveis a venda, App Copel, Copel Agro, Seguro Protege, Copel investe, Leilao federal).",
+  "reuseGuidance": "Use for full-width rotating promotional banners where each slide has an image, title, optional summary and up to two CTAs. Keep the 2-cell row structure stable: it is the contract for feeding slides from AEM headless banner Content Fragments. Slides without summary are supported; a single slide renders without navigation."
+}

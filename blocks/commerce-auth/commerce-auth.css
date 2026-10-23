@@ -1,0 +1,28 @@
+.commerce-auth {
+  color: var(--copel-ink);
+}
+
+.commerce-auth .commerce-auth-form {
+  box-sizing: border-box;
+  max-width: 520px;
+  margin: 0 auto;
+  border: 1px solid var(--copel-border);
+  border-radius: var(--radius-m);
+  padding: 24px 16px;
+  background-color: #fff;
+  box-shadow: var(--shadow-card);
+}
+
+.commerce-auth .commerce-auth-message {
+  margin: 0;
+  border-radius: var(--radius-s);
+  padding: 16px;
+  background-color: var(--copel-orange-soft);
+  color: var(--copel-ink);
+}
+
+@media (width >= 600px) {
+  .commerce-auth .commerce-auth-form {
+    padding: 32px;
+  }
+}

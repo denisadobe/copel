@@ -1,0 +1,11 @@
+{
+  "variantName": "cards-steps",
+  "baseBlock": "cards",
+  "canonicalModel": "standalone",
+  "visualCharacteristics": "Numbered steps side by side in a staggered row on desktop (icon above title and text, centered), stacked on mobile.",
+  "contentPattern": "One row per step. Cell 1: icon image. Cell 2: H3 step title (e.g. '1o Passo: Faca a adesao ao seguro') + description paragraph.",
+  "options": [],
+  "memberVariantIds": ["cards-steps"],
+  "usage": "Seguro Protege Casa 'Contratacao simples e sem burocracia' three steps (adesao, pagamento na conta de luz, seguro ativo).",
+  "reuseGuidance": "Use for short ordered processes (2-5 steps). Rendered as an ordered list. Place the section heading, logo and closing CTA as default content in the same section (section style: centered)."
+}

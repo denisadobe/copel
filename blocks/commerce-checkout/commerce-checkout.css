@@ -1,0 +1,161 @@
+.commerce-checkout {
+  color: var(--copel-ink);
+}
+
+.commerce-checkout .commerce-checkout-wrapper {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 24px;
+}
+
+.commerce-checkout .commerce-checkout-main,
+.commerce-checkout .commerce-checkout-aside {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.commerce-checkout .commerce-checkout-main > div:empty {
+  display: none;
+}
+
+/* steps: customer + payment cards */
+.commerce-checkout .commerce-checkout-customer,
+.commerce-checkout .commerce-checkout-payment,
+.commerce-checkout .commerce-checkout-aside {
+  border: 1px solid var(--copel-border);
+  border-radius: var(--radius-m);
+  padding: 16px;
+  background-color: #fff;
+}
+
+.commerce-checkout .commerce-checkout-aside {
+  background-color: var(--light-color);
+}
+
+.commerce-checkout .commerce-checkout-step-title,
+.commerce-checkout .commerce-checkout-aside-title {
+  margin: 0 0 8px;
+  font-size: var(--heading-font-size-s);
+}
+
+.commerce-checkout .commerce-checkout-customer p,
+.commerce-checkout .commerce-checkout-payment p {
+  margin: 0;
+}
+
+.commerce-checkout .commerce-checkout-customer-name,
+.commerce-checkout .commerce-checkout-payment-title {
+  font-weight: 700;
+}
+
+.commerce-checkout .commerce-checkout-customer-email,
+.commerce-checkout .commerce-checkout-payment-note,
+.commerce-checkout .commerce-checkout-terms-text {
+  color: var(--text-muted-color);
+  font-size: var(--body-font-size-s);
+}
+
+.commerce-checkout .commerce-checkout-payment-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.commerce-checkout .commerce-checkout-payment-title::before {
+  content: '';
+  flex: none;
+  width: 10px;
+  height: 10px;
+  border: 4px solid var(--button-bg);
+  border-radius: 50%;
+}
+
+.commerce-checkout .commerce-checkout-payment-note {
+  margin-top: 4px;
+}
+
+.commerce-checkout .commerce-checkout-signout {
+  margin-top: 8px;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--link-color);
+  font-size: var(--body-font-size-s);
+  cursor: pointer;
+}
+
+.commerce-checkout .commerce-checkout-signout:hover {
+  color: var(--link-hover-color);
+  text-decoration: underline;
+}
+
+.commerce-checkout .commerce-checkout-terms-text {
+  margin: 0;
+}
+
+.commerce-checkout .commerce-checkout-loading {
+  margin: 0;
+  color: var(--text-muted-color);
+}
+
+/* drop-in containers sit inside the Copel cards: no extra band / padding of their own */
+.commerce-checkout .commerce-checkout-place-order .checkout-place-order {
+  padding: 0;
+  background-color: transparent;
+}
+
+.commerce-checkout .commerce-checkout-summary .cart-order-summary {
+  padding: 0;
+  background-color: transparent;
+}
+
+/* server error: only the error message is shown */
+.commerce-checkout .commerce-checkout-wrapper.has-error .commerce-checkout-main > :not(.commerce-checkout-error),
+.commerce-checkout .commerce-checkout-wrapper.has-error .commerce-checkout-aside {
+  display: none;
+}
+
+.commerce-checkout .commerce-checkout-wrapper.is-placing {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* empty cart / error message */
+.commerce-checkout .commerce-checkout-message {
+  grid-column: 1 / -1;
+  border-radius: var(--radius-m);
+  padding: 24px;
+  background-color: var(--light-color);
+  text-align: center;
+}
+
+.commerce-checkout .commerce-checkout-message-text {
+  margin: 0;
+}
+
+.commerce-checkout .commerce-checkout-message-action {
+  margin: 16px 0 0;
+}
+
+@media (width >= 600px) {
+  .commerce-checkout .commerce-checkout-customer,
+  .commerce-checkout .commerce-checkout-payment,
+  .commerce-checkout .commerce-checkout-aside {
+    padding: 24px;
+  }
+}
+
+@media (width >= 900px) {
+  .commerce-checkout .commerce-checkout-wrapper {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 32px;
+  }
+
+  .commerce-checkout .commerce-checkout-aside {
+    align-self: start;
+    position: sticky;
+    top: 24px;
+  }
+}

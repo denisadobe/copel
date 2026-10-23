@@ -1,0 +1,323 @@
+/* cards-news: values from https://www.copel.com/site/ (Elementor posts widgets) */
+
+.cards-news > ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 35px 10px;
+}
+
+.cards-news > ul > li {
+  margin: 0;
+}
+
+/* ---------- card (grid item, default) ---------- */
+.cards-news .cards-news-card {
+  --cards-news-pad: 10px;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius-m);
+  background-color: #f1f1f1;
+  text-align: start;
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+
+.cards-news .cards-news-card:hover,
+.cards-news .cards-news-card:focus-within {
+  box-shadow: var(--shadow-card-hover);
+}
+
+.cards-news .cards-news-card-image {
+  line-height: 0;
+}
+
+.cards-news .cards-news-card-image picture {
+  display: block;
+}
+
+.cards-news .cards-news-card-image img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+}
+
+.cards-news .cards-news-card-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  margin-top: 20px;
+  padding: 0 var(--cards-news-pad);
+}
+
+.cards-news .cards-news-card-body > * {
+  margin: 0;
+}
+
+/* title */
+.cards-news .cards-news-title {
+  margin: 0 0 25px;
+  color: var(--copel-graphite);
+  font-family: var(--heading-font-family);
+  font-size: var(--heading-font-size-s);
+  font-weight: var(--heading-font-weight);
+  line-height: 1.5;
+  text-wrap: wrap;
+}
+
+.cards-news .cards-news-title a:any-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+.cards-news .cards-news-title a:hover,
+.cards-news .cards-news-title a:focus-visible {
+  color: var(--link-color);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+/* summary */
+.cards-news .cards-news-summary {
+  display: -webkit-box;
+  margin: 0 0 25px;
+  overflow: hidden;
+  color: #555;
+  font-size: 14px;
+  line-height: 1.7;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+/* "Leia mais" */
+.cards-news .cards-news-more {
+  margin: 0 0 20px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+}
+
+.cards-news .cards-news-more a:any-link {
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+.cards-news .cards-news-more a::after {
+  content: "\2192";
+  display: inline-block;
+  margin-inline-start: 4px;
+  color: var(--copel-orange);
+  font-weight: 700;
+  transition: transform var(--transition);
+}
+
+.cards-news .cards-news-more a:hover,
+.cards-news .cards-news-more a:focus-visible {
+  color: var(--link-color);
+  text-decoration: underline;
+}
+
+.cards-news .cards-news-more a:hover::after {
+  transform: translateX(3px);
+}
+
+/* date: meta bar pinned to the card bottom */
+.cards-news .cards-news-date {
+  order: 10;
+  margin: auto calc(-1 * var(--cards-news-pad)) 0;
+  padding: 10px var(--cards-news-pad);
+  border-top: 1px solid #eaeaea;
+  color: var(--text-muted-color);
+  font-size: 12px;
+  line-height: 18px;
+}
+
+/* category: hidden by default (source home grid shows none) */
+.cards-news .cards-news-category {
+  display: none;
+}
+
+/* ---------- featured item (first card, default variant) ---------- */
+.cards-news .cards-news-featured {
+  --cards-news-pad: 20px;
+}
+
+.cards-news .cards-news-featured .cards-news-card-image img {
+  aspect-ratio: 4 / 3;
+}
+
+.cards-news .cards-news-featured .cards-news-card-body {
+  padding-bottom: 24px;
+}
+
+.cards-news .cards-news-featured .cards-news-title {
+  margin: 0;
+  font-size: var(--heading-font-size-l);
+}
+
+.cards-news .cards-news-featured .cards-news-date {
+  order: 0;
+  margin: 0 0 13px;
+  padding: 0;
+  border-top: 0;
+  color: var(--link-color);
+}
+
+.cards-news .cards-news-featured .cards-news-summary {
+  margin: 0 0 10px;
+  line-height: 1.5;
+  -webkit-line-clamp: 7;
+}
+
+.cards-news .cards-news-featured .cards-news-more {
+  margin: 0;
+  font-weight: 400;
+}
+
+.cards-news .cards-news-featured .cards-news-more a:any-link {
+  color: #000;
+}
+
+/* home grid hides "Leia mais" (title is the link), like the source */
+.cards-news:not(.no-featured) .cards-news-card:not(.cards-news-featured) .cards-news-more {
+  display: none;
+}
+
+@media (width >= 600px) {
+  .cards-news > ul {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .cards-news .cards-news-featured {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (width >= 900px) {
+  .cards-news > ul {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  /* featured sits 10px above the grid, as on the source */
+  .cards-news:not(.no-featured, .stacked) .cards-news-featured {
+    flex-direction: row;
+    margin-bottom: -25px;
+  }
+
+  .cards-news:not(.no-featured, .stacked) .cards-news-featured .cards-news-card-image {
+    flex: 0 0 50%;
+    margin-right: 20px;
+  }
+
+  .cards-news:not(.no-featured, .stacked) .cards-news-featured .cards-news-card-image picture {
+    height: 100%;
+  }
+
+  .cards-news:not(.no-featured, .stacked) .cards-news-featured .cards-news-card-image img {
+    height: 100%;
+    aspect-ratio: auto;
+  }
+
+  .cards-news:not(.no-featured, .stacked) .cards-news-featured .cards-news-card-body {
+    flex: 1;
+    margin-top: 0;
+    padding: 32px 32px 24px 0;
+  }
+}
+
+/* ---------- no-featured: listing grid (columns follow the block's width) ---------- */
+.cards-news.no-featured > ul {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  gap: 35px 30px;
+}
+
+.cards-news.no-featured .cards-news-card {
+  --cards-news-pad: 30px;
+
+  background-color: var(--background-color);
+  box-shadow: var(--shadow-card);
+}
+
+.cards-news.no-featured .cards-news-card:hover,
+.cards-news.no-featured .cards-news-card:focus-within {
+  box-shadow: var(--shadow-card-hover);
+}
+
+.cards-news.no-featured .cards-news-card-image img {
+  aspect-ratio: 4 / 3;
+}
+
+.cards-news.no-featured .cards-news-summary {
+  -webkit-line-clamp: 5;
+}
+
+.cards-news.no-featured .cards-news-date {
+  padding-block: 15px;
+}
+
+/* no-featured: category as a pill badge over the image */
+.cards-news.no-featured .cards-news-category {
+  display: block;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1;
+  padding: 7.2px 14.4px;
+  border-radius: 999px;
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  text-transform: uppercase;
+}
+
+.cards-news.no-featured .cards-news-category a:any-link {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ---------- stacked: featured item keeps image above text ---------- */
+.cards-news.stacked .cards-news-featured {
+  background-color: var(--background-color);
+  box-shadow: var(--shadow-card);
+}
+
+.cards-news.stacked .cards-news-featured .cards-news-card-image img {
+  aspect-ratio: 5 / 3;
+}
+
+.cards-news.stacked .cards-news-featured .cards-news-card-body {
+  margin-top: 32px;
+  padding: 0 var(--cards-news-pad) 20px;
+}
+
+.cards-news.stacked .cards-news-featured .cards-news-title {
+  line-height: 1.5;
+}
+
+.cards-news.stacked .cards-news-featured .cards-news-date {
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.cards-news.stacked .cards-news-featured .cards-news-summary {
+  color: var(--text-color);
+  font-size: 16px;
+  -webkit-line-clamp: unset;
+}
+
+.cards-news.stacked .cards-news-featured .cards-news-more a:any-link {
+  color: var(--text-color);
+}
+
+@media (width >= 900px) {
+  .cards-news.stacked .cards-news-featured .cards-news-title {
+    font-size: 26px;
+  }
+}

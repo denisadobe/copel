@@ -14,5 +14,7 @@ module.exports = {
     'import/extensions': ['error', { js: 'always' }], // require js file extensions in imports
     'linebreak-style': ['error', 'unix'], // enforce unix linebreaks
     'no-param-reassign': [2, { props: false }], // allow modifying properties of param
+    // no build step: packages are devDependencies, drop-ins are vendored + import-mapped
+    'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
   },
 };

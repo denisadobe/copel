@@ -1,0 +1,532 @@
+{
+  "templates": [
+    {
+      "name": "home",
+      "urls": [
+        "https://www.copel.com/site/"
+      ],
+      "representativeUrl": "https://www.copel.com/site/",
+      "description": "Copel home page: hero banner carousel, quick services, news, app promo, audience tiles, feature panels, quick links",
+      "blocks": [
+        {
+          "name": "carousel-hero",
+          "instances": [
+            ".elementor-element-7fd830f6",
+            ".elementor-widget-slides.anunciosHome"
+          ]
+        },
+        {
+          "name": "cards-services",
+          "instances": [
+            ".elementor-element-f449e99"
+          ]
+        },
+        {
+          "name": "cards-news",
+          "instances": [
+            ".elementor-element-ae6699a"
+          ]
+        },
+        {
+          "name": "columns-app",
+          "instances": [
+            ".elementor-element-db01c2f"
+          ]
+        },
+        {
+          "name": "cards-audience",
+          "instances": [
+            ".elementor-element-caea78d"
+          ]
+        },
+        {
+          "name": "columns-feature",
+          "instances": [
+            ".elementor-element-d58124b",
+            ".elementor-element-0873ed7",
+            ".elementor-element-b803038",
+            ".elementor-element-a0b2ffc",
+            ".elementor-element-05b7424"
+          ]
+        },
+        {
+          "name": "carousel-quicklinks",
+          "instances": [
+            ".elementor-element-b566fc0",
+            ".elementor-widget-reviews"
+          ]
+        },
+        {
+          "name": "columns-links",
+          "instances": [
+            ".elementor-element-a75d5f3"
+          ]
+        }
+      ],
+      "urlPattern": "/*",
+      "sections": [
+        {
+          "id": "rc2",
+          "name": "Hero banner carousel",
+          "selector": [
+            ".elementor-element-49bcabf3"
+          ],
+          "style": null,
+          "blocks": [
+            "carousel-hero"
+          ],
+          "defaultContent": []
+        },
+        {
+          "id": "rc3",
+          "name": "Quick services",
+          "selector": [
+            ".elementor-element-d8408d9"
+          ],
+          "style": "centered",
+          "blocks": [
+            "cards-services"
+          ],
+          "defaultContent": [
+            ".elementor-element-2b2e421"
+          ]
+        },
+        {
+          "id": "rc5",
+          "name": "News",
+          "selector": [
+            ".elementor-element-87273e0",
+            ".elementor-element-ae6699a",
+            "#aplicativo"
+          ],
+          "style": "centered",
+          "blocks": [
+            "cards-news"
+          ],
+          "defaultContent": [
+            ".elementor-element-9158681",
+            ".elementor-element-e1e198c",
+            ".elementor-element-606f175"
+          ]
+        },
+        {
+          "id": "rc7",
+          "name": "Aplicativo Copel",
+          "selector": [
+            ".elementor-element-db01c2f"
+          ],
+          "style": null,
+          "blocks": [
+            "columns-app"
+          ],
+          "defaultContent": []
+        },
+        {
+          "id": "rc8",
+          "name": "Para sua casa / Para sua empresa",
+          "selector": [
+            ".elementor-element-caea78d"
+          ],
+          "style": null,
+          "blocks": [
+            "cards-audience"
+          ],
+          "defaultContent": []
+        },
+        {
+          "id": "rc9",
+          "name": "A Copel",
+          "selector": [
+            ".elementor-element-d58124b"
+          ],
+          "style": null,
+          "blocks": [
+            "columns-feature"
+          ],
+          "defaultContent": []
+        },
+        {
+          "id": "rc11",
+          "name": "Sustentabilidade e Inovacao",
+          "selector": [
+            ".elementor-element-0873ed7"
+          ],
+          "style": null,
+          "blocks": [
+            "columns-feature"
+          ],
+          "defaultContent": []
+        },
+        {
+          "id": "rc12",
+          "name": "Educacao",
+          "selector": [
+            ".elementor-element-b803038"
+          ],
+          "style": null,
+          "blocks": [
+            "columns-feature"
+          ],
+          "defaultContent": []
+        },
+        {
+          "id": "rc13",
+          "name": "Mercado livre",
+          "selector": [
+            ".elementor-element-a0b2ffc"
+          ],
+          "style": null,
+          "blocks": [
+            "columns-feature"
+          ],
+          "defaultContent": []
+        },
+        {
+          "id": "rc14",
+          "name": "Carreira",
+          "selector": [
+            ".elementor-element-05b7424"
+          ],
+          "style": null,
+          "blocks": [
+            "columns-feature"
+          ],
+          "defaultContent": []
+        },
+        {
+          "id": "rc15",
+          "name": "Quick links carousel",
+          "selector": [
+            ".elementor-element-425e15d"
+          ],
+          "style": null,
+          "blocks": [
+            "carousel-quicklinks"
+          ],
+          "defaultContent": []
+        },
+        {
+          "id": "rc16",
+          "name": "Link directory (above footer)",
+          "selector": [
+            ".elementor-element-a75d5f3"
+          ],
+          "style": "light",
+          "blocks": [
+            "columns-links"
+          ],
+          "defaultContent": []
+        }
+      ]
+    },
+    {
+      "name": "atendimento",
+      "urls": [
+        "https://www.copel.com/site/copel-distribuicao/falta-de-luz/"
+      ],
+      "representativeUrl": "https://www.copel.com/site/copel-distribuicao/falta-de-luz/",
+      "description": "Customer service page: title, embedded Copel self-service app (iframe) beside instructions for other channels",
+      "blocks": [
+        {
+          "name": "embed-service",
+          "instances": [
+            ".elementor-element-5f821cf",
+            ".elementor-widget-html:has(iframe[src*=\"copel.com/slwweb\"])"
+          ]
+        }
+      ],
+      "urlPattern": "/site/copel-distribuicao/*",
+      "sections": [
+        {
+          "id": "rc2",
+          "name": "Page title",
+          "selector": [
+            ".elementor-element-cc298da"
+          ],
+          "style": null,
+          "blocks": [],
+          "defaultContent": [
+            ".elementor-element-5d590316"
+          ]
+        },
+        {
+          "id": "rc3",
+          "name": "Outage self-service app with alternative channels",
+          "selector": [
+            ".elementor-element-cb2c92f"
+          ],
+          "style": "split",
+          "blocks": [
+            "embed-service"
+          ],
+          "defaultContent": [
+            ".elementor-element-14a69eaf",
+            ".elementor-element-273dca5b",
+            ".elementor-element-54c3a3c",
+            ".elementor-element-1f8649cb"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "noticias",
+      "urls": [
+        "https://www.copel.com/site/noticias/"
+      ],
+      "representativeUrl": "https://www.copel.com/site/noticias/",
+      "description": "News listing: page banner, featured news card, news grid with sidebar (Webséries, press office)",
+      "blocks": [
+        {
+          "name": "cards-news",
+          "instances": [
+            ".elementor-element-72046274",
+            ".elementor-element-fe6c3a8"
+          ]
+        }
+      ],
+      "urlPattern": "/site/*",
+      "sections": [
+        {
+          "id": "rc2",
+          "name": "Page banner",
+          "selector": [
+            ".elementor-element-4ef813c3"
+          ],
+          "style": "page-banner",
+          "blocks": [],
+          "defaultContent": [
+            ".elementor-element-60b04e32"
+          ]
+        },
+        {
+          "id": "rc3",
+          "name": "Featured news item",
+          "selector": [
+            ".elementor-element-50c10c7"
+          ],
+          "style": null,
+          "blocks": [
+            "cards-news"
+          ],
+          "defaultContent": []
+        },
+        {
+          "id": "rc4",
+          "name": "News list with sidebar",
+          "selector": [
+            ".elementor-element-425a7445"
+          ],
+          "style": "split",
+          "blocks": [
+            "cards-news"
+          ],
+          "defaultContent": [
+            ".elementor-element-1ee28de1",
+            ".elementor-element-14032477",
+            ".elementor-element-4a19e926"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "servico",
+      "urls": [
+        "https://www.copel.com/site/seguro-protege-casa/"
+      ],
+      "representativeUrl": "https://www.copel.com/site/seguro-protege-casa/",
+      "description": "Service sale landing page (Seguro Protege Casa): anchor menu, hero, intro, coverages carousel, steps, plans/pricing, FAQ accordions",
+      "blocks": [
+        {
+          "name": "hero-service",
+          "instances": [
+            ".elementor-element-b72699d"
+          ]
+        },
+        {
+          "name": "columns-intro",
+          "instances": [
+            ".elementor-element-7a475ea"
+          ]
+        },
+        {
+          "name": "carousel-coverage",
+          "instances": [
+            ".elementor-element-6ae60bb"
+          ]
+        },
+        {
+          "name": "cards-steps",
+          "instances": [
+            ".elementor-element-2ee91eb"
+          ]
+        },
+        {
+          "name": "cards-plans",
+          "instances": [
+            ".elementor-element-9d43412"
+          ]
+        },
+        {
+          "name": "accordion-faq",
+          "instances": [
+            ".elementor-element-9ea6f27",
+            ".elementor-element-6654c7a",
+            ".elementor-element-e7083e4",
+            ".elementor-element-db819b2",
+            ".elementor-element-4565a90",
+            ".elementor-element-a3c74d3"
+          ]
+        }
+      ],
+      "urlPattern": "/site/*",
+      "sections": [
+        {
+          "id": "rc2",
+          "name": "Hero with in-page anchor menu",
+          "selector": [
+            "#topo"
+          ],
+          "style": null,
+          "blocks": [
+            "hero-service"
+          ],
+          "defaultContent": [
+            ".elementor-element-e8d2453"
+          ]
+        },
+        {
+          "id": "rc3",
+          "name": "Decorative seguro wordmark",
+          "selector": [
+            ".elementor-element-3822d4a"
+          ],
+          "style": null,
+          "blocks": [],
+          "defaultContent": [
+            ".elementor-element-7762ced"
+          ]
+        },
+        {
+          "id": "rc4",
+          "name": "Intro: Protecao para sua casa",
+          "selector": [
+            ".elementor-element-6117e01"
+          ],
+          "style": null,
+          "blocks": [
+            "columns-intro"
+          ],
+          "defaultContent": [
+            ".elementor-element-d4595c9"
+          ]
+        },
+        {
+          "id": "rc5",
+          "name": "Coverages carousel",
+          "selector": [
+            "#coberturas"
+          ],
+          "style": null,
+          "blocks": [
+            "carousel-coverage"
+          ],
+          "defaultContent": [
+            ".elementor-element-2799aaf",
+            ".elementor-element-cfce4d6"
+          ]
+        },
+        {
+          "id": "rc6",
+          "name": "Contratacao simples (steps)",
+          "selector": [
+            ".elementor-element-3e260a4"
+          ],
+          "style": "centered",
+          "blocks": [
+            "cards-steps"
+          ],
+          "defaultContent": [
+            ".elementor-element-db3db7a",
+            ".elementor-element-a697370",
+            ".elementor-element-560a2d2",
+            ".elementor-element-91d9b2b",
+            ".elementor-element-4504ce6"
+          ]
+        },
+        {
+          "id": "rc7",
+          "name": "Promo banner O banheiro inundou",
+          "selector": [
+            ".elementor-element-45cea77"
+          ],
+          "style": null,
+          "blocks": [],
+          "defaultContent": [
+            ".elementor-element-1bbe187"
+          ]
+        },
+        {
+          "id": "rc8",
+          "name": "Plans / pricing",
+          "selector": [
+            "#planos"
+          ],
+          "style": "centered",
+          "blocks": [
+            "cards-plans"
+          ],
+          "defaultContent": [
+            ".elementor-element-626227a",
+            ".elementor-element-bca91a3"
+          ]
+        },
+        {
+          "id": "rc9",
+          "name": "Promo banner Concorra a premios",
+          "selector": [
+            ".elementor-element-061249d"
+          ],
+          "style": null,
+          "blocks": [],
+          "defaultContent": [
+            ".elementor-element-ed161c5"
+          ]
+        },
+        {
+          "id": "rc10",
+          "name": "FAQ",
+          "selector": [
+            "#faq"
+          ],
+          "style": null,
+          "blocks": [
+            "accordion-faq"
+          ],
+          "defaultContent": [
+            ".elementor-element-df4c116",
+            ".elementor-element-664167c",
+            ".elementor-element-c0db97c",
+            ".elementor-element-5d76a9c",
+            ".elementor-element-25e1b02",
+            ".elementor-element-d6ec172"
+          ]
+        },
+        {
+          "id": "rc11",
+          "name": "Copel Servicos brand band",
+          "selector": [
+            ".elementor-element-d53fdd7"
+          ],
+          "style": "light, centered",
+          "blocks": [],
+          "defaultContent": [
+            ".elementor-element-c7c0764"
+          ]
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "projectType": "da"
+  }
+}

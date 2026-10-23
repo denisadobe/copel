@@ -1,20 +1,190 @@
-footer {
-  background-color: var(--light-color);
-  font-size: var(--body-font-size-xs);
+/* Footer — mobile-first; desktop layout from 900px */
+footer .footer {
+  position: relative;
+  color: #fff;
+  font-family: var(--body-font-family);
+  font-size: 14px;
+  line-height: 21px;
 }
 
-footer .footer > div {
-  margin: auto;
-  max-width: 1200px;
-  padding: 40px 24px 24px;
+footer .footer a:any-link {
+  color: #fff;
+  text-decoration: none;
+}
+
+footer .footer a:focus-visible {
+  outline: 2px solid var(--copel-orange);
+  outline-offset: 2px;
+  box-shadow: none;
 }
 
 footer .footer p {
   margin: 0;
 }
 
+footer .footer img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.footer .footer-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* back to top: square grey button centred over the top edge of the band */
+.footer .footer-back-to-top {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  z-index: 2;
+  transform: translateX(-50%);
+}
+
+.footer .footer-back-to-top-link {
+  display: block;
+  padding: 15px;
+  background-color: #7d8488;
+  color: #fff;
+  line-height: 0;
+}
+
+.footer .footer-back-to-top-link::before {
+  content: '';
+  display: block;
+  width: 13px;
+  height: 15px;
+  background-color: currentcolor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 448 512'%3E%3Cpath d='M34.9 289.5l-22.2-22.2c-9.4-9.4-9.4-24.6 0-33.9L207 39c9.4-9.4 24.6-9.4 33.9 0l194.3 194.3c9.4 9.4 9.4 24.6 0 33.9L413 289.4c-9.5 9.5-25 9.3-34.3-.4L264 168.6V456c0 13.3-10.7 24-24 24h-32c-13.3 0-24-10.7-24-24V168.6L69.2 289.1c-9.3 9.8-24.8 10-34.3.4z'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* main band (carries the dark background; the back-to-top overlays it) */
+.footer .footer-main {
+  padding: 24px;
+  background-color: var(--copel-graphite);
+}
+
+/* mobile: one stacked column, groups 20px apart (source rhythm) */
+.footer .footer-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 20px;
+  max-width: 1312px;
+  margin: 0 auto;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.footer .footer-group {
+  min-width: 0;
+}
+
+.footer .footer-brand img,
+.footer .footer-badge img {
+  width: 214px;
+}
+
+.footer .footer-group h2 {
+  margin: 0 0 16px;
+  color: #fff;
+  font-family: var(--body-font-family);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 30px;
+  text-wrap: wrap;
+}
+
+.footer .footer-group ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.footer .footer-group li + li {
+  margin-top: 5px;
+}
+
+.footer .footer-column p {
+  margin-bottom: 11px;
+}
+
+.footer .footer-badge {
+  margin-top: 12px;
+}
+
+/* social icons */
+.footer .footer-social {
+  margin-top: 21px;
+}
+
+.footer .footer-social ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-left: -14px;
+}
+
+.footer .footer-social li + li {
+  margin-top: 0;
+}
+
+.footer .footer-social a:any-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 10%;
+  color: #fff;
+  transition: 0.3s;
+}
+
+.footer .footer-social a:hover {
+  color: var(--copel-orange);
+  opacity: 0.9;
+}
+
+.footer .footer-social .footer-icon,
+.footer .footer-social img {
+  width: auto;
+  height: 20px;
+}
+
 @media (width >= 900px) {
-  footer .footer > div {
-    padding: 40px 32px 24px;
+  .footer .footer-main {
+    padding: 64px;
+  }
+
+  .footer .footer-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 36px 20px;
+  }
+
+  /* desktop rhythm comes from the grid gap only */
+  .footer .footer-column p {
+    margin-bottom: 0;
+  }
+
+  .footer .footer-badge {
+    margin-top: 0;
+  }
+
+  /* top row: brand on the left, social icons in the last column */
+  .footer .footer-social {
+    grid-column: -2 / -1;
+    margin-top: 0;
+  }
+
+  .footer .footer-social ul {
+    margin-left: 0;
+  }
+
+  .footer .footer-social + .footer-group {
+    grid-column-start: 1;
   }
 }

@@ -1,0 +1,22 @@
+{
+  "variantName": "columns-feature",
+  "baseBlock": "columns",
+  "canonicalModel": "standalone",
+  "visualCharacteristics": "Half image / half text panel. Image position follows authored cell order (image-left or text-left). Text panel: heading, paragraph(s), right-aligned 'Veja mais' link. A text cell with several headings renders as stacked panels beside a full-height image. Option 'dark': ink (#151c21) panel with white text, orange headings and yellow 'Veja mais'. Option 'reverse': mirrors the authored cell order on desktop so the image switches sides without re-authoring; mobile keeps the image on top.",
+  "contentPattern": "One row, two cells in any order. Image cell: picture. Text cell: heading (H2/H3), paragraph(s), 'Veja mais' link; multiple heading groups become stacked panels.",
+  "options": [
+    {
+      "class": "dark",
+      "label": "Dark panel"
+    },
+    {
+      "class": "reverse",
+      "label": "Reverse (swap image side)"
+    }
+  ],
+  "memberVariantIds": [
+    "columns-feature"
+  ],
+  "usage": "Home page institutional features: A Copel, Sustentabilidade/Inovacao, Educacao, Mercado livre, Carreira.",
+  "reuseGuidance": "Use for alternating image + text feature bands. Swap cell order to put the image on the right. Add another heading in the text cell to create an extra stacked panel."
+}

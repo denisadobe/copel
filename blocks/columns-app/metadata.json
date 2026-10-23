@@ -1,0 +1,11 @@
+{
+  "variantName": "columns-app",
+  "baseBlock": "columns",
+  "canonicalModel": "standalone",
+  "visualCharacteristics": "Two columns: left H2 + intro paragraphs with two side-by-side download tiles below (each tile: heading, text, pill button); right full-height photo. Stacks on mobile with the image first.",
+  "contentPattern": "One row, two cells. Text cell: H2, paragraph(s), then one H3 group per tile (H3, paragraph, link). Image cell: picture.",
+  "options": [],
+  "memberVariantIds": ["columns-app"],
+  "usage": "Home page 'Aplicativo Copel' promo with Android and iOS download tiles.",
+  "reuseGuidance": "Use for a promo with text, a set of call-to-action tiles and a large photo. Every H3 in the text cell starts a new tile; content after it until the next H3 belongs to that tile."
+}

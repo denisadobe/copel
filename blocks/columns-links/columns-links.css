@@ -1,0 +1,137 @@
+/* columns-links: link directory band above the footer
+ * (source: copel.com home, Elementor section a75d5f3: #f2f4f6 band, 48px padding,
+ *  5 x 256px columns, ink 24px titles, 2px orange divider at 40% width, 14px ink links) */
+
+.columns-links {
+  --columns-links-gap: 32px;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--columns-links-gap) 24px;
+  padding: 36px 24px;
+  border-radius: var(--radius-m);
+  background-color: var(--light-color);
+}
+
+/* inside a full-bleed light section the band is already drawn */
+main .section.light .columns-links,
+main .section.highlight .columns-links {
+  padding-inline: 0;
+  border-radius: 0;
+  background-color: transparent;
+}
+
+.columns-links .columns-links-col {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* title + orange divider */
+.columns-links .columns-links-title {
+  position: relative;
+  margin: 0 0 20px;
+  padding-bottom: 12px;
+  font-family: var(--heading-font-family);
+  font-size: var(--heading-font-size-m);
+  font-weight: var(--heading-font-weight);
+  line-height: 1.15;
+  color: var(--copel-ink);
+}
+
+.columns-links .columns-links-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40%;
+  max-width: 96px;
+  height: 2px;
+  border-radius: 1px;
+  background-color: var(--copel-orange);
+}
+
+.columns-links .columns-links-title a:any-link {
+  color: inherit;
+}
+
+.columns-links .columns-links-title a:hover {
+  color: var(--heading-accent-color);
+}
+
+/* link list */
+.columns-links .columns-links-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.columns-links .columns-links-list li {
+  margin: 0;
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-s);
+  line-height: 1.45;
+  color: var(--copel-ink);
+}
+
+.columns-links .columns-links-list a:any-link {
+  display: inline-block;
+  padding-block: 2px;
+  color: var(--copel-ink);
+}
+
+.columns-links .columns-links-list a:hover {
+  color: var(--link-color);
+}
+
+@media (width >= 600px) {
+  .columns-links {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding: 40px 32px;
+  }
+}
+
+@media (width >= 900px) {
+  .columns-links {
+    grid-template-columns: repeat(var(--columns-links-count, 5), minmax(0, 1fr));
+    padding: 48px 32px;
+  }
+
+  /* align titles/dividers across a row: each column spans title + list rows */
+  .columns-links .columns-links-col {
+    display: grid;
+    grid-row: span 2;
+    grid-template-rows: subgrid;
+    row-gap: 0;
+  }
+
+  .columns-links .columns-links-title {
+    align-self: end;
+  }
+
+  .columns-links .columns-links-list {
+    align-self: start;
+  }
+
+  .columns-links .columns-links-col-no-title .columns-links-list {
+    grid-row: 2;
+  }
+
+  .columns-links.columns-links-no-titles .columns-links-col {
+    grid-row: auto;
+    grid-template-rows: none;
+  }
+
+  .columns-links.columns-links-no-titles .columns-links-col-no-title .columns-links-list {
+    grid-row: auto;
+  }
+}
+
+@media (width >= 1200px) {
+  .columns-links {
+    padding: 48px 40px;
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "variantName": "embed-service",
+  "baseBlock": "embed",
+  "canonicalModel": "standalone",
+  "visualCharacteristics": "Full-width iframe embedding an external self-service app (e.g. Copel 'Sem Luz', 850px tall), with a small 'Abrir em nova aba' fallback link below. Placed in a 'split' section: block takes 2/3 beside default-content instructions (1/3) on desktop; stacks on mobile.",
+  "contentPattern": "Row 1: link to an https service URL (link text = iframe title, e.g. 'Servicos Copel'). Row 2 (optional): height such as 850px; default 800px.",
+  "options": [],
+  "memberVariantIds": ["embed-service"],
+  "usage": "Atendimento pages that embed Copel self-service applications, e.g. Falta de luz (https://www.copel.com/slwweb/publico/semluz/inicio.jsf).",
+  "reuseGuidance": "Use for any external https web app or form that must appear inline. Put the instructions as default content in the same section with Section Metadata style 'split'. Use the vanilla embed block for video/social providers instead."
+}

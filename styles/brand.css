@@ -1,0 +1,85 @@
+/* Copel brand tokens (source: https://www.copel.com/site/, Elementor global kit) */
+:root {
+  /* brand palette */
+  --copel-orange: #f5821e;
+  --copel-orange-strong: #e06000;
+  --copel-orange-ink: #c85000;
+  --copel-orange-ink-hover: #a84300;
+  --copel-orange-soft: #fff3e8;
+  --copel-yellow: #fdb422;
+  --copel-graphite: #373a3c;
+  --copel-ink: #151c21;
+  --copel-gray: #5f6468;
+  --copel-gray-light: #f2f4f6;
+  --copel-border: #e3e6e9;
+  --copel-dark-red: #7a0000;
+  --copel-green: #008000;
+
+  /* semantic colors */
+  --background-color: #fff;
+  --light-color: var(--copel-gray-light);
+  --dark-color: var(--copel-graphite);
+  --text-color: var(--copel-ink);
+  --text-muted-color: var(--copel-gray);
+  --link-color: #b34700;
+  --link-hover-color: var(--copel-orange-ink-hover);
+  --heading-color: var(--copel-ink);
+  --heading-accent-color: var(--copel-orange-strong);
+  --button-bg: var(--copel-orange-ink);
+  --button-bg-hover: var(--copel-orange-ink-hover);
+  --button-text: #fff;
+  --focus-ring: 0 0 0 3px rgb(245 130 30 / 45%);
+
+  /* fonts */
+  --body-font-family: 'Univers LT 55 Roman', univers-fallback, arial, sans-serif;
+  --heading-font-family: quenda, quenda-fallback, arial, sans-serif;
+  --heading-font-weight: 500;
+
+  /* body sizes */
+  --body-font-size-m: 17px;
+  --body-font-size-s: 15px;
+  --body-font-size-xs: 13px;
+
+  /* heading sizes (mobile) */
+  --heading-font-size-xxl: 36px;
+  --heading-font-size-xl: 28px;
+  --heading-font-size-l: 24px;
+  --heading-font-size-m: 20px;
+  --heading-font-size-s: 18px;
+  --heading-font-size-xs: 16px;
+
+  /* shape and rhythm */
+  --radius-s: 6px;
+  --radius-m: 12px;
+  --radius-l: 20px;
+  --shadow-card: 0 4px 18px rgb(21 28 33 / 8%);
+  --shadow-card-hover: 0 10px 28px rgb(21 28 33 / 14%);
+  --section-spacing: 48px;
+  --content-max-width: 1200px;
+  --transition: 0.3s ease;
+
+  /* nav height */
+  --nav-height: 62px;
+}
+
+@media (width >= 900px) {
+  :root {
+    --body-font-size-m: 16px;
+    --body-font-size-s: 15px;
+    --body-font-size-xs: 13px;
+    --heading-font-size-xxl: 48px;
+    --heading-font-size-xl: 40px;
+    --heading-font-size-l: 32px;
+    --heading-font-size-m: 24px;
+    --heading-font-size-s: 21px;
+    --heading-font-size-xs: 18px;
+    --section-spacing: 72px;
+    --nav-height: 102px;
+  }
+}
+
+@media (width >= 1200px) {
+  :root {
+    --nav-height: 111px;
+  }
+}

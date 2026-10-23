@@ -1,0 +1,209 @@
+/* cards-services: service shortcut tiles (source: copel.com .atalhosHome) */
+
+.cards-services > ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  background-color: var(--copel-border);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-card);
+}
+
+.cards-services .cards-services-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  box-sizing: border-box;
+  min-height: 120px;
+  margin: 0;
+  padding: 12px 12px 36px;
+  background-color: var(--background-color);
+  transition: background-color var(--transition), box-shadow var(--transition);
+}
+
+.cards-services .cards-services-card:hover {
+  background-color: var(--light-color);
+  box-shadow: rgb(0 0 0 / 10%) 0 0 10px inset;
+}
+
+.cards-services .cards-services-card:focus-within {
+  box-shadow: inset var(--focus-ring);
+}
+
+/* icon */
+.cards-services .cards-services-card-icon {
+  line-height: 0;
+}
+
+.cards-services .cards-services-card-icon picture {
+  display: block;
+}
+
+.cards-services .cards-services-card-icon .icon,
+.cards-services .cards-services-card-icon img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.cards-services .cards-services-card-icon-mask {
+  width: 34px;
+  height: 34px;
+  background-color: var(--copel-orange);
+  mask: var(--cards-services-icon) center / contain no-repeat;
+}
+
+.cards-services .cards-services-card-icon-mask picture,
+.cards-services .cards-services-card-icon-mask img {
+  opacity: 0;
+}
+
+/* body */
+.cards-services .cards-services-card-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 8px;
+  width: 100%;
+}
+
+.cards-services .cards-services-card-body p {
+  margin: 0;
+}
+
+/* label: Quenda Medium, whole tile is the click target */
+.cards-services .cards-services-card-label,
+.cards-services .cards-services-card-label:any-link {
+  font-family: var(--heading-font-family);
+  font-size: 14px;
+  font-weight: var(--heading-font-weight);
+  line-height: 1;
+  color: #000;
+  text-decoration: none;
+}
+
+.cards-services a.cards-services-card-label::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.cards-services a.cards-services-card-label:focus-visible {
+  outline: none;
+}
+
+/* "Veja mais" affordance, bottom-right (source renders it as a pseudo-element) */
+.cards-services .cards-services-card:not(:has(.cards-services-card-more)) a.cards-services-card-label::after,
+.cards-services .cards-services-card-more {
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  padding-right: 20px;
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-xs);
+  font-weight: 400;
+  line-height: 23px;
+  color: var(--link-color);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23f5821e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 8h11M8.5 3.5 13 8l-4.5 4.5'/%3E%3C/svg%3E") right center / 14px 14px no-repeat;
+}
+
+.cards-services .cards-services-card:not(:has(.cards-services-card-more)) a.cards-services-card-label::after {
+  content: 'Veja mais';
+}
+
+.cards-services .cards-services-card-more {
+  z-index: 2;
+  text-decoration: none;
+}
+
+.cards-services .cards-services-card:hover a.cards-services-card-label::after,
+.cards-services .cards-services-card-more:hover {
+  text-decoration: underline;
+}
+
+/* option "compact": short horizontal tiles (icon beside label), no "Veja mais" affordance */
+.cards-services.compact .cards-services-card {
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  min-height: 0;
+  padding: 16px 12px;
+}
+
+.cards-services.compact .cards-services-card-icon .icon,
+.cards-services.compact .cards-services-card-icon img,
+.cards-services.compact .cards-services-card-icon-mask {
+  width: 28px;
+  height: 28px;
+}
+
+.cards-services.compact .cards-services-card-icon {
+  flex: 0 0 auto;
+}
+
+.cards-services.compact .cards-services-card-label,
+.cards-services.compact .cards-services-card-label:any-link {
+  line-height: 1.25;
+}
+
+.cards-services.compact .cards-services-card:not(:has(.cards-services-card-more)) a.cards-services-card-label::after {
+  content: none;
+}
+
+.cards-services.compact .cards-services-card-more {
+  position: static;
+}
+
+@media (width >= 900px) {
+  .cards-services {
+    /* how far the tiles ride up over a hero carousel placed directly above */
+    --cards-services-overlap: 96px;
+  }
+
+  /* overlap the bottom of a hero carousel that sits directly above */
+  main > .carousel-hero-container + .section > .cards-services-wrapper:first-child > .cards-services {
+    position: relative;
+    z-index: 2;
+    margin-top: calc(-1 * (var(--section-spacing) + var(--cards-services-overlap)));
+  }
+
+  .cards-services > ul {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .cards-services .cards-services-card {
+    min-height: 160px;
+    padding: 16px 16px 48px;
+  }
+
+  .cards-services .cards-services-card-label,
+  .cards-services .cards-services-card-label:any-link {
+    font-size: 23px;
+    line-height: 23px;
+  }
+
+  .cards-services .cards-services-card:not(:has(.cards-services-card-more)) a.cards-services-card-label::after,
+  .cards-services .cards-services-card-more {
+    right: 16px;
+    bottom: 16px;
+    padding-right: 24px;
+    font-size: 14.4px;
+  }
+
+  .cards-services.compact .cards-services-card {
+    padding: 20px 16px;
+  }
+
+  .cards-services.compact .cards-services-card-label,
+  .cards-services.compact .cards-services-card-label:any-link {
+    font-size: 18px;
+    line-height: 1.25;
+  }
+}

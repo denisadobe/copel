@@ -1,0 +1,170 @@
+/* columns-app: "Aplicativo Copel" — text + download tiles beside a full-height photo */
+
+.columns-app .columns-app-row {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* text column */
+.columns-app .columns-app-text-col {
+  display: flex;
+  flex-direction: column;
+  order: 1;
+  color: var(--text-color);
+  font-size: 16px;
+  line-height: 24px;
+}
+
+.columns-app .columns-app-text-col > h2 {
+  margin: 0 0 20px;
+  color: var(--heading-accent-color);
+  font-size: var(--heading-font-size-xl);
+  line-height: 1.5;
+}
+
+.columns-app .columns-app-text-col > p {
+  margin: 0 0 14.4px;
+}
+
+/* download tiles */
+.columns-app .columns-app-tiles {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin-top: 32px;
+}
+
+.columns-app .columns-app-tile {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 20px;
+  min-height: 240px;
+  box-sizing: border-box;
+  border: 1px solid var(--copel-border);
+  border-radius: var(--radius-m);
+  padding: 32px;
+  background-color: #fff;
+  color: #000;
+}
+
+/* first tile: Copel orange (dark ink text keeps WCAG AA contrast on #f5821e) */
+.columns-app .columns-app-tile:first-child {
+  border-color: var(--copel-orange);
+  background-color: var(--copel-orange);
+  color: var(--copel-ink);
+}
+
+.columns-app .columns-app-tile > * {
+  margin: 0;
+}
+
+.columns-app .columns-app-tile h3 {
+  color: inherit;
+  font-size: 20px;
+  line-height: 30px;
+}
+
+.columns-app .columns-app-tile p {
+  font-size: 12px;
+  line-height: 18px;
+}
+
+/* download CTAs */
+main .columns-app a.columns-app-tile-cta:any-link {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  border-radius: var(--radius-s);
+  padding: 10px 20px;
+  background-color: #000;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color var(--transition), color var(--transition);
+}
+
+main .columns-app a.columns-app-tile-cta:hover,
+main .columns-app a.columns-app-tile-cta:focus-visible {
+  background-color: var(--copel-graphite);
+  color: #fff;
+}
+
+main .columns-app .columns-app-tile:first-child a.columns-app-tile-cta:any-link {
+  background-color: #fff;
+  color: #000;
+}
+
+main .columns-app .columns-app-tile:first-child a.columns-app-tile-cta:hover,
+main .columns-app .columns-app-tile:first-child a.columns-app-tile-cta:focus-visible {
+  background-color: var(--copel-ink);
+  color: #fff;
+}
+
+/* image column */
+.columns-app .columns-app-img-col {
+  order: 0;
+  line-height: 0;
+}
+
+.columns-app .columns-app-img-col picture {
+  display: block;
+  height: 100%;
+}
+
+.columns-app .columns-app-img-col img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 360px;
+  border-radius: var(--radius-m);
+  object-fit: cover;
+}
+
+@media (width >= 600px) {
+  .columns-app .columns-app-tiles {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (width >= 900px) {
+  .columns-app .columns-app-row {
+    flex-direction: row;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  .columns-app .columns-app-row > div {
+    flex: 1 1 50%;
+    min-width: 0;
+    order: unset;
+  }
+
+  .columns-app .columns-app-text-col {
+    padding: 10px 32px 10px 0;
+  }
+
+  .columns-app .columns-app-tiles {
+    margin-top: auto;
+    padding-top: 88px;
+  }
+
+  .columns-app .columns-app-tile {
+    min-height: 290px;
+  }
+
+  .columns-app .columns-app-img-col {
+    position: relative;
+    min-height: 400px;
+  }
+
+  .columns-app .columns-app-img-col img {
+    position: absolute;
+    inset: 0;
+    max-height: none;
+  }
+}

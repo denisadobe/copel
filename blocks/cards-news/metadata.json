@@ -1,0 +1,39 @@
+{
+  "variantName": "cards-news",
+  "baseBlock": "cards",
+  "canonicalModel": "standalone",
+  "visualCharacteristics": "Featured news item (large image left, category/title/date/excerpt right) followed by a 4-column news grid (image, title, excerpt, date). Featured layout is applied by CSS to the first card. Option 'stacked': featured item rendered as a single large card with full-width image on top and title/date/excerpt/Leia mais below (Noticias listing destaque). Option 'no-featured': plain grid whose column count follows the block width (auto-fill, min 280px per card), e.g. 2 columns inside a 2/3 split section, 4 at full width, 1 on mobile.",
+  "contentPattern": "One row per news item. Cell 1: image. Cell 2: category paragraph (before heading), title heading (linked), date paragraph (dd/mm/yyyy), summary paragraph(s), 'Leia mais' link paragraph. Same row contract for all options; 'stacked' is typically used with a single row.",
+  "options": [
+    {
+      "class": "no-featured",
+      "label": "No featured item"
+    },
+    {
+      "class": "stacked",
+      "label": "Stacked featured (image above text)"
+    }
+  ],
+  "memberVariantIds": [
+    "cards-news"
+  ],
+  "contentFragmentModel": "news-article",
+  "cfMapping": {
+    "image": "row cell 1 picture",
+    "category": "row cell 2, paragraph(s) before the heading",
+    "title": "row cell 2, first heading text",
+    "link": "row cell 2, heading link href (falls back to the 'Leia mais' link)",
+    "date": "row cell 2, first dd/mm/yyyy paragraph after the heading",
+    "summary": "row cell 2, remaining text paragraph(s)"
+  },
+  "usage": {
+    "description": "Home page news band: 1 featured + 4 latest news items.",
+    "pagesUsing": [
+      "/index",
+      "/site/noticias/index"
+    ],
+    "reuseCount": 1,
+    "lastUsed": "2026-10-22"
+  },
+  "reuseGuidance": "Use for lists of news/articles. Keep the 2-cell row structure stable: it is the contract for producing the markup from AEM headless news-article Content Fragments. Any field can be omitted per item. Put the section heading, intro and 'Leia todas as noticias' button as default content in the same section (section style: centered)."
+}

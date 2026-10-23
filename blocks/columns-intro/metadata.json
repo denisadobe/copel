@@ -1,0 +1,11 @@
+{
+  "variantName": "columns-intro",
+  "baseBlock": "columns",
+  "canonicalModel": "standalone",
+  "visualCharacteristics": "Three columns on desktop: intro text with a product logo, then two tall photos (electrician, technician). Stacks to one column on mobile.",
+  "contentPattern": "One row. Cell 1: paragraph(s) + optional logo image. Cells 2..n: one photo each.",
+  "options": [],
+  "memberVariantIds": ["columns-intro"],
+  "usage": "Seguro Protege Casa intro under 'Protecao para sua casa, sossego para voce.' (text + Protege Casa logo | electrician photo | technician photo).",
+  "reuseGuidance": "Use for an intro paragraph paired with one or more photos. Image-only cells become cover photos; an image alone in a paragraph inside the text cell is treated as a logo. Empty cells are dropped."
+}

@@ -10,6 +10,9 @@ import {
   loadSections,
   loadCSS,
   buildBlock,
+  readBlockConfig,
+  toClassName,
+  toCamelCase,
 } from './aem.js';
 
 if (window.trustedTypes && window.trustedTypes.createPolicy) {
@@ -124,7 +127,14 @@ function decorateButtons(main) {
     // require authored formatting for buttonization
     const strong = a.closest('strong');
     const em = a.closest('em');
-    if (!strong && !em) return;
+    if (!strong && !em) {
+      // a link alone in a default-content paragraph is a call to action
+      if (p.parentElement && p.parentElement.classList.contains('default-content-wrapper')) {
+        p.className = 'button-wrapper';
+        a.className = 'button primary';
+      }
+      return;
+    }
 
     p.className = 'button-wrapper';
     a.className = 'button';
@@ -143,6 +153,29 @@ function decorateButtons(main) {
 }
 
 /**
+ * Applies Section Metadata tables to their sections and removes them.
+ * `style` values (comma separated) become section classes; other keys become data attributes.
+ * @param {Element} main The main element
+ */
+function decorateSectionMetadata(main) {
+  main.querySelectorAll(':scope > .section div.section-metadata').forEach((meta) => {
+    const section = meta.closest('.section');
+    const config = readBlockConfig(meta);
+    Object.entries(config).forEach(([key, value]) => {
+      if (key === 'style') {
+        `${value}`.split(',').map((s) => toClassName(s.trim())).filter(Boolean)
+          .forEach((cls) => section.classList.add(cls));
+      } else {
+        section.dataset[toCamelCase(key)] = value;
+      }
+    });
+    const wrapper = meta.parentElement;
+    meta.remove();
+    if (wrapper !== section && !wrapper.children.length) wrapper.remove();
+  });
+}
+
+/**
  * Decorates the main element.
  * @param {Element} main The main element
  */
@@ -151,6 +184,7 @@ export function decorateMain(main) {
   decorateIcons(main);
   buildAutoBlocks(main);
   decorateSections(main);
+  decorateSectionMetadata(main);
   decorateBlocks(main);
   decorateButtons(main);
 }
@@ -160,7 +194,7 @@ export function decorateMain(main) {
  * @param {Element} doc The container element
  */
 async function loadEager(doc) {
-  document.documentElement.lang = 'en';
+  document.documentElement.lang = 'pt-BR';
   decorateTemplateAndTheme();
   const main = doc.querySelector('main');
   if (main) {
@@ -187,7 +221,15 @@ async function loadLazy(doc) {
   loadHeader(doc.querySelector('body > header'));
 
   const main = doc.querySelector('main');
+  // plan cards with a SKU: Commerce express checkout (listener ready before the cards load)
+  const plans = main?.querySelector('.cards-plans')
+    ? import('./commerce-plans.js').then((m) => { m.default(); return m; })
+    : null;
   await loadSections(main);
+  plans?.then((m) => m.resumePurchase()).catch((e) => {
+    // eslint-disable-next-line no-console
+    console.error('commerce-plans', e);
+  });
 
   const { hash } = window.location;
   const element = hash ? doc.getElementById(hash.substring(1)) : false;

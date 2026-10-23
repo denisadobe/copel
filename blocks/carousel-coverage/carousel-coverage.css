@@ -1,0 +1,297 @@
+/* carousel-coverage: values from source (.elementor-element-6ae60bb, copel.com/site/seguro-protege-casa) */
+
+.carousel-coverage {
+  color: var(--text-color);
+}
+
+.carousel-coverage .carousel-coverage-controls {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.carousel-coverage .carousel-coverage-viewport {
+  flex: 1;
+  min-width: 0;
+}
+
+.carousel-coverage .carousel-coverage-track {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+
+.carousel-coverage .carousel-coverage-track::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-coverage .carousel-coverage-track:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-radius: var(--radius-m);
+}
+
+/* mobile: one card + 50px peek (source offset_width_mobile) */
+.carousel-coverage .carousel-coverage-item {
+  flex: 0 0 calc(100% - 50px);
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  scroll-snap-align: start;
+}
+
+.carousel-coverage .carousel-coverage-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 10px;
+  background-color: var(--background-color);
+}
+
+.carousel-coverage .carousel-coverage-image {
+  flex-shrink: 0;
+  line-height: 0;
+  aspect-ratio: 454 / 278;
+  overflow: hidden;
+  border-radius: var(--radius-m);
+}
+
+.carousel-coverage .carousel-coverage-image picture,
+.carousel-coverage .carousel-coverage-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.carousel-coverage .carousel-coverage-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 0;
+}
+
+.carousel-coverage .carousel-coverage-tags {
+  display: flex;
+  gap: 10px;
+  margin: 0;
+}
+
+.carousel-coverage .carousel-coverage-tags a.carousel-coverage-tag:any-link {
+  flex: 1 1 0;
+  min-width: 0;
+  box-sizing: border-box;
+  padding: 5.6px 4.8px;
+  border-radius: 100px;
+  background-color: var(--copel-yellow);
+  color: var(--copel-ink);
+  font-family: var(--body-font-family);
+  font-size: 11.2px;
+  font-weight: 700;
+  line-height: 16.8px;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.carousel-coverage .carousel-coverage-tags a.carousel-coverage-tag-premium:any-link {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+}
+
+.carousel-coverage .carousel-coverage-tags a.carousel-coverage-tag:hover {
+  background-color: var(--copel-orange);
+  color: var(--copel-ink);
+}
+
+.carousel-coverage .carousel-coverage-tags a.carousel-coverage-tag-premium:hover {
+  background-color: var(--button-bg-hover);
+  color: var(--button-text);
+}
+
+.carousel-coverage .carousel-coverage-tags a.carousel-coverage-tag:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.carousel-coverage .carousel-coverage-title {
+  margin: 0;
+  font-family: var(--heading-font-family);
+  font-size: 20px;
+  font-weight: var(--heading-font-weight);
+  line-height: 1.4;
+  color: var(--heading-color);
+}
+
+.carousel-coverage .carousel-coverage-body p {
+  margin: 0;
+  font-family: var(--body-font-family);
+  font-size: 14.4px;
+  line-height: 1.5;
+  color: var(--text-color);
+}
+
+/* arrows: source eicon chevrons, 25px, Copel orange */
+.carousel-coverage .carousel-coverage-prev,
+.carousel-coverage .carousel-coverage-next {
+  position: relative;
+  flex: 0 0 auto;
+  width: 25px;
+  height: 25px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--copel-orange-strong);
+  cursor: pointer;
+}
+
+.carousel-coverage .carousel-coverage-prev::after,
+.carousel-coverage .carousel-coverage-next::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 11px;
+  height: 11px;
+  border: solid currentcolor;
+  border-width: 0 3px 3px 0;
+}
+
+.carousel-coverage .carousel-coverage-prev::after {
+  transform: translate(-25%, -50%) rotate(135deg);
+}
+
+.carousel-coverage .carousel-coverage-next::after {
+  transform: translate(-75%, -50%) rotate(-45deg);
+}
+
+.carousel-coverage .carousel-coverage-prev:hover,
+.carousel-coverage .carousel-coverage-next:hover {
+  color: var(--copel-orange-ink);
+}
+
+.carousel-coverage .carousel-coverage-prev:focus-visible,
+.carousel-coverage .carousel-coverage-next:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.carousel-coverage .carousel-coverage-prev:disabled,
+.carousel-coverage .carousel-coverage-next:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* dots: source bullets 6px, 12px apart, #000 at 20% / 100% */
+.carousel-coverage .carousel-coverage-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  margin-top: 10px;
+}
+
+.carousel-coverage .carousel-coverage-dot {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.carousel-coverage .carousel-coverage-dot::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #000;
+  opacity: 0.2;
+  transition: opacity var(--transition);
+}
+
+.carousel-coverage .carousel-coverage-dot[aria-current='true']::before {
+  opacity: 1;
+}
+
+.carousel-coverage .carousel-coverage-dot:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.carousel-coverage.carousel-coverage-static .carousel-coverage-prev,
+.carousel-coverage.carousel-coverage-static .carousel-coverage-next,
+.carousel-coverage.carousel-coverage-static .carousel-coverage-dots {
+  visibility: hidden;
+}
+
+/* below desktop the arrows overlay the 24px section gutters (source: arrows inside) */
+@media (width < 900px) {
+  .carousel-coverage .carousel-coverage-controls {
+    position: relative;
+  }
+
+  .carousel-coverage .carousel-coverage-prev,
+  .carousel-coverage .carousel-coverage-next {
+    position: absolute;
+    z-index: 1;
+    top: calc(50% - 12.5px);
+  }
+
+  .carousel-coverage .carousel-coverage-prev {
+    left: -24px;
+  }
+
+  .carousel-coverage .carousel-coverage-next {
+    right: -24px;
+  }
+}
+
+/* tablet: two cards + 80px peek */
+@media (width >= 600px) {
+  .carousel-coverage .carousel-coverage-item {
+    flex-basis: calc((100% - 80px - 10px) / 2);
+  }
+}
+
+/* desktop: three cards + 80px peek (source slides 340px incl. 10px gutters) */
+@media (width >= 900px) {
+  .carousel-coverage .carousel-coverage-controls {
+    gap: 10px;
+  }
+
+  .carousel-coverage .carousel-coverage-item {
+    flex-basis: calc((100% - 80px - 20px) / 3);
+  }
+
+  .carousel-coverage .carousel-coverage-title {
+    font-size: 16px;
+    line-height: 24px;
+  }
+
+  .carousel-coverage .carousel-coverage-body p {
+    font-size: var(--body-font-size-xs);
+    line-height: 19.2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carousel-coverage .carousel-coverage-track {
+    scroll-behavior: auto;
+  }
+}

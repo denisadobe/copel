@@ -1,0 +1,18 @@
+{
+  "variantName": "cards-services",
+  "baseBlock": "cards",
+  "canonicalModel": "standalone",
+  "visualCharacteristics": "White rounded cards overlapping the bottom of the hero; 4x2 grid (2 columns on mobile) of icon + label tiles with a 'Veja mais' link. Option 'compact': short tiles with the icon beside the label and no 'Veja mais' affordance, for secondary service lists.",
+  "contentPattern": "One row per tile. Cell 1: icon (:icon-name: or SVG image). Cell 2: label as linked text, optional 'Veja mais' link.",
+  "options": [
+    {
+      "class": "compact",
+      "label": "Compact (icon beside label)"
+    }
+  ],
+  "memberVariantIds": [
+    "cards-services"
+  ],
+  "usage": "Home page quick service tiles (Falta de Energia, Fatura Digital, Consulta protocolo, Troca de titularidade, Pedido de nova ligacao, Pedido de religacao, Segunda via, Parcelamento).",
+  "reuseGuidance": "Use for grids of short service shortcuts with an icon, a linked label and an optional secondary link. Place a centered 'Mais Servicos' button after the block in the same section (section style: centered)."
+}

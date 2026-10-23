@@ -20,15 +20,17 @@ import {
  */
 export async function loadFragment(path) {
   if (path && path.startsWith('/') && !path.startsWith('//')) {
-    const resp = await fetch(`${path}.plain.html`);
+    let resp = await fetch(`${path}.plain.html`);
+    // local preview serves authored content under /content
+    if (!resp.ok && !path.startsWith('/content/')) resp = await fetch(`/content${path}.plain.html`);
     if (resp.ok) {
       const main = document.createElement('main');
       main.innerHTML = await resp.text();
 
-      // reset base path for media to fragment base
+      // reset base path for relative media (./media_*, ./images/*) to the fragment base
       const resetAttributeBase = (tag, attr) => {
-        main.querySelectorAll(`${tag}[${attr}^="./media_"]`).forEach((elem) => {
-          elem[attr] = new URL(elem.getAttribute(attr), new URL(path, window.location)).href;
+        main.querySelectorAll(`${tag}[${attr}^="./"]`).forEach((elem) => {
+          elem[attr] = new URL(elem.getAttribute(attr), resp.url).href;
         });
       };
       resetAttributeBase('img', 'src');
