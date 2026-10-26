@@ -24,9 +24,10 @@ import { createOptimizedPicture } from '../../scripts/aem.js';
  * no picture, otherwise as image. Options (block classes): "no-autoplay".
  *
  * Headless source (optional): leading "key | value" config rows
- *   Fonte / Source           persisted query URL (absolute, or relative to
- *                            config.json "aem-publish-url")
- *   Público / Audience       passed as the ";publico=" query variable
+ *   Fonte / Source           banner list URL (AEM persisted query or app proxy), a
+ *                            channel ("site"/"app", uses config.json "aem-banners-url")
+ *                            or a persisted-query path on "aem-publish-url"
+ *   Público / Audience       overrides the detected audience (publicoAtual)
  *   Escopo Target / Target scope   Adobe Target decision scope (alloy)
  * are removed; slides then come from banner Content Fragments
  * (carousel-hero-cf.js) and the remaining authored rows are the fallback.
@@ -289,6 +290,7 @@ export default function decorate(block) {
       if (teardown) teardown();
       teardown = mount(block, slides);
       block.dataset.source = 'content-fragments';
+      block.dataset.publico = result.audience;
       result.onDisplay();
     })
     .catch(() => {

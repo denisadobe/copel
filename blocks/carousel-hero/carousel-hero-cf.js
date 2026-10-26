@@ -1,17 +1,36 @@
 /* eslint-disable no-underscore-dangle -- AEM GraphQL fields (_path, _publishUrl, _dynamicUrl) */
 /*
- * carousel-hero: AEM headless source (banner Content Fragments via GraphQL persisted query).
+ * carousel-hero: AEM headless source (banner Content Fragments).
  * Loaded on demand by carousel-hero.js only when the block has a "Fonte"/"Source" config row.
  *
  * Turns each `banner` Content Fragment into a row with exactly the authored structure
  * (cell 1: picture(s), cell 2: h2 + p + p>a), so carousel-hero.js decorates it unchanged.
  * DOM is built with createElement/textContent only (CSP: require-trusted-types-for 'script').
+ *
+ * Source resolution (Fonte value):
+ *   - absolute URL on another host (e.g. the app proxy https://<app>/api/banners?canal=site)
+ *     -> fetched exactly as written
+ *   - bare channel ("site", "app") or empty -> config.json `aem-banners-url` template
+ *     ("…?canal={canal}"), else <aem-publish-url>/graphql/execute.json/global/banners-por-canal
+ *   - path (/graphql/execute.json/…, global/banners-por-canal;canal=site) -> on aem-publish-url
+ *
+ * Audience (publicoAtual): "visitante"; a signed-in Commerce customer (auth_dropin_user_token)
+ * who ordered a protege-casa-* product is "cliente-protege-casa". A "Público" row overrides it.
+ * Items are kept when publico is empty, "todos" or publicoAtual.
  */
 
 const FETCH_TIMEOUT_MS = 4000;
 const ALLOY_TIMEOUT_MS = 1500;
-const DEFAULT_QUERY_PREFIX = '/graphql/execute.json/copel/';
+const COMMERCE_TIMEOUT_MS = 2500;
+const AEM_QUERY_PREFIX = '/graphql/execute.json/global/';
+const LIST_QUERY = 'banners-por-canal';
 const BY_PATH_QUERY = 'banner-por-path';
+const DEFAULT_CHANNEL = 'site';
+const DEFAULT_AUDIENCE = 'visitante';
+const CUSTOMER_AUDIENCE = 'cliente-protege-casa';
+const CUSTOMER_SKU_PREFIX = 'protege-casa-';
+const AUTH_COOKIE = 'auth_dropin_user_token'; // same cookie as scripts/commerce.js
+const AUDIENCE_CACHE_KEY = 'carousel-hero-publico';
 // same cache key/shape as scripts/commerce.js getConfig(), so the page fetches /config.json once
 const CONFIG_CACHE_KEY = 'commerce-config';
 const CONFIG_TTL_S = 7200;
@@ -55,54 +74,61 @@ function getSiteConfig() {
 
 const isHttp = (url) => url.protocol === 'http:' || url.protocol === 'https:';
 
+function toHttpUrl(value, base) {
+  if (typeof value !== 'string' || !value.trim()) return null;
+  try {
+    const url = new URL(value.trim(), base);
+    return isHttp(url) ? url : null;
+  } catch (e) {
+    return null;
+  }
+}
+
 async function getPublishOrigin() {
-  const value = (await getSiteConfig())['aem-publish-url'];
-  if (typeof value !== 'string' || !value) return null;
-  try {
-    const url = new URL(value);
-    return isHttp(url) ? url.origin : null;
-  } catch (e) {
-    return null;
-  }
+  return toHttpUrl((await getSiteConfig())['aem-publish-url'])?.origin || null;
 }
 
-/**
- * Absolute persisted-query URL. Accepts a full URL, a publish-relative path
- * (/graphql/execute.json/copel/…) or just "copel/banners-por-canal;canal=site".
- */
-async function resolveQueryUrl(value) {
-  if (!value) return null;
-  const isAbsolute = /^https?:\/\//i.test(value);
-  let url;
-  try {
-    url = new URL(value, window.location.origin);
-  } catch (e) {
-    return null;
-  }
-  if (!isAbsolute || url.origin === window.location.origin) {
+const isPersistedQuery = (url) => url.pathname.includes('/graphql/execute.json/');
+
+/** URL to fetch the banner list from (see header comment); null when unresolvable. */
+async function resolveSourceUrl(rawValue) {
+  const value = (rawValue || '').trim();
+
+  // bare channel or empty: config template, else the AEM persisted query
+  if (!value || /^[a-z][\w-]*$/i.test(value)) {
+    const channel = value || DEFAULT_CHANNEL;
+    const template = (await getSiteConfig())['aem-banners-url'];
+    if (typeof template === 'string' && template) {
+      return toHttpUrl(template.replace(/\{canal\}/g, encodeURIComponent(channel)));
+    }
     const origin = await getPublishOrigin();
-    if (!origin) return null;
-    let path = isAbsolute ? url.pathname : value.split(/[?#]/)[0];
-    if (!path.startsWith('/')) path = `/${path}`;
-    if (!path.startsWith('/graphql/')) path = `/graphql/execute.json${path}`;
-    url = new URL(origin);
-    url.pathname = path;
+    return origin ? toHttpUrl(`${origin}${AEM_QUERY_PREFIX}${LIST_QUERY};canal=${encodeURIComponent(channel)}`) : null;
   }
-  return isHttp(url) ? url : null;
+
+  // absolute URL on another host (AEM publish or app proxy): as written
+  if (/^https?:\/\//i.test(value)) {
+    const url = toHttpUrl(value);
+    if (!url) return null;
+    if (url.origin !== window.location.origin || !url.pathname.startsWith('/graphql/')) return url;
+  }
+
+  // persisted-query path (DA may turn an authored publish link into a site-relative one)
+  const origin = await getPublishOrigin();
+  if (!origin) return null;
+  let path = /^https?:\/\//i.test(value) ? new URL(value).pathname : value.split(/[?#]/)[0];
+  if (!path.startsWith('/')) path = `/${path}`;
+  if (!path.startsWith('/graphql/')) path = `/graphql/execute.json${path}`;
+  const url = new URL(origin);
+  url.pathname = path;
+  return url;
 }
 
-/** Adds a persisted-query variable (";name=value") unless the URL already sets it. */
-function addVariable(url, name, value) {
-  if (!value || new RegExp(`;${name}=`).test(url.pathname)) return;
-  url.pathname = `${url.pathname};${name}=${encodeURIComponent(value)}`;
-}
-
-async function fetchJson(url, timeout) {
+async function fetchJson(url, timeout, init = {}) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
   try {
-    const resp = await fetch(url.href, { credentials: 'omit', signal: controller.signal });
-    if (!resp.ok) throw new Error(`Persisted query failed (${resp.status})`);
+    const resp = await fetch(url.href, { credentials: 'omit', ...init, signal: controller.signal });
+    if (!resp.ok) throw new Error(`Request failed (${resp.status})`);
     return await resp.json();
   } finally {
     clearTimeout(timer);
@@ -118,6 +144,89 @@ function withTimeout(promise, ms) {
     }),
   ]).finally(() => clearTimeout(timer));
 }
+
+/* ---------------------------------------------------------------------------------------- */
+/* Audience (publicoAtual)                                                                   */
+/* ---------------------------------------------------------------------------------------- */
+
+const readCookie = (name) => {
+  const value = document.cookie.split('; ').find((c) => c.startsWith(`${name}=`))?.slice(name.length + 1);
+  return value ? decodeURIComponent(value) : '';
+};
+
+/** Non-cryptographic fingerprint: keys the cache to the token without storing it. */
+function fingerprint(value) {
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i); // eslint-disable-line no-bitwise
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return `${value.length}:${(hash >>> 0).toString(36)}`; // eslint-disable-line no-bitwise
+}
+
+const CUSTOMER_ORDERS_QUERY = '{ customer { orders(pageSize: 20) { items { items { product_sku } } } } }';
+
+async function fetchCustomerAudience(token) {
+  const config = await getSiteConfig();
+  const endpoint = toHttpUrl(config['commerce-core-endpoint'] || config['commerce-endpoint']);
+  if (!endpoint) return null;
+  const headers = {
+    ...(config.headers?.all || {}),
+    ...(config.headers?.cs || {}),
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`,
+  };
+  const json = await fetchJson(endpoint, COMMERCE_TIMEOUT_MS, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ query: CUSTOMER_ORDERS_QUERY }),
+  });
+  const orders = json?.data?.customer?.orders?.items;
+  if (!Array.isArray(orders)) return null; // errors / expired token: not cached
+  const isCustomer = orders.some((order) => (order?.items || [])
+    .some((line) => typeof line?.product_sku === 'string' && line.product_sku.startsWith(CUSTOMER_SKU_PREFIX)));
+  return isCustomer ? CUSTOMER_AUDIENCE : DEFAULT_AUDIENCE;
+}
+
+/** Current audience; cached in sessionStorage per token. Never rejects. */
+async function getAudience() {
+  const token = readCookie(AUTH_COOKIE);
+  if (!token) {
+    try { sessionStorage.removeItem(AUDIENCE_CACHE_KEY); } catch (e) { /* ignore */ }
+    return DEFAULT_AUDIENCE;
+  }
+  const key = fingerprint(token);
+  try {
+    const cached = JSON.parse(sessionStorage.getItem(AUDIENCE_CACHE_KEY));
+    if (cached?.key === key && typeof cached.publico === 'string') return cached.publico;
+    if (cached) sessionStorage.removeItem(AUDIENCE_CACHE_KEY); // token changed
+  } catch (e) {
+    // ignore malformed cache
+  }
+  try {
+    const publico = await fetchCustomerAudience(token);
+    if (!publico) return DEFAULT_AUDIENCE;
+    try {
+      sessionStorage.setItem(AUDIENCE_CACHE_KEY, JSON.stringify({ key, publico }));
+    } catch (e) {
+      // storage full / disabled
+    }
+    return publico;
+  } catch (e) {
+    return DEFAULT_AUDIENCE;
+  }
+}
+
+function matchesAudience(item, audience) {
+  const values = (Array.isArray(item.publico) ? item.publico : [item.publico])
+    .filter((v) => typeof v === 'string' && v.trim())
+    .map((v) => v.trim().toLowerCase());
+  return !values.length || values.includes('todos') || values.includes(audience.toLowerCase());
+}
+
+/* ---------------------------------------------------------------------------------------- */
+/* Items                                                                                     */
+/* ---------------------------------------------------------------------------------------- */
 
 function extractItems(json) {
   const data = json?.data;
@@ -153,29 +262,22 @@ function safeHref(value) {
   if (typeof value !== 'string') return null;
   const v = value.trim();
   if (/^\/(?![/\\])/.test(v)) return v;
-  try {
-    const url = new URL(v);
-    return isHttp(url) ? url.href : null;
-  } catch (e) {
-    return null;
-  }
+  return toHttpUrl(v)?.href || null;
 }
 
-function resolveImage(ref, origin) {
+/**
+ * ImageRef (jpg: _publishUrl, _dynamicUrl, width, height) or DocumentRef (webp: _path,
+ * _publishUrl). Order: _publishUrl, then publish host + _path, then _dynamicUrl (with width).
+ */
+function resolveImage(ref, assetOrigin) {
   if (!ref) return null;
   const image = typeof ref === 'string' ? { _path: ref } : ref;
-  const value = image._dynamicUrl || image._publishUrl || image._path;
-  if (typeof value !== 'string' || !value) return null;
-  try {
-    const url = new URL(value, origin);
-    if (!isHttp(url)) return null;
-    const dynamic = !!image._dynamicUrl
-      || url.pathname.includes('/adobe/dynamicmedia/deliver/')
-      || url.pathname.includes('/is/image/');
-    return { url, dynamic };
-  } catch (e) {
-    return null;
-  }
+  const publishUrl = toHttpUrl(image._publishUrl, assetOrigin);
+  if (publishUrl) return { url: publishUrl, dynamic: false };
+  const pathUrl = typeof image._path === 'string' && image._path.startsWith('/') ? toHttpUrl(image._path, assetOrigin) : null;
+  if (pathUrl) return { url: pathUrl, dynamic: false };
+  const dynamicUrl = toHttpUrl(image._dynamicUrl, assetOrigin);
+  return dynamicUrl ? { url: dynamicUrl, dynamic: true } : null;
 }
 
 function dynamicSrc(url, width) {
@@ -205,6 +307,8 @@ function buildPicture({ url, dynamic }, alt) {
   }
   img.alt = alt;
   img.loading = 'lazy';
+  // unpublished/missing asset: show the hero background instead of a broken image + alt text
+  img.addEventListener('error', () => { picture.style.display = 'none'; }, { once: true });
   picture.append(img);
   return picture;
 }
@@ -230,10 +334,11 @@ function linkParagraph(label, href) {
 }
 
 /** One `banner` fragment -> authored-equivalent row (or null when nothing renderable). */
-function buildRow(item, origin) {
+function buildRow(item, assetOrigin) {
   const title = text(item.titulo);
-  const alt = text(item.imagemAlt) || '';
-  const images = [resolveImage(item.imagem, origin), resolveImage(item.imagemMobile, origin)]
+  const alt = text(item.imagemAlt);
+  const images = [item.imagem, item.imagemMobile]
+    .map((ref) => resolveImage(ref, assetOrigin))
     .filter(Boolean);
   if (!title && !images.length) return null;
 
@@ -266,11 +371,24 @@ function buildRow(item, origin) {
   return { row, path: typeof item._path === 'string' ? item._path : '' };
 }
 
-function byPathUrl(queryUrl, bannerPath) {
-  const url = new URL(queryUrl.origin);
-  const prefix = queryUrl.pathname.match(/^(.*\/execute\.json\/[^/;]+\/)/)?.[1] || DEFAULT_QUERY_PREFIX;
-  url.pathname = `${prefix}${BY_PATH_QUERY};path=${encodeURIComponent(bannerPath)}`;
-  return url;
+/* ---------------------------------------------------------------------------------------- */
+/* Personalization (Adobe Target via Web SDK)                                                */
+/* ---------------------------------------------------------------------------------------- */
+
+/** banner-por-path on the same AEM endpoint as the list query, or `aem-banner-by-path-url`. */
+async function byPathUrl(sourceUrl, bannerPath) {
+  const template = (await getSiteConfig())['aem-banner-by-path-url'];
+  if (typeof template === 'string' && template) {
+    return toHttpUrl(template.replace(/\{path\}/g, encodeURIComponent(bannerPath)));
+  }
+  let { origin } = sourceUrl;
+  let prefix = AEM_QUERY_PREFIX;
+  const match = isPersistedQuery(sourceUrl) && sourceUrl.pathname.match(/^(.*\/execute\.json\/[^/;]+\/)/);
+  if (match) [, prefix] = match;
+  else origin = await getPublishOrigin();
+  if (!origin) return null;
+  // AEM does not decode %2F in persisted-query variables: the (validated) path goes in raw
+  return toHttpUrl(`${origin}${prefix}${BY_PATH_QUERY};path=${bannerPath}`);
 }
 
 function readPropositionContent(proposition) {
@@ -280,10 +398,10 @@ function readPropositionContent(proposition) {
 }
 
 /**
- * Adobe Target hook (inert unless a scope is configured and Web SDK is on the page):
- * moves the decided banner first, fetching it by path when it is not in the list.
+ * Inert unless a scope is configured and Web SDK is on the page: moves the decided banner
+ * first, fetching it by path when it is not in the list.
  */
-async function personalize(items, scope, queryUrl, now) {
+async function personalize(items, { scope, sourceUrl, keep }) {
   if (!scope || typeof window.alloy !== 'function') return { items };
   try {
     const result = await withTimeout(
@@ -294,14 +412,15 @@ async function personalize(items, scope, queryUrl, now) {
     const proposition = propositions.find((p) => p?.scope === scope && p.items?.length)
       || propositions.find((p) => p?.items?.length);
     const bannerPath = readPropositionContent(proposition)?.bannerPath;
-    if (typeof bannerPath !== 'string' || !bannerPath.startsWith('/content/dam/')) return { items };
+    if (typeof bannerPath !== 'string' || !/^\/content\/dam\/[\w\-/.]+$/.test(bannerPath)) return { items };
 
     const index = items.findIndex((item) => item._path === bannerPath);
     if (index >= 0) {
       return { items: [items[index], ...items.filter((_, i) => i !== index)], proposition };
     }
-    const [extra] = extractItems(await fetchJson(byPathUrl(queryUrl, bannerPath), FETCH_TIMEOUT_MS))
-      .filter((item) => isActive(item, now));
+    const url = await byPathUrl(sourceUrl, bannerPath);
+    if (!url) return { items };
+    const [extra] = extractItems(await fetchJson(url, FETCH_TIMEOUT_MS)).filter(keep);
     if (!extra) return { items };
     return { items: [extra, ...items], proposition };
   } catch (e) {
@@ -325,26 +444,33 @@ function recordDisplay(proposition) {
 
 /**
  * @param {{source?: string, audience?: string, targetScope?: string}} config block config rows
- * @returns {Promise<{rows: {row: HTMLElement, path: string}[], onDisplay: Function}|null>}
+ * @returns {Promise<{rows: {row: HTMLElement, path: string}[], audience: string,
+ *   onDisplay: Function}|null>}
  *   null when there is nothing to render (caller keeps the authored fallback)
  */
 export default async function loadBannerRows(config) {
-  const queryUrl = await resolveQueryUrl(config.source);
-  if (!queryUrl) return null;
-  addVariable(queryUrl, 'publico', config.audience);
+  const sourceUrl = await resolveSourceUrl(config.source);
+  if (!sourceUrl) return null;
+
+  // banners and audience in parallel; an authored "Público" row overrides the audience
+  const audiencePromise = config.audience ? Promise.resolve(config.audience) : getAudience();
+  const [json, audience] = await Promise.all([
+    fetchJson(sourceUrl, FETCH_TIMEOUT_MS),
+    audiencePromise,
+  ]);
 
   const now = new Date();
-  const json = await fetchJson(queryUrl, FETCH_TIMEOUT_MS);
-  const items = byOrder(extractItems(json).filter((item) => isActive(item, now)));
+  const keep = (item) => isActive(item, now) && matchesAudience(item, audience);
+  const items = byOrder(extractItems(json).filter(keep));
   if (!items.length) return null;
 
-  const { items: ordered, proposition } = await personalize(
-    items,
-    config.targetScope,
-    queryUrl,
-    now,
-  );
-  const rows = ordered.map((item) => buildRow(item, queryUrl.origin)).filter(Boolean);
+  const { items: ordered, proposition } = await personalize(items, {
+    scope: config.targetScope,
+    sourceUrl,
+    keep,
+  });
+  const assetOrigin = (await getPublishOrigin()) || sourceUrl.origin;
+  const rows = ordered.map((item) => buildRow(item, assetOrigin)).filter(Boolean);
   if (!rows.length) return null;
-  return { rows, onDisplay: proposition ? () => recordDisplay(proposition) : () => {} };
+  return { rows, audience, onDisplay: proposition ? () => recordDisplay(proposition) : () => {} };
 }
