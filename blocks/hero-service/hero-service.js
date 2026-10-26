@@ -1,4 +1,7 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
+import {
+  IS_UE, claimDecoration, moveInstrumentation, replacePicture,
+} from '../../scripts/ue-utils.js';
 
 /*
  * Hero (service)
@@ -9,19 +12,22 @@ import { createOptimizedPicture } from '../../scripts/aem.js';
  *
  * Rows are classified by content, not position, so authors may omit
  * the background or the aside row, or put everything in one row.
+ * Pictures without an image (empty placeholders of a block added in the Universal Editor)
+ * are ignored on the site and kept in the editor, where they stay selectable.
  */
 
+const hasImage = (pic) => IS_UE || !!pic.querySelector('img')?.getAttribute('src');
 const isPictureOnly = (el) => !!el.querySelector('picture, img') && !el.textContent.trim();
 
 function optimize(pic, eager, width) {
   const img = pic.querySelector('img');
-  if (!img || img.src.split('?')[0].endsWith('.svg')) return pic;
+  if (!img?.getAttribute('src') || img.src.split('?')[0].endsWith('.svg')) return pic;
   const opt = createOptimizedPicture(img.src, img.alt, eager, [{ media: '(min-width: 900px)', width: '2000' }, { width }]);
-  pic.replaceWith(opt);
-  return opt;
+  return replacePicture(pic, opt);
 }
 
 export default function decorate(block) {
+  if (!claimDecoration(block)) return;
   const cells = [...block.children].flatMap((row) => [...row.children]);
 
   let background = null;
@@ -30,7 +36,7 @@ export default function decorate(block) {
 
   cells.forEach((cell) => {
     if (isPictureOnly(cell)) {
-      const pics = [...cell.querySelectorAll('picture')];
+      const pics = [...cell.querySelectorAll('picture')].filter(hasImage);
       if (!background && !contentCells.length && pics.length) {
         background = pics.shift();
       }
@@ -46,6 +52,7 @@ export default function decorate(block) {
 
   const content = document.createElement('div');
   content.className = 'hero-service-content';
+  if (contentCells.length === 1) moveInstrumentation(contentCells[0], content);
   contentCells.forEach((cell) => {
     // pictures inside a text cell after the text are treated as aside media
     [...cell.querySelectorAll('picture')].forEach((pic) => {

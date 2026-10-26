@@ -1,0 +1,734 @@
+{
+  "groups": [
+    {
+      "title": "Conteúdo padrão",
+      "id": "default",
+      "components": [
+        {
+          "title": "Texto",
+          "id": "text",
+          "model": "text",
+          "plugins": {
+            "da": {
+              "name": "text",
+              "type": "text"
+            }
+          }
+        },
+        {
+          "title": "Título",
+          "id": "title",
+          "model": "title",
+          "plugins": {
+            "da": {
+              "unsafeHTML": "<h2>Título da seção</h2>"
+            }
+          }
+        },
+        {
+          "title": "Botão / link",
+          "id": "button",
+          "model": "button",
+          "plugins": {
+            "da": {
+              "unsafeHTML": "<p><strong><a href=\"/\">Texto do botão</a></strong></p>"
+            }
+          }
+        },
+        {
+          "title": "Imagem",
+          "id": "image",
+          "model": "image",
+          "plugins": {
+            "da": {
+              "name": "image",
+              "type": "image",
+              "fields": [
+                {
+                  "name": "image",
+                  "selector": "img[src]"
+                },
+                {
+                  "name": "imageAlt",
+                  "selector": "img[alt]"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Seções",
+      "id": "sections",
+      "components": [
+        {
+          "title": "Seção",
+          "id": "section",
+          "plugins": {
+            "da": {
+              "unsafeHTML": "<div></div>"
+            }
+          },
+          "filter": "section",
+          "model": "section"
+        }
+      ]
+    },
+    {
+      "title": "Blocos",
+      "id": "blocks",
+      "components": [
+        {
+          "title": "Perguntas frequentes (FAQ)",
+          "id": "accordion-faq",
+          "model": "accordion-faq",
+          "filter": "accordion-faq",
+          "plugins": {
+            "da": {
+              "name": "accordion-faq",
+              "rows": 1,
+              "columns": 2
+            }
+          }
+        },
+        {
+          "title": "Pergunta",
+          "id": "accordion-faq-item",
+          "model": "accordion-faq-item",
+          "plugins": {
+            "da": {
+              "rows": 2,
+              "columns": 0,
+              "fields": [
+                {
+                  "name": "question",
+                  "selector": "div:nth-child(1)"
+                },
+                {
+                  "name": "answer",
+                  "selector": "div:nth-child(2)"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "title": "Cards de público",
+          "id": "cards-audience",
+          "model": "cards-audience",
+          "filter": "cards-audience",
+          "plugins": {
+            "da": {
+              "name": "cards-audience",
+              "rows": 1,
+              "columns": 2
+            }
+          }
+        },
+        {
+          "title": "Card de público",
+          "id": "cards-audience-item",
+          "model": "cards-audience-item",
+          "plugins": {
+            "da": {
+              "rows": 1,
+              "columns": 2,
+              "fields": [
+                {
+                  "name": "image",
+                  "selector": "div:nth-child(1)>picture>img[src]"
+                },
+                {
+                  "name": "imageAlt",
+                  "selector": "div:nth-child(1)>picture>img[alt]"
+                },
+                {
+                  "name": "text",
+                  "selector": "div:nth-child(2)"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "title": "Cards de notícias",
+          "id": "cards-news",
+          "model": "cards-news",
+          "filter": "cards-news",
+          "plugins": {
+            "da": {
+              "name": "cards-news",
+              "rows": 1,
+              "columns": 2
+            }
+          }
+        },
+        {
+          "title": "Notícia",
+          "id": "cards-news-item",
+          "model": "cards-news-item",
+          "plugins": {
+            "da": {
+              "rows": 1,
+              "columns": 2,
+              "fields": [
+                {
+                  "name": "image",
+                  "selector": "div:nth-child(1)>picture>img[src]"
+                },
+                {
+                  "name": "imageAlt",
+                  "selector": "div:nth-child(1)>picture>img[alt]"
+                },
+                {
+                  "name": "text",
+                  "selector": "div:nth-child(2)"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "title": "Cards de planos",
+          "id": "cards-plans",
+          "model": "cards-plans",
+          "filter": "cards-plans",
+          "plugins": {
+            "da": {
+              "name": "cards-plans",
+              "rows": 1,
+              "columns": 5
+            }
+          }
+        },
+        {
+          "title": "Plano",
+          "id": "cards-plans-item",
+          "model": "cards-plans-item",
+          "plugins": {
+            "da": {
+              "rows": 1,
+              "columns": 5,
+              "fields": [
+                {
+                  "name": "header",
+                  "selector": "div:nth-child(1)"
+                },
+                {
+                  "name": "cta",
+                  "selector": "div:nth-child(2)"
+                },
+                {
+                  "name": "coverages",
+                  "selector": "div:nth-child(3)"
+                },
+                {
+                  "name": "details",
+                  "selector": "div:nth-child(4)"
+                },
+                {
+                  "name": "sku",
+                  "selector": "div:nth-child(5)"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "title": "Cards de serviços",
+          "id": "cards-services",
+          "model": "cards-services",
+          "filter": "cards-services",
+          "plugins": {
+            "da": {
+              "name": "cards-services",
+              "rows": 1,
+              "columns": 2
+            }
+          }
+        },
+        {
+          "title": "Serviço",
+          "id": "cards-services-item",
+          "model": "cards-services-item",
+          "plugins": {
+            "da": {
+              "rows": 1,
+              "columns": 2,
+              "fields": [
+                {
+                  "name": "image",
+                  "selector": "div:nth-child(1)>picture>img[src]"
+                },
+                {
+                  "name": "imageAlt",
+                  "selector": "div:nth-child(1)>picture>img[alt]"
+                },
+                {
+                  "name": "text",
+                  "selector": "div:nth-child(2)"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "title": "Passo a passo",
+          "id": "cards-steps",
+          "model": "cards-steps",
+          "filter": "cards-steps",
+          "plugins": {
+            "da": {
+              "name": "cards-steps",
+              "rows": 1,
+              "columns": 2
+            }
+          }
+        },
+        {
+          "title": "Passo",
+          "id": "cards-steps-item",
+          "model": "cards-steps-item",
+          "plugins": {
+            "da": {
+              "rows": 1,
+              "columns": 2,
+              "fields": [
+                {
+                  "name": "image",
+                  "selector": "div:nth-child(1)>picture>img[src]"
+                },
+                {
+                  "name": "imageAlt",
+                  "selector": "div:nth-child(1)>picture>img[alt]"
+                },
+                {
+                  "name": "text",
+                  "selector": "div:nth-child(2)"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "title": "Carrossel de coberturas",
+          "id": "carousel-coverage",
+          "model": "carousel-coverage",
+          "filter": "carousel-coverage",
+          "plugins": {
+            "da": {
+              "name": "carousel-coverage",
+              "rows": 1,
+              "columns": 2
+            }
+          }
+        },
+        {
+          "title": "Cobertura",
+          "id": "carousel-coverage-item",
+          "model": "carousel-coverage-item",
+          "plugins": {
+            "da": {
+              "rows": 1,
+              "columns": 2,
+              "fields": [
+                {
+                  "name": "image",
+                  "selector": "div:nth-child(1)>picture>img[src]"
+                },
+                {
+                  "name": "imageAlt",
+                  "selector": "div:nth-child(1)>picture>img[alt]"
+                },
+                {
+                  "name": "text",
+                  "selector": "div:nth-child(2)"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "title": "Carrossel hero (banners)",
+          "id": "carousel-hero",
+          "model": "carousel-hero",
+          "filter": "carousel-hero",
+          "plugins": {
+            "da": {
+              "unsafeHTML": "<div class=\"carousel-hero\"><div><div>Fonte</div><div></div></div><div><div>Público</div><div></div></div><div><div>Escopo Target</div><div></div></div><div><div><picture><img loading=\"lazy\"></picture></div><div><h2>Título do banner</h2><p>Texto de apoio.</p><p><a href=\"/\">Chamada principal</a></p></div></div></div>",
+              "fields": [
+                {
+                  "name": "fonte",
+                  "selector": "div:nth-child(1):not(:has(picture, h1, h2, h3, h4, h5, h6))>div:nth-child(2)"
+                },
+                {
+                  "name": "publico",
+                  "selector": "div:nth-child(2):not(:has(picture, h1, h2, h3, h4, h5, h6))>div:nth-child(2)"
+                },
+                {
+                  "name": "escopoTarget",
+                  "selector": "div:nth-child(3):not(:has(picture, h1, h2, h3, h4, h5, h6))>div:nth-child(2)"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "title": "Slide",
+          "id": "carousel-hero-item",
+          "model": "carousel-hero-item",
+          "plugins": {
+            "da": {
+              "rows": 1,
+              "columns": 2,
+              "fields": [
+                {
+                  "name": "image",
+                  "selector": "div:nth-child(1)>picture>img[src]"
+                },
+                {
+                  "name": "imageAlt",
+                  "selector": "div:nth-child(1)>picture>img[alt]"
+                },
+                {
+                  "name": "imageMobile",
+                  "selector": "div:nth-child(1)>picture:nth-of-type(2)>img[src]"
+                },
+                {
+                  "name": "imageMobileAlt",
+                  "selector": "div:nth-child(1)>picture:nth-of-type(2)>img[alt]"
+                },
+                {
+                  "name": "text",
+                  "selector": "div:nth-child(2)"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "title": "Carrossel de atalhos",
+          "id": "carousel-quicklinks",
+          "model": "carousel-quicklinks",
+          "filter": "carousel-quicklinks",
+          "plugins": {
+            "da": {
+              "name": "carousel-quicklinks",
+              "rows": 1,
+              "columns": 2
+            }
+          }
+        },
+        {
+          "title": "Atalho",
+          "id": "carousel-quicklinks-item",
+          "model": "carousel-quicklinks-item",
+          "plugins": {
+            "da": {
+              "rows": 1,
+              "columns": 2,
+              "fields": [
+                {
+                  "name": "image",
+                  "selector": "div:nth-child(1)>picture>img[src]"
+                },
+                {
+                  "name": "imageAlt",
+                  "selector": "div:nth-child(1)>picture>img[alt]"
+                },
+                {
+                  "name": "text",
+                  "selector": "div:nth-child(2)"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "title": "Colunas: app",
+          "id": "columns-app",
+          "model": "columns-app",
+          "filter": "columns-app",
+          "plugins": {
+            "da": {
+              "name": "columns-app",
+              "rows": 1,
+              "columns": 2,
+              "behaviour": "columns"
+            }
+          }
+        },
+        {
+          "title": "Colunas: app: linha",
+          "id": "columns-app-row",
+          "model": "columns-app-row",
+          "filter": "columns-app-row",
+          "plugins": {
+            "da": {
+              "name": "columns-app-row",
+              "behaviour": "columns-row"
+            }
+          }
+        },
+        {
+          "title": "Colunas: app: célula",
+          "id": "columns-app-cell",
+          "model": "columns-app-cell",
+          "filter": "columns-app-cell",
+          "plugins": {
+            "da": {
+              "unsafeHTML": "<div></div>",
+              "behaviour": "columns-cell"
+            }
+          }
+        },
+        {
+          "title": "Colunas: destaque",
+          "id": "columns-feature",
+          "model": "columns-feature",
+          "filter": "columns-feature",
+          "plugins": {
+            "da": {
+              "name": "columns-feature",
+              "rows": 1,
+              "columns": 2,
+              "behaviour": "columns"
+            }
+          }
+        },
+        {
+          "title": "Colunas: destaque: linha",
+          "id": "columns-feature-row",
+          "model": "columns-feature-row",
+          "filter": "columns-feature-row",
+          "plugins": {
+            "da": {
+              "name": "columns-feature-row",
+              "behaviour": "columns-row"
+            }
+          }
+        },
+        {
+          "title": "Colunas: destaque: célula",
+          "id": "columns-feature-cell",
+          "model": "columns-feature-cell",
+          "filter": "columns-feature-cell",
+          "plugins": {
+            "da": {
+              "unsafeHTML": "<div></div>",
+              "behaviour": "columns-cell"
+            }
+          }
+        },
+        {
+          "title": "Colunas: introdução",
+          "id": "columns-intro",
+          "model": "columns-intro",
+          "filter": "columns-intro",
+          "plugins": {
+            "da": {
+              "name": "columns-intro",
+              "rows": 1,
+              "columns": 3,
+              "behaviour": "columns"
+            }
+          }
+        },
+        {
+          "title": "Colunas: introdução: linha",
+          "id": "columns-intro-row",
+          "model": "columns-intro-row",
+          "filter": "columns-intro-row",
+          "plugins": {
+            "da": {
+              "name": "columns-intro-row",
+              "behaviour": "columns-row"
+            }
+          }
+        },
+        {
+          "title": "Colunas: introdução: célula",
+          "id": "columns-intro-cell",
+          "model": "columns-intro-cell",
+          "filter": "columns-intro-cell",
+          "plugins": {
+            "da": {
+              "unsafeHTML": "<div></div>",
+              "behaviour": "columns-cell"
+            }
+          }
+        },
+        {
+          "title": "Colunas: diretório de links",
+          "id": "columns-links",
+          "model": "columns-links",
+          "filter": "columns-links",
+          "plugins": {
+            "da": {
+              "name": "columns-links",
+              "rows": 1,
+              "columns": 5,
+              "behaviour": "columns"
+            }
+          }
+        },
+        {
+          "title": "Colunas: diretório de links: linha",
+          "id": "columns-links-row",
+          "model": "columns-links-row",
+          "filter": "columns-links-row",
+          "plugins": {
+            "da": {
+              "name": "columns-links-row",
+              "behaviour": "columns-row"
+            }
+          }
+        },
+        {
+          "title": "Colunas: diretório de links: célula",
+          "id": "columns-links-cell",
+          "model": "columns-links-cell",
+          "filter": "columns-links-cell",
+          "plugins": {
+            "da": {
+              "unsafeHTML": "<div></div>",
+              "behaviour": "columns-cell"
+            }
+          }
+        },
+        {
+          "title": "Serviço incorporado (iframe)",
+          "id": "embed-service",
+          "model": "embed-service",
+          "plugins": {
+            "da": {
+              "unsafeHTML": "<div class=\"embed-service\"><div><div><p><a href=\"https://\">Nome do serviço</a></p></div></div><div><div><p>800px</p></div></div></div>",
+              "fields": [
+                {
+                  "name": "url",
+                  "selector": "div:nth-child(1)>div a[href]"
+                },
+                {
+                  "name": "title",
+                  "selector": "div:nth-child(1)>div a"
+                },
+                {
+                  "name": "height",
+                  "selector": "div:nth-child(2)>div"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "title": "Fragmento",
+          "id": "fragment",
+          "model": "fragment",
+          "plugins": {
+            "da": {
+              "unsafeHTML": "<div class=\"fragment\"><div><div><p><a href=\"\">Caminho do fragmento</a></p></div></div></div>",
+              "fields": [
+                {
+                  "name": "url",
+                  "selector": "div>div a[href]"
+                },
+                {
+                  "name": "urlText",
+                  "selector": "div>div a"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "title": "Hero de serviço",
+          "id": "hero-service",
+          "model": "hero-service",
+          "plugins": {
+            "da": {
+              "unsafeHTML": "<div class=\"hero-service\"><div><div><picture><img loading=\"lazy\"></picture></div></div><div><div><h1>Título do serviço</h1><p>Chamada de apoio</p><p><a href=\"#planos\">Contratar</a></p></div></div><div><div><picture><img loading=\"lazy\"></picture><picture><img loading=\"lazy\"></picture></div></div></div>",
+              "fields": [
+                {
+                  "name": "image",
+                  "selector": "div:nth-child(1)>div>picture>img[src]"
+                },
+                {
+                  "name": "imageAlt",
+                  "selector": "div:nth-child(1)>div>picture>img[alt]"
+                },
+                {
+                  "name": "text",
+                  "selector": "div:nth-child(2)>div"
+                },
+                {
+                  "name": "asideImage",
+                  "selector": "div:nth-child(3)>div>picture>img[src]"
+                },
+                {
+                  "name": "asideImageAlt",
+                  "selector": "div:nth-child(3)>div>picture>img[alt]"
+                },
+                {
+                  "name": "asideImage2",
+                  "selector": "div:nth-child(3)>div>picture:nth-of-type(2)>img[src]"
+                },
+                {
+                  "name": "asideImage2Alt",
+                  "selector": "div:nth-child(3)>div>picture:nth-of-type(2)>img[alt]"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "title": "Commerce",
+      "id": "commerce",
+      "components": [
+        {
+          "title": "Minha conta (Commerce)",
+          "id": "commerce-account",
+          "model": "commerce-account",
+          "plugins": {
+            "da": {
+              "unsafeHTML": "<div class=\"commerce-account\"><div><div></div></div></div>"
+            }
+          }
+        },
+        {
+          "title": "Login / cadastro (Commerce)",
+          "id": "commerce-auth",
+          "model": "commerce-auth",
+          "plugins": {
+            "da": {
+              "name": "commerce-auth",
+              "type": "key-value-block"
+            }
+          }
+        },
+        {
+          "title": "Checkout (Commerce)",
+          "id": "commerce-checkout",
+          "model": "commerce-checkout",
+          "plugins": {
+            "da": {
+              "unsafeHTML": "<div class=\"commerce-checkout\"><div><div></div></div></div>"
+            }
+          }
+        },
+        {
+          "title": "Detalhes do pedido (Commerce)",
+          "id": "commerce-order",
+          "model": "commerce-order",
+          "plugins": {
+            "da": {
+              "unsafeHTML": "<div class=\"commerce-order\"><div><div></div></div></div>"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

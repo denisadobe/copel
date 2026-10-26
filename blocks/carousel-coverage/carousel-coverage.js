@@ -1,4 +1,7 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
+import {
+  claimDecoration, emptyMediaSlot, isEmptyRow, moveInstrumentation, replacePicture,
+} from '../../scripts/ue-utils.js';
 
 /*
  * Carousel (coverage)
@@ -16,13 +19,15 @@ const isPictureOnly = (el) => !!el.querySelector('picture, img') && !el.textCont
 
 function buildCard(row) {
   const li = document.createElement('li');
+  moveInstrumentation(row, li);
   li.className = 'carousel-coverage-item';
 
   const card = document.createElement('div');
   card.className = 'carousel-coverage-card';
 
   const cells = [...row.children];
-  const imageCell = cells.find(isPictureOnly);
+  // editor: a card just added has no photo yet, keep [photo | body] by position
+  const imageCell = cells.find(isPictureOnly) || emptyMediaSlot(cells);
   const bodyCells = cells.filter((c) => c !== imageCell);
 
   if (imageCell) {
@@ -35,6 +40,7 @@ function buildCard(row) {
 
   const body = document.createElement('div');
   body.className = 'carousel-coverage-body';
+  if (bodyCells.length === 1) moveInstrumentation(bodyCells[0], body);
   bodyCells.forEach((c) => body.append(...c.childNodes));
 
   // a paragraph that contains only links (before the title) holds the plan tags
@@ -73,7 +79,8 @@ function buildCard(row) {
 }
 
 export default function decorate(block) {
-  const rows = [...block.children].filter((r) => r.textContent.trim() || r.querySelector('picture, img'));
+  if (!claimDecoration(block)) return;
+  const rows = [...block.children].filter((r) => !isEmptyRow(r, 'picture, img'));
 
   const track = document.createElement('ul');
   track.className = 'carousel-coverage-track';
@@ -82,8 +89,8 @@ export default function decorate(block) {
   rows.forEach((row) => track.append(buildCard(row)));
 
   track.querySelectorAll('picture > img').forEach((img) => {
-    if (img.src.split('?')[0].endsWith('.svg')) return;
-    img.closest('picture').replaceWith(createOptimizedPicture(img.src, img.alt, false, [{ width: '600' }]));
+    if (!img.getAttribute('src') || img.src.split('?')[0].endsWith('.svg')) return;
+    replacePicture(img.closest('picture'), createOptimizedPicture(img.src, img.alt, false, [{ width: '600' }]));
   });
 
   const viewport = document.createElement('div');

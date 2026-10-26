@@ -11,7 +11,15 @@
  *   - trailing <br> / empty lines in headings (Elementor alignment hack) are removed
  *
  * Output per cell: div.columns-links-col > [h*.columns-links-title] + ul.columns-links-list
+ *
+ * Universal Editor: rows and cells keep their instrumentation (rows stay in the DOM as
+ * div.columns-links-row with display: contents) and the title + list stay inside the cell's
+ * editable text (contentRoot).
  */
+
+import {
+  IS_UE, claimDecoration, contentRoot, moveInstrumentation,
+} from '../../scripts/ue-utils.js';
 
 const HEADING_SELECTOR = 'h1, h2, h3, h4, h5, h6';
 
@@ -58,28 +66,49 @@ function buildList(cell) {
 }
 
 function buildColumn(cell) {
-  if (!cell.textContent.trim()) return null;
+  if (!cell.textContent.trim() && !IS_UE) return null;
   const col = document.createElement('div');
+  moveInstrumentation(cell, col);
   col.className = 'columns-links-col';
 
-  const heading = cell.querySelector(HEADING_SELECTOR);
+  // editor: title + list go back into the cell's editable text
+  const root = contentRoot(cell);
+  const target = root === cell ? col : root;
+  const parts = [];
+
+  const heading = root.querySelector(HEADING_SELECTOR);
   if (heading) {
     cleanHeading(heading);
-    col.append(heading);
+    parts.push(heading);
   } else {
     col.classList.add('columns-links-col-no-title');
   }
 
-  const list = buildList(cell);
-  if (list.children.length) col.append(list);
-  return col.children.length ? col : null;
+  const list = buildList(root);
+  if (list.children.length) parts.push(list);
+  if (target === col) {
+    col.append(...parts);
+  } else {
+    target.replaceChildren(...parts);
+    col.append(target);
+  }
+  return parts.length || IS_UE ? col : null;
 }
 
 export default function decorate(block) {
-  const cells = [...block.children].flatMap((row) => [...row.children]);
-  const cols = cells.map(buildColumn).filter(Boolean);
-
-  block.replaceChildren(...cols);
+  if (!claimDecoration(block)) return;
+  let cols;
+  if (IS_UE) {
+    // keep the (instrumented) rows; they create no box, so the grid stays on the block
+    [...block.children].forEach((row) => {
+      row.classList.add('columns-links-row');
+      row.replaceChildren(...[...row.children].map(buildColumn).filter(Boolean));
+    });
+    cols = [...block.querySelectorAll('.columns-links-col')];
+  } else {
+    cols = [...block.children].flatMap((row) => [...row.children]).map(buildColumn).filter(Boolean);
+    block.replaceChildren(...cols);
+  }
   // desktop columns per row: one per cell, max 5 (extra cells wrap)
   block.style.setProperty('--columns-links-count', Math.min(Math.max(cols.length, 1), 5));
   if (!block.querySelector('.columns-links-title')) block.classList.add('columns-links-no-titles');

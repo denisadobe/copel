@@ -1,0 +1,83 @@
+{
+  "definitions": [
+    {
+      "title": "Cards de público",
+      "id": "cards-audience",
+      "model": "cards-audience",
+      "filter": "cards-audience",
+      "plugins": {
+        "da": {
+          "name": "cards-audience",
+          "rows": 1,
+          "columns": 2
+        }
+      }
+    },
+    {
+      "title": "Card de público",
+      "id": "cards-audience-item",
+      "model": "cards-audience-item",
+      "plugins": {
+        "da": {
+          "rows": 1,
+          "columns": 2,
+          "fields": [
+            {
+              "name": "image",
+              "selector": "div:nth-child(1)>picture>img[src]"
+            },
+            {
+              "name": "imageAlt",
+              "selector": "div:nth-child(1)>picture>img[alt]"
+            },
+            {
+              "name": "text",
+              "selector": "div:nth-child(2)"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "cards-audience",
+      "fields": []
+    },
+    {
+      "id": "cards-audience-item",
+      "fields": [
+        {
+          "component": "reference",
+          "valueType": "string",
+          "name": "image",
+          "label": "Imagem de fundo",
+          "multi": false
+        },
+        {
+          "component": "text",
+          "valueType": "string",
+          "name": "imageAlt",
+          "label": "Texto alternativo",
+          "value": ""
+        },
+        {
+          "component": "richtext",
+          "name": "text",
+          "label": "Conteúdo",
+          "valueType": "string",
+          "value": "",
+          "description": "Título (H2), lista de links rápidos e link de chamada"
+        }
+      ]
+    }
+  ],
+  "filters": [
+    {
+      "id": "cards-audience",
+      "components": [
+        "cards-audience-item"
+      ]
+    }
+  ]
+}

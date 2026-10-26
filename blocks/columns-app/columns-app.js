@@ -1,4 +1,5 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
+import { claimDecoration, contentRoot, replacePicture } from '../../scripts/ue-utils.js';
 
 /*
  * Columns (app)
@@ -9,6 +10,8 @@ import { createOptimizedPicture } from '../../scripts/aem.js';
  *   image cell: picture only
  *
  * Each H3 group is wrapped in div.columns-app-tile inside div.columns-app-tiles.
+ * Universal Editor: cells keep their instrumentation; the tiles are built inside the
+ * cell's editable text (contentRoot).
  */
 
 function groupTiles(col) {
@@ -37,6 +40,7 @@ function groupTiles(col) {
 }
 
 export default function decorate(block) {
+  if (!claimDecoration(block)) return;
   [...block.children].forEach((row) => {
     row.classList.add('columns-app-row');
     [...row.children].forEach((col) => {
@@ -44,10 +48,10 @@ export default function decorate(block) {
       if (pic && !col.textContent.trim()) {
         col.classList.add('columns-app-img-col');
         const img = pic.querySelector('img');
-        if (img) pic.replaceWith(createOptimizedPicture(img.src, img.alt, false, [{ media: '(min-width: 900px)', width: '1200' }, { width: '750' }]));
+        if (img?.getAttribute('src')) replacePicture(pic, createOptimizedPicture(img.src, img.alt, false, [{ media: '(min-width: 900px)', width: '1200' }, { width: '750' }]));
       } else {
         col.classList.add('columns-app-text-col');
-        groupTiles(col);
+        groupTiles(contentRoot(col));
       }
     });
   });

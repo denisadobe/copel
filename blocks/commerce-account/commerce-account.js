@@ -6,6 +6,7 @@ import {
   PLANS_LINK, PLANS_PAGE, getLoginLink, getOrderLink, initializeAccount, initializeAuth,
   isAuthenticated, loadCommerceStyles, redirectTo, signOut,
 } from '../../scripts/commerce.js';
+import { IS_UE, showEditorPlaceholder } from '../../scripts/ue-utils.js';
 
 /** "dd/mm/aaaa" from the drop-in's en-US "mm/dd/yyyy" order date. */
 const toBrazilianDate = (date) => {
@@ -34,6 +35,10 @@ const div = (name) => {
 };
 
 export default async function decorate(block) {
+  if (IS_UE) {
+    showEditorPlaceholder(block, 'Minha conta: pedidos e dados do cliente conectado (exibidos no site).');
+    return;
+  }
   const orders = div('orders');
   const details = div('details');
   const logout = document.createElement('button');

@@ -1,4 +1,7 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
+import {
+  IS_UE, claimDecoration, emptyMediaSlot, isEmptyRow, moveInstrumentation, replacePicture,
+} from '../../scripts/ue-utils.js';
 
 /*
  * Cards (steps)
@@ -13,16 +16,20 @@ import { createOptimizedPicture } from '../../scripts/aem.js';
 const isMediaOnly = (el) => !!el.querySelector('picture, img, span.icon') && !el.textContent.trim();
 
 export default function decorate(block) {
+  if (!claimDecoration(block)) return;
   const ol = document.createElement('ol');
   ol.className = 'cards-steps-list';
 
   [...block.children].forEach((row) => {
-    if (!row.textContent.trim() && !row.querySelector('picture, img, span.icon')) return;
+    if (isEmptyRow(row)) return;
     const li = document.createElement('li');
+    moveInstrumentation(row, li);
     li.className = 'cards-steps-item';
 
     const cells = [...row.children];
-    const iconCell = cells.find(isMediaOnly);
+    // editor: an item just added has no media yet, keep [media | text] by position
+    const iconCell = cells.find(isMediaOnly)
+      || emptyMediaSlot(cells);
     if (iconCell) {
       iconCell.className = 'cards-steps-icon';
       li.append(iconCell);
@@ -30,9 +37,11 @@ export default function decorate(block) {
 
     const body = document.createElement('div');
     body.className = 'cards-steps-body';
-    cells.filter((c) => c !== iconCell).forEach((c) => body.append(...c.childNodes));
+    const textCells = cells.filter((c) => c !== iconCell);
+    if (textCells.length === 1) moveInstrumentation(textCells[0], body);
+    textCells.forEach((c) => body.append(...c.childNodes));
     body.querySelector('h1, h2, h3, h4, h5, h6')?.classList.add('cards-steps-title');
-    if (body.childNodes.length) li.append(body);
+    if (body.childNodes.length || IS_UE) li.append(body);
 
     ol.append(li);
   });
@@ -41,8 +50,8 @@ export default function decorate(block) {
     const src = img.getAttribute('src') || '';
     // inline (data-URI) and SVG icons are multicolor illustrations: keep as-is,
     // createOptimizedPicture would mangle them (src="nullimage/svg+xml...")
-    if (src.startsWith('data:') || src.split('?')[0].endsWith('.svg')) return;
-    img.closest('picture').replaceWith(createOptimizedPicture(img.src, img.alt, false, [{ width: '200' }]));
+    if (!src || src.startsWith('data:') || src.split('?')[0].endsWith('.svg')) return;
+    replacePicture(img.closest('picture'), createOptimizedPicture(img.src, img.alt, false, [{ width: '200' }]));
   });
 
   block.replaceChildren(ol);

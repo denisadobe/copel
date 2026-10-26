@@ -1,0 +1,49 @@
+{
+  "definitions": [
+    {
+      "title": "Texto",
+      "id": "text",
+      "model": "text",
+      "plugins": {
+        "da": {
+          "name": "text",
+          "type": "text"
+        }
+      }
+    },
+    {
+      "title": "Título",
+      "id": "title",
+      "model": "title",
+      "plugins": {
+        "da": {
+          "unsafeHTML": "<h2>Título da seção</h2>"
+        }
+      }
+    },
+    {
+      "title": "Botão / link",
+      "id": "button",
+      "model": "button",
+      "plugins": {
+        "da": {
+          "unsafeHTML": "<p><strong><a href=\"/\">Texto do botão</a></strong></p>"
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "text",
+      "fields": []
+    },
+    {
+      "id": "title",
+      "fields": []
+    },
+    {
+      "id": "button",
+      "fields": []
+    }
+  ]
+}

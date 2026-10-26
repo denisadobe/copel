@@ -13,18 +13,26 @@
  *   single-open: only one item of the block can be open at a time.
  */
 
+import { IS_UE, claimDecoration, moveInstrumentation } from '../../scripts/ue-utils.js';
+
 let singleOpenCount = 0;
 
 export default function decorate(block) {
+  if (!claimDecoration(block)) return;
   const items = [];
 
   [...block.children].forEach((row) => {
-    const cells = [...row.children].filter((c) => c.textContent.trim() || c.querySelector('picture, img'));
-    if (!cells.length) return;
+    // in the editor every cell counts: a question just added is still empty
+    const cells = [...row.children].filter((c) => IS_UE || c.textContent.trim() || c.querySelector('picture, img'));
+    if (!cells.length && !IS_UE) return;
 
-    let questionNodes;
-    let answerNodes;
-    if (cells.length === 1) {
+    let questionNodes = [];
+    let answerNodes = [];
+    let questionCell = null;
+    let answerCell = null;
+    if (!cells.length) {
+      // empty row kept in the editor
+    } else if (cells.length === 1) {
       const [only] = cells;
       const first = only.firstElementChild;
       if (first && only.children.length > 1) {
@@ -36,6 +44,8 @@ export default function decorate(block) {
       }
     } else {
       const [q, ...rest] = cells;
+      questionCell = q;
+      if (rest.length === 1) [answerCell] = rest;
       // flatten a single wrapping paragraph/heading in the question cell
       const qWrap = q.children.length === 1 && q.firstElementChild.matches('p, h1, h2, h3, h4, h5, h6')
         ? q.firstElementChild : q;
@@ -44,6 +54,7 @@ export default function decorate(block) {
     }
 
     const details = document.createElement('details');
+    moveInstrumentation(row, details);
     details.className = 'accordion-faq-item';
 
     const summary = document.createElement('summary');
@@ -51,14 +62,16 @@ export default function decorate(block) {
     const label = document.createElement('span');
     label.className = 'accordion-faq-question-text';
     label.append(...questionNodes);
+    moveInstrumentation(questionCell, label);
     summary.append(label);
 
     const answer = document.createElement('div');
     answer.className = 'accordion-faq-answer';
     answer.append(...answerNodes);
+    moveInstrumentation(answerCell, answer);
 
     details.append(summary);
-    if (answer.textContent.trim() || answer.querySelector('picture, img')) details.append(answer);
+    if (answer.textContent.trim() || answer.querySelector('picture, img') || IS_UE) details.append(answer);
     else details.classList.add('accordion-faq-empty');
     items.push(details);
   });

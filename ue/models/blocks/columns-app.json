@@ -1,0 +1,87 @@
+{
+  "definitions": [
+    {
+      "title": "Colunas: app",
+      "id": "columns-app",
+      "model": "columns-app",
+      "filter": "columns-app",
+      "plugins": {
+        "da": {
+          "name": "columns-app",
+          "rows": 1,
+          "columns": 2,
+          "behaviour": "columns"
+        }
+      }
+    },
+    {
+      "title": "Colunas: app: linha",
+      "id": "columns-app-row",
+      "model": "columns-app-row",
+      "filter": "columns-app-row",
+      "plugins": {
+        "da": {
+          "name": "columns-app-row",
+          "behaviour": "columns-row"
+        }
+      }
+    },
+    {
+      "title": "Colunas: app: célula",
+      "id": "columns-app-cell",
+      "model": "columns-app-cell",
+      "filter": "columns-app-cell",
+      "plugins": {
+        "da": {
+          "unsafeHTML": "<div></div>",
+          "behaviour": "columns-cell"
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "columns-app",
+      "fields": [
+        {
+          "component": "number",
+          "valueType": "number",
+          "name": "columns",
+          "label": "Número de colunas",
+          "value": 2,
+          "validation": {
+            "numberMin": 1,
+            "numberMax": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "columns-app-row",
+      "fields": []
+    },
+    {
+      "id": "columns-app-cell",
+      "fields": []
+    }
+  ],
+  "filters": [
+    {
+      "id": "columns-app",
+      "components": [
+        "columns-app-row"
+      ]
+    },
+    {
+      "id": "columns-app-row",
+      "components": []
+    },
+    {
+      "id": "columns-app-cell",
+      "components": [
+        "text",
+        "image"
+      ]
+    }
+  ]
+}

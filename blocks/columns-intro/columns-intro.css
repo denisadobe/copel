@@ -23,11 +23,13 @@
   line-height: 1.4;
 }
 
-.columns-intro .columns-intro-text-col > :first-child {
+.columns-intro .columns-intro-text-col > :first-child,
+.columns-intro .columns-intro-text-col > :where(.richtext) > :first-child {
   margin-top: 0;
 }
 
-.columns-intro .columns-intro-text-col > :last-child {
+.columns-intro .columns-intro-text-col > :last-child,
+.columns-intro .columns-intro-text-col > :where(.richtext) > :last-child {
   margin-bottom: 0;
 }
 

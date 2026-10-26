@@ -1,4 +1,7 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
+import {
+  IS_UE, claimDecoration, isEmptyRow, moveInstrumentation,
+} from '../../scripts/ue-utils.js';
 
 /*
  * Carousel (hero)
@@ -23,47 +26,58 @@ import { createOptimizedPicture } from '../../scripts/aem.js';
  * Any cell may be missing; a single-cell row is treated as content if it has
  * no picture, otherwise as image. Options (block classes): "no-autoplay".
  *
- * Headless source (optional): leading "key | value" config rows
+ * Headless source (optional): leading "key | value" config rows, in any order
  *   Fonte / Source           banner list URL (AEM persisted query or app proxy), a
  *                            channel ("site"/"app", uses config.json "aem-banners-url")
- *                            or a persisted-query path on "aem-publish-url"
+ *                            or a persisted-query path on "aem-publish-url";
+ *                            empty = authored slides only
  *   Público / Audience       overrides the detected audience (publicoAtual)
  *   Escopo Target / Target scope   Adobe Target decision scope (alloy)
- * are removed; slides then come from banner Content Fragments
+ * are removed; with a Fonte, slides then come from banner Content Fragments
  * (carousel-hero-cf.js) and the remaining authored rows are the fallback.
+ * Keys are matched case-, accent-, space- and dash-insensitively, so the Universal Editor
+ * field names (fonte, publico, escopoTarget) work as keys too.
+ *
+ * Universal Editor (IS_UE): the authored slides are always shown (Content Fragments are
+ * never fetched, so authors see and edit the fallback), a badge tells that the live site
+ * uses Content Fragments, autoplay is off and empty (just added) slides are kept.
  */
 
 const AUTOPLAY_MS = 6000;
 
+const BADGE_TEXT = 'Conteúdo de Content Fragments do AEM (fallback autorado abaixo)';
+
+// keys after normalizeKey (accents, case, spaces, dashes and a trailing colon removed)
 const CONFIG_KEYS = {
   fonte: 'source',
   source: 'source',
   publico: 'audience',
   audience: 'audience',
-  'escopo target': 'targetScope',
-  'target scope': 'targetScope',
+  escopotarget: 'targetScope',
+  targetscope: 'targetScope',
 };
 
 const normalizeKey = (value) => value
   .normalize('NFD')
   .replace(/[\u0300-\u036f]/g, '')
   .toLowerCase()
-  .replace(/\s+/g, ' ')
-  .replace(/[\s:]+$/, '')
-  .trim();
+  .replace(/[^a-z0-9]/g, '');
 
 function readConfigRow(row) {
   const cells = [...row.children];
-  if (cells.length !== 2 || row.querySelector('picture, img')) return null;
+  if (cells.length !== 2 || row.querySelector('picture, img, h1, h2, h3, h4, h5, h6')) return null;
   const key = CONFIG_KEYS[normalizeKey(cells[0].textContent)];
   if (!key) return null;
   const link = cells[1].querySelector('a[href]');
   return { key, value: (link ? link.getAttribute('href') : cells[1].textContent).trim() };
 }
 
-/** Removes the leading config rows; returns their values only when row 1 is "Fonte"/"Source". */
+/**
+ * Removes the leading config rows (any order; the first row must be one of them).
+ * @returns {{source?: string, audience?: string, targetScope?: string}|null} their values,
+ *   null when the block has no config rows
+ */
 function extractSourceConfig(rows) {
-  if (!rows.length || readConfigRow(rows[0])?.key !== 'source') return null;
   const config = {};
   let count = 0;
   while (count < rows.length) {
@@ -72,13 +86,25 @@ function extractSourceConfig(rows) {
     if (!(entry.key in config)) config[entry.key] = entry.value;
     count += 1;
   }
+  if (!count) return null;
   rows.splice(0, count).forEach((row) => row.remove());
   return config;
+}
+
+/** Editor-only note on blocks whose live slides come from Content Fragments. */
+function addEditorBadge(block, source) {
+  const badge = document.createElement('p');
+  badge.className = 'carousel-hero-ue-badge';
+  badge.textContent = BADGE_TEXT;
+  badge.title = `Fonte: ${source}`;
+  block.append(badge);
 }
 
 function getSlideCells(row) {
   const cells = [...row.children];
   let imageCell = cells.find((c) => c.querySelector('picture, img'));
+  // positional fallback (a slide just added in the editor, no picture yet): [image | content]
+  if (!imageCell && cells.length > 1 && !cells[0].textContent.trim()) [imageCell] = cells;
   let contentCell = cells.find((c) => c !== imageCell);
   // An image cell that also holds text acts as both.
   if (imageCell && !contentCell && imageCell.querySelector('h1, h2, h3, h4, h5, h6, p:not(:has(picture))')) {
@@ -96,6 +122,7 @@ function getSlideCells(row) {
  */
 function buildSlide(row, index, prebuilt = false) {
   const slide = document.createElement('li');
+  moveInstrumentation(row, slide);
   slide.className = 'carousel-hero-slide';
   slide.dataset.slideIndex = index;
   slide.setAttribute('role', 'group');
@@ -107,24 +134,31 @@ function buildSlide(row, index, prebuilt = false) {
     const imageWrap = document.createElement('div');
     imageWrap.className = 'carousel-hero-slide-image';
     const pictures = [...imageCell.querySelectorAll('picture')];
+    moveInstrumentation(imageCell, imageWrap);
     pictures.forEach((pic, i) => {
       const img = pic.querySelector('img');
-      if (!img) return;
+      if (!img || !img.getAttribute('src')) return;
       if (prebuilt) img.loading = index === 0 && i === 0 ? 'eager' : 'lazy';
-      const optimized = prebuilt ? pic : createOptimizedPicture(
-        img.src,
-        img.alt || '',
-        index === 0 && i === 0,
-        [{ media: '(min-width: 600px)', width: '2000' }, { width: '750' }],
-      );
+      let optimized = pic;
+      if (!prebuilt) {
+        optimized = createOptimizedPicture(
+          img.src,
+          img.alt || '',
+          index === 0 && i === 0,
+          [{ media: '(min-width: 600px)', width: '2000' }, { width: '750' }],
+        );
+        moveInstrumentation(pic, optimized);
+        moveInstrumentation(img, optimized.querySelector('img'));
+      }
       if (pictures.length > 1) optimized.classList.add(i === 0 ? 'carousel-hero-desktop' : 'carousel-hero-mobile');
       imageWrap.append(optimized);
     });
-    if (imageWrap.children.length) slide.append(imageWrap);
+    if (imageWrap.children.length || IS_UE) slide.append(imageWrap);
   }
 
   if (contentCell && contentCell !== imageCell) {
     const content = document.createElement('div');
+    moveInstrumentation(contentCell, content);
     content.className = 'carousel-hero-slide-content';
     while (contentCell.firstChild) content.append(contentCell.firstChild);
     // remove stray pictures in content cell (already handled as image)
@@ -157,7 +191,7 @@ function buildSlide(row, index, prebuilt = false) {
       ctaPs.forEach((p) => ctas.append(p));
     }
 
-    if (content.textContent.trim() || content.children.length) slide.append(content);
+    if (content.textContent.trim() || content.children.length || IS_UE) slide.append(content);
   }
 
   return slide;
@@ -168,7 +202,8 @@ function buildSlide(row, index, prebuilt = false) {
  * slides can be swapped (authored fallback -> Content Fragments).
  */
 function mount(block, slides) {
-  const autoplay = !block.classList.contains('no-autoplay');
+  // never in the editor: authors must be able to select and edit a slide
+  const autoplay = !block.classList.contains('no-autoplay') && !IS_UE;
 
   const slidesWrapper = document.createElement('ul');
   slidesWrapper.className = 'carousel-hero-slides';
@@ -232,7 +267,11 @@ function mount(block, slides) {
   function start() {
     if (signal.aborted || !autoplay || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     stop();
-    timer = setInterval(() => show(current + 1), AUTOPLAY_MS);
+    timer = setInterval(() => {
+      // a block removed from the page (e.g. re-rendered) must not keep a timer alive
+      if (!block.isConnected) { listeners.abort(); stop(); return; }
+      show(current + 1);
+    }, AUTOPLAY_MS);
   }
 
   nav.querySelector('.carousel-hero-prev').addEventListener('click', () => { show(current - 1); start(); }, { signal });
@@ -247,6 +286,8 @@ function mount(block, slides) {
   block.addEventListener('mouseleave', start, { signal });
   block.addEventListener('focusin', stop, { signal });
   block.addEventListener('focusout', start, { signal });
+  // the editor (ue/scripts/ue.js) shows the slide the author selects
+  block.addEventListener('carousel-hero:show', (e) => { show(e.detail.index); stop(); }, { signal });
 
   show(0);
   start();
@@ -265,16 +306,26 @@ function showSkeleton(block) {
 }
 
 export default function decorate(block) {
-  const rows = [...block.children].filter((r) => r.textContent.trim() || r.querySelector('picture, img'));
-  const source = extractSourceConfig(rows);
-  if (!rows.length && !source) return;
+  if (!claimDecoration(block)) return;
+  const rows = [...block.children].filter((row) => !isEmptyRow(row, 'picture, img'));
+  const config = extractSourceConfig(rows);
+  // Content Fragments only with a non-empty Fonte; in the editor the authored slides stay
+  const source = config?.source ? config : null;
+  const useCf = source && !IS_UE;
+  if (!rows.length && !useCf && !IS_UE) return;
 
   block.setAttribute('role', 'region');
   block.setAttribute('aria-roledescription', 'carousel');
 
   // authored slides render immediately (LCP); Content Fragments replace them when they arrive
   let teardown = rows.length ? mount(block, rows.map((row, i) => buildSlide(row, i))) : null;
-  if (!source) return;
+
+  if (IS_UE) {
+    if (!teardown) showSkeleton(block);
+    if (source) addEditorBadge(block, source.source);
+    return;
+  }
+  if (!useCf) return;
 
   if (!teardown) showSkeleton(block);
   block.setAttribute('aria-busy', 'true');

@@ -1,0 +1,43 @@
+{
+  "groups": [
+    {
+      "title": "Conteúdo padrão",
+      "id": "default",
+      "components": [
+        {
+          "...": "./text.json#/definitions"
+        },
+        {
+          "...": "./image.json#/definitions"
+        }
+      ]
+    },
+    {
+      "title": "Seções",
+      "id": "sections",
+      "components": [
+        {
+          "...": "./section.json#/definitions"
+        }
+      ]
+    },
+    {
+      "title": "Blocos",
+      "id": "blocks",
+      "components": [
+        {
+          "...": "./blocks/*.json#/definitions"
+        }
+      ]
+    },
+    {
+      "title": "Commerce",
+      "id": "commerce",
+      "components": [
+        {
+          "...": "./blocks/commerce/*.json#/definitions"
+        }
+      ]
+    }
+  ]
+}

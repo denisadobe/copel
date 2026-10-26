@@ -1,0 +1,101 @@
+{
+  "definitions": [
+    {
+      "title": "Cards de serviços",
+      "id": "cards-services",
+      "model": "cards-services",
+      "filter": "cards-services",
+      "plugins": {
+        "da": {
+          "name": "cards-services",
+          "rows": 1,
+          "columns": 2
+        }
+      }
+    },
+    {
+      "title": "Serviço",
+      "id": "cards-services-item",
+      "model": "cards-services-item",
+      "plugins": {
+        "da": {
+          "rows": 1,
+          "columns": 2,
+          "fields": [
+            {
+              "name": "image",
+              "selector": "div:nth-child(1)>picture>img[src]"
+            },
+            {
+              "name": "imageAlt",
+              "selector": "div:nth-child(1)>picture>img[alt]"
+            },
+            {
+              "name": "text",
+              "selector": "div:nth-child(2)"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "cards-services",
+      "fields": [
+        {
+          "component": "select",
+          "name": "classes",
+          "label": "Layout",
+          "valueType": "string",
+          "value": "",
+          "options": [
+            {
+              "name": "Padrão (ícone acima)",
+              "value": ""
+            },
+            {
+              "name": "Compacto (ícone ao lado do rótulo)",
+              "value": "compact"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cards-services-item",
+      "fields": [
+        {
+          "component": "reference",
+          "valueType": "string",
+          "name": "image",
+          "label": "Ícone (SVG ou imagem)",
+          "multi": false
+        },
+        {
+          "component": "text",
+          "valueType": "string",
+          "name": "imageAlt",
+          "label": "Texto alternativo do ícone",
+          "value": ""
+        },
+        {
+          "component": "richtext",
+          "name": "text",
+          "label": "Rótulo",
+          "valueType": "string",
+          "value": "",
+          "description": "Rótulo com link e, opcionalmente, um segundo link \"Veja mais\""
+        }
+      ]
+    }
+  ],
+  "filters": [
+    {
+      "id": "cards-services",
+      "components": [
+        "cards-services-item"
+      ]
+    }
+  ]
+}

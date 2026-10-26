@@ -1,0 +1,758 @@
+[
+  {
+    "id": "page-metadata",
+    "fields": [
+      {
+        "component": "text",
+        "name": "title",
+        "label": "Título da página"
+      },
+      {
+        "component": "text",
+        "name": "description",
+        "label": "Descrição"
+      },
+      {
+        "component": "reference",
+        "name": "image",
+        "label": "Imagem de compartilhamento"
+      },
+      {
+        "component": "text",
+        "name": "robots",
+        "label": "Robots",
+        "description": "Controle de indexação, ex.: noindex, nofollow"
+      }
+    ]
+  },
+  {
+    "id": "text",
+    "fields": []
+  },
+  {
+    "id": "title",
+    "fields": []
+  },
+  {
+    "id": "button",
+    "fields": []
+  },
+  {
+    "id": "image",
+    "fields": [
+      {
+        "component": "reference",
+        "name": "image",
+        "label": "Imagem",
+        "multi": false
+      },
+      {
+        "component": "text",
+        "name": "imageAlt",
+        "label": "Texto alternativo"
+      }
+    ]
+  },
+  {
+    "id": "section",
+    "fields": [
+      {
+        "component": "multiselect",
+        "name": "style",
+        "label": "Estilo",
+        "options": [
+          {
+            "name": "Centralizada",
+            "value": "centered"
+          },
+          {
+            "name": "Duas colunas (texto 1/3 + bloco 2/3)",
+            "value": "split"
+          },
+          {
+            "name": "Banner de página (faixa escura com imagem)",
+            "value": "page-banner"
+          },
+          {
+            "name": "Fundo claro",
+            "value": "light"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "accordion-faq",
+    "fields": [
+      {
+        "component": "select",
+        "name": "classes",
+        "label": "Comportamento",
+        "valueType": "string",
+        "value": "",
+        "options": [
+          {
+            "name": "Várias abertas ao mesmo tempo",
+            "value": ""
+          },
+          {
+            "name": "Uma aberta por vez",
+            "value": "single-open"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "accordion-faq-item",
+    "fields": [
+      {
+        "component": "text",
+        "name": "question",
+        "label": "Pergunta",
+        "valueType": "string",
+        "required": true
+      },
+      {
+        "component": "richtext",
+        "name": "answer",
+        "label": "Resposta",
+        "valueType": "string",
+        "value": "",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "cards-audience",
+    "fields": []
+  },
+  {
+    "id": "cards-audience-item",
+    "fields": [
+      {
+        "component": "reference",
+        "valueType": "string",
+        "name": "image",
+        "label": "Imagem de fundo",
+        "multi": false
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "imageAlt",
+        "label": "Texto alternativo",
+        "value": ""
+      },
+      {
+        "component": "richtext",
+        "name": "text",
+        "label": "Conteúdo",
+        "valueType": "string",
+        "value": "",
+        "description": "Título (H2), lista de links rápidos e link de chamada"
+      }
+    ]
+  },
+  {
+    "id": "cards-news",
+    "fields": [
+      {
+        "component": "multiselect",
+        "name": "classes",
+        "label": "Opções",
+        "valueType": "string",
+        "options": [
+          {
+            "name": "Sem destaque (todos iguais)",
+            "value": "no-featured"
+          },
+          {
+            "name": "Destaque empilhado (imagem acima do texto)",
+            "value": "stacked"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cards-news-item",
+    "fields": [
+      {
+        "component": "reference",
+        "valueType": "string",
+        "name": "image",
+        "label": "Imagem",
+        "multi": false
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "imageAlt",
+        "label": "Texto alternativo",
+        "value": ""
+      },
+      {
+        "component": "richtext",
+        "name": "text",
+        "label": "Conteúdo",
+        "valueType": "string",
+        "value": "",
+        "description": "Categoria (parágrafo antes do título), título H3 com link, data dd/mm/aaaa, resumo e link \"Leia mais\""
+      }
+    ]
+  },
+  {
+    "id": "cards-plans",
+    "fields": []
+  },
+  {
+    "id": "cards-plans-item",
+    "fields": [
+      {
+        "component": "richtext",
+        "name": "header",
+        "label": "Cabeçalho",
+        "valueType": "string",
+        "value": "",
+        "description": "Selo opcional (parágrafo antes do título), nome do plano (H3), preço em negrito e observação"
+      },
+      {
+        "component": "richtext",
+        "name": "cta",
+        "label": "Botão de contratação",
+        "valueType": "string",
+        "value": "",
+        "description": "Link do botão principal"
+      },
+      {
+        "component": "richtext",
+        "name": "coverages",
+        "label": "Coberturas",
+        "valueType": "string",
+        "value": "",
+        "description": "Lista; item riscado = não incluso"
+      },
+      {
+        "component": "richtext",
+        "name": "details",
+        "label": "Detalhes e notas (opcional)",
+        "valueType": "string",
+        "value": ""
+      },
+      {
+        "component": "text",
+        "name": "sku",
+        "label": "SKU no Commerce (opcional)",
+        "valueType": "string",
+        "description": "Ex.: protege-casa-basico. Com SKU, o botão abre a contratação expressa"
+      }
+    ]
+  },
+  {
+    "id": "cards-services",
+    "fields": [
+      {
+        "component": "select",
+        "name": "classes",
+        "label": "Layout",
+        "valueType": "string",
+        "value": "",
+        "options": [
+          {
+            "name": "Padrão (ícone acima)",
+            "value": ""
+          },
+          {
+            "name": "Compacto (ícone ao lado do rótulo)",
+            "value": "compact"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "cards-services-item",
+    "fields": [
+      {
+        "component": "reference",
+        "valueType": "string",
+        "name": "image",
+        "label": "Ícone (SVG ou imagem)",
+        "multi": false
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "imageAlt",
+        "label": "Texto alternativo do ícone",
+        "value": ""
+      },
+      {
+        "component": "richtext",
+        "name": "text",
+        "label": "Rótulo",
+        "valueType": "string",
+        "value": "",
+        "description": "Rótulo com link e, opcionalmente, um segundo link \"Veja mais\""
+      }
+    ]
+  },
+  {
+    "id": "cards-steps",
+    "fields": []
+  },
+  {
+    "id": "cards-steps-item",
+    "fields": [
+      {
+        "component": "reference",
+        "valueType": "string",
+        "name": "image",
+        "label": "Ícone",
+        "multi": false
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "imageAlt",
+        "label": "Texto alternativo",
+        "value": ""
+      },
+      {
+        "component": "richtext",
+        "name": "text",
+        "label": "Conteúdo",
+        "valueType": "string",
+        "value": "",
+        "description": "Título do passo (H3) e descrição"
+      }
+    ]
+  },
+  {
+    "id": "carousel-coverage",
+    "fields": []
+  },
+  {
+    "id": "carousel-coverage-item",
+    "fields": [
+      {
+        "component": "reference",
+        "valueType": "string",
+        "name": "image",
+        "label": "Foto",
+        "multi": false
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "imageAlt",
+        "label": "Texto alternativo",
+        "value": ""
+      },
+      {
+        "component": "richtext",
+        "name": "text",
+        "label": "Conteúdo",
+        "valueType": "string",
+        "value": "",
+        "description": "Etiquetas de plano (parágrafo só com links), título (H3) e descrição"
+      }
+    ]
+  },
+  {
+    "id": "carousel-hero",
+    "fields": [
+      {
+        "component": "text",
+        "name": "fonte",
+        "label": "Fonte (Content Fragments)",
+        "valueType": "string",
+        "value": "",
+        "description": "site / app / URL da persisted query ou da ponte do app; vazio = slides autorados"
+      },
+      {
+        "component": "select",
+        "name": "publico",
+        "label": "Público",
+        "valueType": "string",
+        "value": "",
+        "description": "Força o público dos banners; vazio = detectado (visitante ou cliente-protege-casa)",
+        "options": [
+          {
+            "name": "(vazio) detectar automaticamente",
+            "value": ""
+          },
+          {
+            "name": "Visitante",
+            "value": "visitante"
+          },
+          {
+            "name": "Cliente Protege Casa",
+            "value": "cliente-protege-casa"
+          }
+        ]
+      },
+      {
+        "component": "text",
+        "name": "escopoTarget",
+        "label": "Escopo Target",
+        "valueType": "string",
+        "value": "",
+        "description": "Decision scope do Adobe Target (opcional)"
+      },
+      {
+        "component": "select",
+        "name": "classes",
+        "label": "Autoplay",
+        "valueType": "string",
+        "value": "",
+        "options": [
+          {
+            "name": "Com autoplay",
+            "value": ""
+          },
+          {
+            "name": "Sem autoplay",
+            "value": "no-autoplay"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "carousel-hero-item",
+    "fields": [
+      {
+        "component": "reference",
+        "valueType": "string",
+        "name": "image",
+        "label": "Imagem (desktop)",
+        "multi": false
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "imageAlt",
+        "label": "Texto alternativo",
+        "value": ""
+      },
+      {
+        "component": "reference",
+        "valueType": "string",
+        "name": "imageMobile",
+        "label": "Imagem mobile (opcional)",
+        "multi": false
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "imageMobileAlt",
+        "label": "Texto alternativo (mobile)",
+        "value": ""
+      },
+      {
+        "component": "richtext",
+        "name": "text",
+        "label": "Conteúdo",
+        "valueType": "string",
+        "value": "",
+        "description": "Título (H2), texto opcional e até 2 links: o 1º é o botão principal, o 2º o secundário"
+      }
+    ]
+  },
+  {
+    "id": "carousel-quicklinks",
+    "fields": []
+  },
+  {
+    "id": "carousel-quicklinks-item",
+    "fields": [
+      {
+        "component": "reference",
+        "valueType": "string",
+        "name": "image",
+        "label": "Ícone (SVG ou imagem)",
+        "multi": false
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "imageAlt",
+        "label": "Texto alternativo do ícone",
+        "value": ""
+      },
+      {
+        "component": "richtext",
+        "name": "text",
+        "label": "Rótulo",
+        "valueType": "string",
+        "value": "",
+        "description": "Rótulo com link"
+      }
+    ]
+  },
+  {
+    "id": "columns-app",
+    "fields": [
+      {
+        "component": "number",
+        "valueType": "number",
+        "name": "columns",
+        "label": "Número de colunas",
+        "value": 2,
+        "validation": {
+          "numberMin": 1,
+          "numberMax": 6
+        }
+      }
+    ]
+  },
+  {
+    "id": "columns-app-row",
+    "fields": []
+  },
+  {
+    "id": "columns-app-cell",
+    "fields": []
+  },
+  {
+    "id": "columns-feature",
+    "fields": [
+      {
+        "component": "multiselect",
+        "name": "classes",
+        "label": "Opções",
+        "valueType": "string",
+        "options": [
+          {
+            "name": "Painel escuro",
+            "value": "dark"
+          },
+          {
+            "name": "Inverter lado da imagem",
+            "value": "reverse"
+          }
+        ]
+      },
+      {
+        "component": "number",
+        "valueType": "number",
+        "name": "columns",
+        "label": "Número de colunas",
+        "value": 2,
+        "validation": {
+          "numberMin": 1,
+          "numberMax": 6
+        }
+      }
+    ]
+  },
+  {
+    "id": "columns-feature-row",
+    "fields": []
+  },
+  {
+    "id": "columns-feature-cell",
+    "fields": []
+  },
+  {
+    "id": "columns-intro",
+    "fields": [
+      {
+        "component": "number",
+        "valueType": "number",
+        "name": "columns",
+        "label": "Número de colunas",
+        "value": 3,
+        "validation": {
+          "numberMin": 1,
+          "numberMax": 6
+        }
+      }
+    ]
+  },
+  {
+    "id": "columns-intro-row",
+    "fields": []
+  },
+  {
+    "id": "columns-intro-cell",
+    "fields": []
+  },
+  {
+    "id": "columns-links",
+    "fields": [
+      {
+        "component": "number",
+        "valueType": "number",
+        "name": "columns",
+        "label": "Número de colunas",
+        "value": 5,
+        "validation": {
+          "numberMin": 1,
+          "numberMax": 6
+        }
+      }
+    ]
+  },
+  {
+    "id": "columns-links-row",
+    "fields": []
+  },
+  {
+    "id": "columns-links-cell",
+    "fields": []
+  },
+  {
+    "id": "embed-service",
+    "fields": [
+      {
+        "component": "text",
+        "name": "url",
+        "label": "URL do serviço",
+        "valueType": "string",
+        "description": "Endereço https da página incorporada",
+        "required": true
+      },
+      {
+        "component": "text",
+        "name": "title",
+        "label": "Título do iframe",
+        "valueType": "string",
+        "description": "Texto do link; também é o nome acessível do iframe"
+      },
+      {
+        "component": "text",
+        "name": "height",
+        "label": "Altura",
+        "valueType": "string",
+        "description": "Ex.: 850px (padrão 800px)"
+      }
+    ]
+  },
+  {
+    "id": "fragment",
+    "fields": [
+      {
+        "component": "text",
+        "name": "url",
+        "label": "Caminho do fragmento",
+        "valueType": "string",
+        "description": "Ex.: /fragments/aviso ou /library/blocks/cards-news",
+        "required": true
+      },
+      {
+        "component": "text",
+        "name": "urlText",
+        "label": "Texto do link",
+        "valueType": "string"
+      }
+    ]
+  },
+  {
+    "id": "hero-service",
+    "fields": [
+      {
+        "component": "reference",
+        "valueType": "string",
+        "name": "image",
+        "label": "Imagem de fundo",
+        "multi": false
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "imageAlt",
+        "label": "Texto alternativo",
+        "value": ""
+      },
+      {
+        "component": "richtext",
+        "name": "text",
+        "label": "Conteúdo",
+        "valueType": "string",
+        "value": "",
+        "description": "Título (H1), linhas de texto e link de chamada"
+      },
+      {
+        "component": "reference",
+        "valueType": "string",
+        "name": "asideImage",
+        "label": "Imagem lateral 1 (opcional, ex.: logo do produto)",
+        "multi": false
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "asideImageAlt",
+        "label": "Texto alternativo (lateral 1)",
+        "value": ""
+      },
+      {
+        "component": "reference",
+        "valueType": "string",
+        "name": "asideImage2",
+        "label": "Imagem lateral 2 (opcional, ex.: selo de preço)",
+        "multi": false
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "asideImage2Alt",
+        "label": "Texto alternativo (lateral 2)",
+        "value": ""
+      }
+    ]
+  },
+  {
+    "id": "commerce-account",
+    "fields": []
+  },
+  {
+    "id": "commerce-auth",
+    "fields": [
+      {
+        "component": "select",
+        "name": "form",
+        "label": "Formulário",
+        "valueType": "string",
+        "value": "sign-in",
+        "options": [
+          {
+            "name": "Entrar",
+            "value": "sign-in"
+          },
+          {
+            "name": "Criar conta",
+            "value": "sign-up"
+          },
+          {
+            "name": "Esqueci a senha",
+            "value": "forgot-password"
+          },
+          {
+            "name": "Nova senha (link do e-mail)",
+            "value": "update-password"
+          }
+        ]
+      },
+      {
+        "component": "text",
+        "name": "redirect",
+        "label": "Página após entrar",
+        "valueType": "string",
+        "value": "",
+        "description": "Padrão /loja/conta; um ?redirect= na URL tem prioridade"
+      }
+    ]
+  },
+  {
+    "id": "commerce-checkout",
+    "fields": []
+  },
+  {
+    "id": "commerce-order",
+    "fields": []
+  }
+]

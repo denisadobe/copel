@@ -1,0 +1,46 @@
+{
+  "definitions": [
+    {
+      "title": "Fragmento",
+      "id": "fragment",
+      "model": "fragment",
+      "plugins": {
+        "da": {
+          "unsafeHTML": "<div class=\"fragment\"><div><div><p><a href=\"\">Caminho do fragmento</a></p></div></div></div>",
+          "fields": [
+            {
+              "name": "url",
+              "selector": "div>div a[href]"
+            },
+            {
+              "name": "urlText",
+              "selector": "div>div a"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "fragment",
+      "fields": [
+        {
+          "component": "text",
+          "name": "url",
+          "label": "Caminho do fragmento",
+          "valueType": "string",
+          "description": "Ex.: /fragments/aviso ou /library/blocks/cards-news",
+          "required": true
+        },
+        {
+          "component": "text",
+          "name": "urlText",
+          "label": "Texto do link",
+          "valueType": "string"
+        }
+      ]
+    }
+  ],
+  "filters": []
+}

@@ -1,0 +1,21 @@
+{
+  "definitions": [
+    {
+      "title": "Detalhes do pedido (Commerce)",
+      "id": "commerce-order",
+      "model": "commerce-order",
+      "plugins": {
+        "da": {
+          "unsafeHTML": "<div class=\"commerce-order\"><div><div></div></div></div>"
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "commerce-order",
+      "fields": []
+    }
+  ],
+  "filters": []
+}

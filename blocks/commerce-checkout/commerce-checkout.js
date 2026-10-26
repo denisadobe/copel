@@ -15,6 +15,7 @@ import {
   sanitizeName, signOut,
 } from '../../scripts/commerce.js';
 import renderOrder from '../../scripts/commerce-order.js';
+import { IS_UE, showEditorPlaceholder } from '../../scripts/ue-utils.js';
 
 /** Offline method whose Admin title is "Cobrança na fatura de energia". */
 const PAYMENT_METHOD = 'checkmo';
@@ -76,6 +77,10 @@ async function getCustomer() {
 }
 
 export default async function decorate(block) {
+  if (IS_UE) {
+    showEditorPlaceholder(block, 'Checkout: exibido no site para o cliente conectado com um plano no carrinho.');
+    return;
+  }
   const $ = Object.fromEntries([
     'error', 'stock', 'customer', 'payment', 'place-order', 'terms', 'items', 'summary',
   ].map((name) => [name, el(name)]));

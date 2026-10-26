@@ -3,7 +3,7 @@
   "baseBlock": "carousel",
   "canonicalModel": "standalone",
   "visualCharacteristics": "Full-bleed rotating banner (6 slides, arrows + autoplay). Background image per slide, left-aligned heading, description and pill CTA(s). Optional second picture per slide is used as the mobile banner.",
-  "contentPattern": "One row per slide. Cell 1: picture (desktop) + optional second picture (mobile). Cell 2: heading (title), optional paragraph(s) (summary), 1-2 links (primary and secondary CTA). Optional headless source: leading 2-cell config rows 'Fonte'/'Source' (banner list URL, app proxy, channel or persisted-query path; must be the first row), 'Público'/'Audience', 'Escopo Target'/'Target scope'; they are removed and the remaining authored rows become the fallback.",
+  "contentPattern": "One row per slide. Cell 1: picture (desktop) + optional second picture (mobile). Cell 2: heading (title), optional paragraph(s) (summary), 1-2 links (primary and secondary CTA). Optional headless source: leading 2-cell config rows in any order, 'Fonte'/'Source' (banner list URL, app proxy, channel or persisted-query path; empty = authored slides only), 'Público'/'Audience', 'Escopo Target'/'Target scope'; they are removed and the remaining authored rows become the fallback. Universal Editor: the config rows are the block fields fonte/publico/escopoTarget and the slides are 'carousel-hero-item' items; in the editor the authored slides are always shown (no Content Fragment fetch, no autoplay) with an editor-only badge.",
   "options": [
     {
       "class": "no-autoplay",
@@ -34,7 +34,7 @@
     "configRows": [
       {
         "key": "Fonte / Source",
-        "value": "Absolute URL on another host (app proxy e.g. https://<app-domain>/api/banners?canal=site, or AEM persisted query) fetched as written; a channel ('site'/'app') or empty uses config.json aem-banners-url ({canal} template) or <aem-publish-url>/graphql/execute.json/global/banners-por-canal;canal=<canal>; a persisted-query path resolves on aem-publish-url. Must be the first row."
+        "value": "Absolute URL on another host (app proxy e.g. https://<app-domain>/api/banners?canal=site, or AEM persisted query) fetched as written; a channel ('site'/'app') uses config.json aem-banners-url ({canal} template) or <aem-publish-url>/graphql/execute.json/global/banners-por-canal;canal=<canal>; a persisted-query path resolves on aem-publish-url. Empty = no Content Fragments (authored slides only)."
       },
       {
         "key": "Público / Audience",

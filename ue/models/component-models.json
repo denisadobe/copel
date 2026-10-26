@@ -1,0 +1,20 @@
+[
+  {
+    "...": "./page.json#/models"
+  },
+  {
+    "...": "./text.json#/models"
+  },
+  {
+    "...": "./image.json#/models"
+  },
+  {
+    "...": "./section.json#/models"
+  },
+  {
+    "...": "./blocks/*.json#/models"
+  },
+  {
+    "...": "./blocks/commerce/*.json#/models"
+  }
+]

@@ -1,4 +1,7 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
+import {
+  claimDecoration, emptyMediaSlot, isEmptyRow, moveInstrumentation, replacePicture,
+} from '../../scripts/ue-utils.js';
 
 /*
  * Cards (audience)
@@ -17,18 +20,24 @@ import { createOptimizedPicture } from '../../scripts/aem.js';
  */
 
 export default function decorate(block) {
+  if (!claimDecoration(block)) return;
   const ul = document.createElement('ul');
 
   [...block.children].forEach((row) => {
-    if (!row.textContent.trim() && !row.querySelector('picture, img')) return;
+    if (isEmptyRow(row, 'picture, img')) return;
     const li = document.createElement('li');
+    moveInstrumentation(row, li);
     li.className = 'cards-audience-card';
 
     const cells = [...row.children];
-    const imageCell = cells.find((c) => c.querySelector('picture, img') && !c.textContent.trim());
+    // editor: an item just added has no media yet, keep [media | text] by position
+    const imageCell = cells.find((c) => c.querySelector('picture, img') && !c.textContent.trim())
+      || emptyMediaSlot(cells);
     const body = document.createElement('div');
     body.className = 'cards-audience-card-body';
-    cells.filter((c) => c !== imageCell).forEach((c) => {
+    const textCells = cells.filter((c) => c !== imageCell);
+    if (textCells.length === 1) moveInstrumentation(textCells[0], body);
+    textCells.forEach((c) => {
       while (c.firstChild) body.append(c.firstChild);
     });
 
@@ -57,7 +66,8 @@ export default function decorate(block) {
   });
 
   ul.querySelectorAll('picture > img').forEach((img) => {
-    img.closest('picture').replaceWith(createOptimizedPicture(img.src, img.alt, false, [{ media: '(min-width: 900px)', width: '1200' }, { width: '750' }]));
+    if (!img.getAttribute('src')) return;
+    replacePicture(img.closest('picture'), createOptimizedPicture(img.src, img.alt, false, [{ media: '(min-width: 900px)', width: '1200' }, { width: '750' }]));
   });
 
   block.replaceChildren(ul);

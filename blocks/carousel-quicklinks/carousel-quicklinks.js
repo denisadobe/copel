@@ -1,4 +1,7 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
+import {
+  claimDecoration, emptyMediaSlot, isEmptyRow, moveInstrumentation, replacePicture,
+} from '../../scripts/ue-utils.js';
 
 /*
  * Carousel (quicklinks)
@@ -13,10 +16,13 @@ import { createOptimizedPicture } from '../../scripts/aem.js';
 
 function buildTile(row) {
   const li = document.createElement('li');
+  moveInstrumentation(row, li);
   li.className = 'carousel-quicklinks-item';
 
   const cells = [...row.children];
-  const iconCell = cells.find((c) => c.querySelector('span.icon, picture, img') && !c.textContent.trim());
+  // editor: a tile just added has no icon yet, keep [icon | label] by position
+  const iconCell = cells.find((c) => c.querySelector('span.icon, picture, img') && !c.textContent.trim())
+    || emptyMediaSlot(cells);
   const textCells = cells.filter((c) => c !== iconCell);
   const link = row.querySelector('a[href]');
 
@@ -39,17 +45,19 @@ function buildTile(row) {
   if (icon.childNodes.length) tile.append(icon);
 
   const label = document.createElement('span');
+  if (textCells.length === 1) moveInstrumentation(textCells[0], label);
   label.className = 'carousel-quicklinks-label';
   label.textContent = textCells.map((c) => c.textContent.trim()).filter(Boolean).join(' ')
     || (link ? link.textContent.trim() : '');
-  if (label.textContent) tile.append(label);
+  if (label.textContent || label.hasAttribute('data-aue-prop')) tile.append(label);
 
   li.append(tile);
   return li;
 }
 
 export default function decorate(block) {
-  const rows = [...block.children].filter((r) => r.textContent.trim() || r.querySelector('span.icon, picture, img'));
+  if (!claimDecoration(block)) return;
+  const rows = [...block.children].filter((r) => !isEmptyRow(r));
 
   const track = document.createElement('ul');
   track.className = 'carousel-quicklinks-track';
@@ -66,9 +74,9 @@ export default function decorate(block) {
       wrap.style.setProperty('--carousel-quicklinks-icon', `url("${src.replace(/"/g, '%22')}")`);
       return;
     }
-    if (src.startsWith('data:')) return;
+    if (!src || src.startsWith('data:')) return;
     const picture = img.closest('picture');
-    if (picture) picture.replaceWith(createOptimizedPicture(src, img.alt, false, [{ width: '160' }]));
+    if (picture) replacePicture(picture, createOptimizedPicture(src, img.alt, false, [{ width: '160' }]));
   });
 
   const viewport = document.createElement('div');

@@ -1,4 +1,5 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
+import { claimDecoration, contentRoot, replacePicture } from '../../scripts/ue-utils.js';
 
 /*
  * Columns (feature)
@@ -17,6 +18,9 @@ import { createOptimizedPicture } from '../../scripts/aem.js';
  *   dark:    ink-colored text panel with light text.
  *   reverse: mirrors the authored order on wide screens (image side swapped);
  *            on mobile the image stays on top.
+ *
+ * Universal Editor: cells keep their instrumentation; panels are built inside the cell's
+ * editable text (contentRoot).
  */
 
 function buildPanels(col) {
@@ -57,6 +61,7 @@ function decorateMore(col) {
 }
 
 export default function decorate(block) {
+  if (!claimDecoration(block)) return;
   const reverse = block.classList.contains('reverse');
   [...block.children].forEach((row) => {
     row.classList.add('columns-feature-row');
@@ -68,12 +73,13 @@ export default function decorate(block) {
         col.classList.add('columns-feature-img-col');
         if (imageIndex < 0) imageIndex = i;
         col.querySelectorAll('picture > img').forEach((img) => {
-          img.closest('picture').replaceWith(createOptimizedPicture(img.src, img.alt, false, [{ media: '(min-width: 900px)', width: '1200' }, { width: '750' }]));
+          if (!img.getAttribute('src')) return;
+          replacePicture(img.closest('picture'), createOptimizedPicture(img.src, img.alt, false, [{ media: '(min-width: 900px)', width: '1200' }, { width: '750' }]));
         });
       } else if (col.textContent.trim() || col.children.length) {
         col.classList.add('columns-feature-text-col');
         decorateMore(col);
-        buildPanels(col);
+        buildPanels(contentRoot(col));
       }
     });
     // row classes describe the visual side of the image on wide screens

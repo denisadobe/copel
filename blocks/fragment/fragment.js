@@ -12,6 +12,7 @@ import {
 import {
   loadSections,
 } from '../../scripts/aem.js';
+import { IS_UE } from '../../scripts/ue-utils.js';
 
 /**
  * Loads a fragment.
@@ -49,6 +50,19 @@ export default async function decorate(block) {
   const path = link ? link.getAttribute('href') : block.textContent.trim();
   const fragment = await loadFragment(path);
   if (!fragment) return;
+
+  if (IS_UE) {
+    // editor: the fragment block stays in place (selectable, its path editable in the
+    // properties panel) and shows a read-only preview; the fragment is edited in its own page
+    fragment.querySelectorAll('*').forEach((el) => {
+      [...el.attributes]
+        .filter(({ name }) => name.startsWith('data-aue-') || name.startsWith('data-richtext-'))
+        .forEach(({ name }) => el.removeAttribute(name));
+    });
+    block.classList.add('fragment-ue-preview');
+    block.replaceChildren(...fragment.childNodes);
+    return;
+  }
 
   const wrapper = block.closest('.fragment-wrapper');
   const section = wrapper.closest('.section');

@@ -16,14 +16,22 @@
   line-height: 24px;
 }
 
-.columns-app .columns-app-text-col > h2 {
+/* Universal Editor: the cell's editable text (div.richtext) lays out like the cell */
+.columns-app .columns-app-text-col > :where(.richtext) {
+  display: flex;
+  flex-direction: column;
+}
+
+.columns-app .columns-app-text-col > h2,
+.columns-app .columns-app-text-col > :where(.richtext) > h2 {
   margin: 0 0 20px;
   color: var(--heading-accent-color);
   font-size: var(--heading-font-size-xl);
   line-height: 1.5;
 }
 
-.columns-app .columns-app-text-col > p {
+.columns-app .columns-app-text-col > p,
+.columns-app .columns-app-text-col > :where(.richtext) > p {
   margin: 0 0 14.4px;
 }
 

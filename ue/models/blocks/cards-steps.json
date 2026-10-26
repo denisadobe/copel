@@ -1,0 +1,83 @@
+{
+  "definitions": [
+    {
+      "title": "Passo a passo",
+      "id": "cards-steps",
+      "model": "cards-steps",
+      "filter": "cards-steps",
+      "plugins": {
+        "da": {
+          "name": "cards-steps",
+          "rows": 1,
+          "columns": 2
+        }
+      }
+    },
+    {
+      "title": "Passo",
+      "id": "cards-steps-item",
+      "model": "cards-steps-item",
+      "plugins": {
+        "da": {
+          "rows": 1,
+          "columns": 2,
+          "fields": [
+            {
+              "name": "image",
+              "selector": "div:nth-child(1)>picture>img[src]"
+            },
+            {
+              "name": "imageAlt",
+              "selector": "div:nth-child(1)>picture>img[alt]"
+            },
+            {
+              "name": "text",
+              "selector": "div:nth-child(2)"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "cards-steps",
+      "fields": []
+    },
+    {
+      "id": "cards-steps-item",
+      "fields": [
+        {
+          "component": "reference",
+          "valueType": "string",
+          "name": "image",
+          "label": "Ícone",
+          "multi": false
+        },
+        {
+          "component": "text",
+          "valueType": "string",
+          "name": "imageAlt",
+          "label": "Texto alternativo",
+          "value": ""
+        },
+        {
+          "component": "richtext",
+          "name": "text",
+          "label": "Conteúdo",
+          "valueType": "string",
+          "value": "",
+          "description": "Título do passo (H3) e descrição"
+        }
+      ]
+    }
+  ],
+  "filters": [
+    {
+      "id": "cards-steps",
+      "components": [
+        "cards-steps-item"
+      ]
+    }
+  ]
+}

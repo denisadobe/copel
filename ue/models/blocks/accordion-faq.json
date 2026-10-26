@@ -1,0 +1,90 @@
+{
+  "definitions": [
+    {
+      "title": "Perguntas frequentes (FAQ)",
+      "id": "accordion-faq",
+      "model": "accordion-faq",
+      "filter": "accordion-faq",
+      "plugins": {
+        "da": {
+          "name": "accordion-faq",
+          "rows": 1,
+          "columns": 2
+        }
+      }
+    },
+    {
+      "title": "Pergunta",
+      "id": "accordion-faq-item",
+      "model": "accordion-faq-item",
+      "plugins": {
+        "da": {
+          "rows": 2,
+          "columns": 0,
+          "fields": [
+            {
+              "name": "question",
+              "selector": "div:nth-child(1)"
+            },
+            {
+              "name": "answer",
+              "selector": "div:nth-child(2)"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "accordion-faq",
+      "fields": [
+        {
+          "component": "select",
+          "name": "classes",
+          "label": "Comportamento",
+          "valueType": "string",
+          "value": "",
+          "options": [
+            {
+              "name": "Várias abertas ao mesmo tempo",
+              "value": ""
+            },
+            {
+              "name": "Uma aberta por vez",
+              "value": "single-open"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "accordion-faq-item",
+      "fields": [
+        {
+          "component": "text",
+          "name": "question",
+          "label": "Pergunta",
+          "valueType": "string",
+          "required": true
+        },
+        {
+          "component": "richtext",
+          "name": "answer",
+          "label": "Resposta",
+          "valueType": "string",
+          "value": "",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "filters": [
+    {
+      "id": "accordion-faq",
+      "components": [
+        "accordion-faq-item"
+      ]
+    }
+  ]
+}

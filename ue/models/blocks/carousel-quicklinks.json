@@ -1,0 +1,83 @@
+{
+  "definitions": [
+    {
+      "title": "Carrossel de atalhos",
+      "id": "carousel-quicklinks",
+      "model": "carousel-quicklinks",
+      "filter": "carousel-quicklinks",
+      "plugins": {
+        "da": {
+          "name": "carousel-quicklinks",
+          "rows": 1,
+          "columns": 2
+        }
+      }
+    },
+    {
+      "title": "Atalho",
+      "id": "carousel-quicklinks-item",
+      "model": "carousel-quicklinks-item",
+      "plugins": {
+        "da": {
+          "rows": 1,
+          "columns": 2,
+          "fields": [
+            {
+              "name": "image",
+              "selector": "div:nth-child(1)>picture>img[src]"
+            },
+            {
+              "name": "imageAlt",
+              "selector": "div:nth-child(1)>picture>img[alt]"
+            },
+            {
+              "name": "text",
+              "selector": "div:nth-child(2)"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "carousel-quicklinks",
+      "fields": []
+    },
+    {
+      "id": "carousel-quicklinks-item",
+      "fields": [
+        {
+          "component": "reference",
+          "valueType": "string",
+          "name": "image",
+          "label": "Ícone (SVG ou imagem)",
+          "multi": false
+        },
+        {
+          "component": "text",
+          "valueType": "string",
+          "name": "imageAlt",
+          "label": "Texto alternativo do ícone",
+          "value": ""
+        },
+        {
+          "component": "richtext",
+          "name": "text",
+          "label": "Rótulo",
+          "valueType": "string",
+          "value": "",
+          "description": "Rótulo com link"
+        }
+      ]
+    }
+  ],
+  "filters": [
+    {
+      "id": "carousel-quicklinks",
+      "components": [
+        "carousel-quicklinks-item"
+      ]
+    }
+  ]
+}

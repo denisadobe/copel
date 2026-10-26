@@ -1,0 +1,102 @@
+{
+  "definitions": [
+    {
+      "title": "Hero de serviço",
+      "id": "hero-service",
+      "model": "hero-service",
+      "plugins": {
+        "da": {
+          "unsafeHTML": "<div class=\"hero-service\"><div><div><picture><img loading=\"lazy\"></picture></div></div><div><div><h1>Título do serviço</h1><p>Chamada de apoio</p><p><a href=\"#planos\">Contratar</a></p></div></div><div><div><picture><img loading=\"lazy\"></picture><picture><img loading=\"lazy\"></picture></div></div></div>",
+          "fields": [
+            {
+              "name": "image",
+              "selector": "div:nth-child(1)>div>picture>img[src]"
+            },
+            {
+              "name": "imageAlt",
+              "selector": "div:nth-child(1)>div>picture>img[alt]"
+            },
+            {
+              "name": "text",
+              "selector": "div:nth-child(2)>div"
+            },
+            {
+              "name": "asideImage",
+              "selector": "div:nth-child(3)>div>picture>img[src]"
+            },
+            {
+              "name": "asideImageAlt",
+              "selector": "div:nth-child(3)>div>picture>img[alt]"
+            },
+            {
+              "name": "asideImage2",
+              "selector": "div:nth-child(3)>div>picture:nth-of-type(2)>img[src]"
+            },
+            {
+              "name": "asideImage2Alt",
+              "selector": "div:nth-child(3)>div>picture:nth-of-type(2)>img[alt]"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "hero-service",
+      "fields": [
+        {
+          "component": "reference",
+          "valueType": "string",
+          "name": "image",
+          "label": "Imagem de fundo",
+          "multi": false
+        },
+        {
+          "component": "text",
+          "valueType": "string",
+          "name": "imageAlt",
+          "label": "Texto alternativo",
+          "value": ""
+        },
+        {
+          "component": "richtext",
+          "name": "text",
+          "label": "Conteúdo",
+          "valueType": "string",
+          "value": "",
+          "description": "Título (H1), linhas de texto e link de chamada"
+        },
+        {
+          "component": "reference",
+          "valueType": "string",
+          "name": "asideImage",
+          "label": "Imagem lateral 1 (opcional, ex.: logo do produto)",
+          "multi": false
+        },
+        {
+          "component": "text",
+          "valueType": "string",
+          "name": "asideImageAlt",
+          "label": "Texto alternativo (lateral 1)",
+          "value": ""
+        },
+        {
+          "component": "reference",
+          "valueType": "string",
+          "name": "asideImage2",
+          "label": "Imagem lateral 2 (opcional, ex.: selo de preço)",
+          "multi": false
+        },
+        {
+          "component": "text",
+          "valueType": "string",
+          "name": "asideImage2Alt",
+          "label": "Texto alternativo (lateral 2)",
+          "value": ""
+        }
+      ]
+    }
+  ],
+  "filters": []
+}

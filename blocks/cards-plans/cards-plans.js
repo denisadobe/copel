@@ -22,6 +22,8 @@
  * data-sku is set on the card and on the CTA when a SKU is authored.
  */
 
+import { claimDecoration, isEmptyRow, moveInstrumentation } from '../../scripts/ue-utils.js';
+
 export const SELECT_EVENT = 'cards-plans:select';
 
 const SKU_RE = /^(?:sku\s*[:-]?\s*)?([A-Za-z0-9][A-Za-z0-9._\-/]{0,63})$/i;
@@ -147,14 +149,16 @@ function decorateCta(cell, card, info) {
 }
 
 export default function decorate(block) {
+  if (!claimDecoration(block)) return;
   const ul = document.createElement('ul');
   ul.className = 'cards-plans-list';
 
   [...block.children].forEach((row, index) => {
     const cells = [...row.children];
-    if (!cells.some((c) => text(c) || c.querySelector('picture, img'))) return;
+    if (isEmptyRow(row, 'picture, img')) return;
 
     const card = document.createElement('li');
+    moveInstrumentation(row, card);
     card.className = 'cards-plans-card';
     const parts = classifyCells(cells);
 

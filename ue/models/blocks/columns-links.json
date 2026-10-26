@@ -1,0 +1,87 @@
+{
+  "definitions": [
+    {
+      "title": "Colunas: diretório de links",
+      "id": "columns-links",
+      "model": "columns-links",
+      "filter": "columns-links",
+      "plugins": {
+        "da": {
+          "name": "columns-links",
+          "rows": 1,
+          "columns": 5,
+          "behaviour": "columns"
+        }
+      }
+    },
+    {
+      "title": "Colunas: diretório de links: linha",
+      "id": "columns-links-row",
+      "model": "columns-links-row",
+      "filter": "columns-links-row",
+      "plugins": {
+        "da": {
+          "name": "columns-links-row",
+          "behaviour": "columns-row"
+        }
+      }
+    },
+    {
+      "title": "Colunas: diretório de links: célula",
+      "id": "columns-links-cell",
+      "model": "columns-links-cell",
+      "filter": "columns-links-cell",
+      "plugins": {
+        "da": {
+          "unsafeHTML": "<div></div>",
+          "behaviour": "columns-cell"
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "columns-links",
+      "fields": [
+        {
+          "component": "number",
+          "valueType": "number",
+          "name": "columns",
+          "label": "Número de colunas",
+          "value": 5,
+          "validation": {
+            "numberMin": 1,
+            "numberMax": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "columns-links-row",
+      "fields": []
+    },
+    {
+      "id": "columns-links-cell",
+      "fields": []
+    }
+  ],
+  "filters": [
+    {
+      "id": "columns-links",
+      "components": [
+        "columns-links-row"
+      ]
+    },
+    {
+      "id": "columns-links-row",
+      "components": []
+    },
+    {
+      "id": "columns-links-cell",
+      "components": [
+        "text",
+        "image"
+      ]
+    }
+  ]
+}

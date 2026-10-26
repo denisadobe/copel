@@ -8,8 +8,13 @@ import {
   redirectTo,
 } from '../../scripts/commerce.js';
 import renderOrder from '../../scripts/commerce-order.js';
+import { IS_UE, showEditorPlaceholder } from '../../scripts/ue-utils.js';
 
 export default async function decorate(block) {
+  if (IS_UE) {
+    showEditorPlaceholder(block, 'Detalhes do pedido: exibidos no site para o cliente conectado (?orderRef=número do pedido).');
+    return;
+  }
   const view = document.createElement('div');
   view.className = 'commerce-order-view';
   block.replaceChildren(view);

@@ -14,4 +14,7 @@ No variations.
 
 ## Universal Editor fields
 
-N/A (Document Authoring project)
+Model: `ue/models/blocks/columns-links.json` (bundled into the root `component-*.json` by `npm run build:json`). Universal Editor on Author Bus (`*.ue.da.live`); the content stays the same DA table.
+
+- Columns block (`behaviour: columns`): rows `columns-links-row`, cells `columns-links-cell`; each cell holds Text and Image components, so cells may be in any order.
+- `columns` (number): Número de colunas (default 5)

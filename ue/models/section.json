@@ -1,0 +1,76 @@
+{
+  "definitions": [
+    {
+      "title": "Seção",
+      "id": "section",
+      "plugins": {
+        "da": {
+          "unsafeHTML": "<div></div>"
+        }
+      },
+      "filter": "section",
+      "model": "section"
+    }
+  ],
+  "models": [
+    {
+      "id": "section",
+      "fields": [
+        {
+          "component": "multiselect",
+          "name": "style",
+          "label": "Estilo",
+          "options": [
+            {
+              "name": "Centralizada",
+              "value": "centered"
+            },
+            {
+              "name": "Duas colunas (texto 1/3 + bloco 2/3)",
+              "value": "split"
+            },
+            {
+              "name": "Banner de página (faixa escura com imagem)",
+              "value": "page-banner"
+            },
+            {
+              "name": "Fundo claro",
+              "value": "light"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "filters": [
+    {
+      "id": "section",
+      "components": [
+        "text",
+        "title",
+        "button",
+        "image",
+        "accordion-faq",
+        "cards-audience",
+        "cards-news",
+        "cards-plans",
+        "cards-services",
+        "cards-steps",
+        "carousel-coverage",
+        "carousel-hero",
+        "carousel-quicklinks",
+        "columns-app",
+        "columns-feature",
+        "columns-intro",
+        "columns-links",
+        "embed-service",
+        "hero-service",
+        "fragment",
+        "commerce-auth",
+        "commerce-account",
+        "commerce-checkout",
+        "commerce-order"
+      ]
+    }
+  ]
+}

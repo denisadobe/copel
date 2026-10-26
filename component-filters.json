@@ -1,0 +1,159 @@
+[
+  {
+    "id": "main",
+    "components": [
+      "section"
+    ]
+  },
+  {
+    "id": "section",
+    "components": [
+      "text",
+      "title",
+      "button",
+      "image",
+      "accordion-faq",
+      "cards-audience",
+      "cards-news",
+      "cards-plans",
+      "cards-services",
+      "cards-steps",
+      "carousel-coverage",
+      "carousel-hero",
+      "carousel-quicklinks",
+      "columns-app",
+      "columns-feature",
+      "columns-intro",
+      "columns-links",
+      "embed-service",
+      "hero-service",
+      "fragment",
+      "commerce-auth",
+      "commerce-account",
+      "commerce-checkout",
+      "commerce-order"
+    ]
+  },
+  {
+    "id": "accordion-faq",
+    "components": [
+      "accordion-faq-item"
+    ]
+  },
+  {
+    "id": "cards-audience",
+    "components": [
+      "cards-audience-item"
+    ]
+  },
+  {
+    "id": "cards-news",
+    "components": [
+      "cards-news-item"
+    ]
+  },
+  {
+    "id": "cards-plans",
+    "components": [
+      "cards-plans-item"
+    ]
+  },
+  {
+    "id": "cards-services",
+    "components": [
+      "cards-services-item"
+    ]
+  },
+  {
+    "id": "cards-steps",
+    "components": [
+      "cards-steps-item"
+    ]
+  },
+  {
+    "id": "carousel-coverage",
+    "components": [
+      "carousel-coverage-item"
+    ]
+  },
+  {
+    "id": "carousel-hero",
+    "components": [
+      "carousel-hero-item"
+    ]
+  },
+  {
+    "id": "carousel-quicklinks",
+    "components": [
+      "carousel-quicklinks-item"
+    ]
+  },
+  {
+    "id": "columns-app",
+    "components": [
+      "columns-app-row"
+    ]
+  },
+  {
+    "id": "columns-app-row",
+    "components": []
+  },
+  {
+    "id": "columns-app-cell",
+    "components": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "id": "columns-feature",
+    "components": [
+      "columns-feature-row"
+    ]
+  },
+  {
+    "id": "columns-feature-row",
+    "components": []
+  },
+  {
+    "id": "columns-feature-cell",
+    "components": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "id": "columns-intro",
+    "components": [
+      "columns-intro-row"
+    ]
+  },
+  {
+    "id": "columns-intro-row",
+    "components": []
+  },
+  {
+    "id": "columns-intro-cell",
+    "components": [
+      "text",
+      "image"
+    ]
+  },
+  {
+    "id": "columns-links",
+    "components": [
+      "columns-links-row"
+    ]
+  },
+  {
+    "id": "columns-links-row",
+    "components": []
+  },
+  {
+    "id": "columns-links-cell",
+    "components": [
+      "text",
+      "image"
+    ]
+  }
+]

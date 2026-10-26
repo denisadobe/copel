@@ -1,4 +1,7 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
+import {
+  claimDecoration, emptyMediaSlot, isEmptyRow, moveInstrumentation, replacePicture,
+} from '../../scripts/ue-utils.js';
 
 /*
  * Cards (services)
@@ -17,18 +20,24 @@ function isIconCell(cell) {
 }
 
 export default function decorate(block) {
+  if (!claimDecoration(block)) return;
   const ul = document.createElement('ul');
 
   [...block.children].forEach((row) => {
-    if (!row.textContent.trim() && !row.querySelector('span.icon, picture, img')) return;
+    if (isEmptyRow(row)) return;
     const li = document.createElement('li');
+    moveInstrumentation(row, li);
     li.className = 'cards-services-card';
 
     const cells = [...row.children];
-    const iconCell = cells.find(isIconCell);
+    // editor: an item just added has no media yet, keep [media | text] by position
+    const iconCell = cells.find(isIconCell)
+      || emptyMediaSlot(cells);
     const body = document.createElement('div');
     body.className = 'cards-services-card-body';
-    cells.filter((c) => c !== iconCell).forEach((c) => {
+    const textCells = cells.filter((c) => c !== iconCell);
+    if (textCells.length === 1) moveInstrumentation(textCells[0], body);
+    textCells.forEach((c) => {
       while (c.firstChild) body.append(c.firstChild);
     });
 
@@ -77,7 +86,7 @@ export default function decorate(block) {
     }
     if (src.startsWith('data:')) return;
     const picture = img.closest('picture');
-    if (picture) picture.replaceWith(createOptimizedPicture(src, img.alt, false, [{ width: '160' }]));
+    if (picture && src) replacePicture(picture, createOptimizedPicture(src, img.alt, false, [{ width: '160' }]));
   });
 
   block.replaceChildren(ul);

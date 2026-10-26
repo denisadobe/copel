@@ -14,6 +14,7 @@ import {
   redirectTo,
 } from '../../scripts/commerce.js';
 import { RESUME_PARAM } from '../../scripts/commerce-plans.js';
+import { IS_UE } from '../../scripts/ue-utils.js';
 
 const FORMS = {
   'sign-in': ['SignIn', ({ next, keep }) => ({
@@ -60,10 +61,19 @@ export default async function decorate(block) {
 
   const container = document.createElement('div');
   container.className = 'commerce-auth-form';
-  block.replaceChildren(container);
+  if (IS_UE) {
+    // editor: keep the (instrumented) key-value rows, hidden, and never redirect
+    const source = document.createElement('div');
+    source.className = 'commerce-auth-source';
+    source.hidden = true;
+    source.append(...block.children);
+    block.replaceChildren(container, source);
+  } else {
+    block.replaceChildren(container);
+  }
 
   // already signed in: nothing to do here
-  if (isAuthenticated() && form !== 'update-password') {
+  if (isAuthenticated() && form !== 'update-password' && !IS_UE) {
     await redirectTo(next);
     return;
   }

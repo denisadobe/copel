@@ -10,7 +10,11 @@
  * A fallback link "Abrir em nova aba" is always rendered, because some
  * services refuse framing (X-Frame-Options / frame-ancestors) and the
  * browser gives no reliable signal for that.
+ *
+ * Universal Editor: a vh height is turned into px (the editor sizes its iframe to the page,
+ * so a vh-based height would keep growing).
  */
+import { IS_UE, claimDecoration } from '../../scripts/ue-utils.js';
 
 const DEFAULT_HEIGHT = '800px';
 const HEIGHT_RE = /^(\d{2,4}(?:\.\d+)?)\s*(px|vh|rem|em)?$/i;
@@ -26,10 +30,15 @@ function parseUrl(value) {
   }
 }
 
+// reference viewport height for vh values in the editor
+const UE_VIEWPORT_PX = 900;
+
 function parseHeight(text) {
   const match = (text || '').trim().match(HEIGHT_RE);
   if (!match) return null;
-  return `${match[1]}${(match[2] || 'px').toLowerCase()}`;
+  const unit = (match[2] || 'px').toLowerCase();
+  if (IS_UE && unit === 'vh') return `${Math.round((parseFloat(match[1]) * UE_VIEWPORT_PX) / 100)}px`;
+  return `${match[1]}${unit}`;
 }
 
 function findSource(block) {
@@ -67,6 +76,7 @@ function buildIframe(url, title) {
 }
 
 export default function decorate(block) {
+  if (!claimDecoration(block)) return;
   const source = findSource(block);
   const height = findHeight(block);
 

@@ -1,0 +1,107 @@
+{
+  "definitions": [
+    {
+      "title": "Cards de planos",
+      "id": "cards-plans",
+      "model": "cards-plans",
+      "filter": "cards-plans",
+      "plugins": {
+        "da": {
+          "name": "cards-plans",
+          "rows": 1,
+          "columns": 5
+        }
+      }
+    },
+    {
+      "title": "Plano",
+      "id": "cards-plans-item",
+      "model": "cards-plans-item",
+      "plugins": {
+        "da": {
+          "rows": 1,
+          "columns": 5,
+          "fields": [
+            {
+              "name": "header",
+              "selector": "div:nth-child(1)"
+            },
+            {
+              "name": "cta",
+              "selector": "div:nth-child(2)"
+            },
+            {
+              "name": "coverages",
+              "selector": "div:nth-child(3)"
+            },
+            {
+              "name": "details",
+              "selector": "div:nth-child(4)"
+            },
+            {
+              "name": "sku",
+              "selector": "div:nth-child(5)"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "cards-plans",
+      "fields": []
+    },
+    {
+      "id": "cards-plans-item",
+      "fields": [
+        {
+          "component": "richtext",
+          "name": "header",
+          "label": "Cabeçalho",
+          "valueType": "string",
+          "value": "",
+          "description": "Selo opcional (parágrafo antes do título), nome do plano (H3), preço em negrito e observação"
+        },
+        {
+          "component": "richtext",
+          "name": "cta",
+          "label": "Botão de contratação",
+          "valueType": "string",
+          "value": "",
+          "description": "Link do botão principal"
+        },
+        {
+          "component": "richtext",
+          "name": "coverages",
+          "label": "Coberturas",
+          "valueType": "string",
+          "value": "",
+          "description": "Lista; item riscado = não incluso"
+        },
+        {
+          "component": "richtext",
+          "name": "details",
+          "label": "Detalhes e notas (opcional)",
+          "valueType": "string",
+          "value": ""
+        },
+        {
+          "component": "text",
+          "name": "sku",
+          "label": "SKU no Commerce (opcional)",
+          "valueType": "string",
+          "description": "Ex.: protege-casa-basico. Com SKU, o botão abre a contratação expressa"
+        }
+      ]
+    }
+  ],
+  "filters": [
+    {
+      "id": "cards-plans",
+      "components": [
+        "cards-plans-item"
+      ]
+    }
+  ]
+}

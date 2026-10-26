@@ -1,4 +1,5 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
+import { IS_UE, claimDecoration, replacePicture } from '../../scripts/ue-utils.js';
 
 /*
  * Columns (intro)
@@ -11,6 +12,7 @@ import { createOptimizedPicture } from '../../scripts/aem.js';
  */
 
 export default function decorate(block) {
+  if (!claimDecoration(block)) return;
   const rows = [...block.children];
   const maxCols = Math.max(0, ...rows.map((r) => r.children.length));
   block.classList.add(`columns-intro-${maxCols}-cols`);
@@ -21,15 +23,16 @@ export default function decorate(block) {
       const hasText = !!col.textContent.trim();
       const pics = col.querySelectorAll('picture');
       if (!hasText && !pics.length) {
-        col.remove();
+        // the editor keeps an empty (just added) cell so it stays selectable
+        if (!IS_UE) col.remove();
         return;
       }
       if (!hasText) {
         col.classList.add('columns-intro-img-col');
         pics.forEach((pic) => {
           const img = pic.querySelector('img');
-          if (!img || img.src.split('?')[0].endsWith('.svg')) return;
-          pic.replaceWith(createOptimizedPicture(img.src, img.alt, false, [{ width: '750' }]));
+          if (!img?.getAttribute('src') || img.src.split('?')[0].endsWith('.svg')) return;
+          replacePicture(pic, createOptimizedPicture(img.src, img.alt, false, [{ width: '750' }]));
         });
       } else {
         col.classList.add('columns-intro-text-col');

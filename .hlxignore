@@ -9,3 +9,4 @@ sync-block-collection.sh
 docs/*
 tools/dropins/
 tools/importer/*
+ue/models/*

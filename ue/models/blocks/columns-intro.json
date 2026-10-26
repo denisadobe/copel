@@ -1,0 +1,87 @@
+{
+  "definitions": [
+    {
+      "title": "Colunas: introdução",
+      "id": "columns-intro",
+      "model": "columns-intro",
+      "filter": "columns-intro",
+      "plugins": {
+        "da": {
+          "name": "columns-intro",
+          "rows": 1,
+          "columns": 3,
+          "behaviour": "columns"
+        }
+      }
+    },
+    {
+      "title": "Colunas: introdução: linha",
+      "id": "columns-intro-row",
+      "model": "columns-intro-row",
+      "filter": "columns-intro-row",
+      "plugins": {
+        "da": {
+          "name": "columns-intro-row",
+          "behaviour": "columns-row"
+        }
+      }
+    },
+    {
+      "title": "Colunas: introdução: célula",
+      "id": "columns-intro-cell",
+      "model": "columns-intro-cell",
+      "filter": "columns-intro-cell",
+      "plugins": {
+        "da": {
+          "unsafeHTML": "<div></div>",
+          "behaviour": "columns-cell"
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "columns-intro",
+      "fields": [
+        {
+          "component": "number",
+          "valueType": "number",
+          "name": "columns",
+          "label": "Número de colunas",
+          "value": 3,
+          "validation": {
+            "numberMin": 1,
+            "numberMax": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "columns-intro-row",
+      "fields": []
+    },
+    {
+      "id": "columns-intro-cell",
+      "fields": []
+    }
+  ],
+  "filters": [
+    {
+      "id": "columns-intro",
+      "components": [
+        "columns-intro-row"
+      ]
+    },
+    {
+      "id": "columns-intro-row",
+      "components": []
+    },
+    {
+      "id": "columns-intro-cell",
+      "components": [
+        "text",
+        "image"
+      ]
+    }
+  ]
+}

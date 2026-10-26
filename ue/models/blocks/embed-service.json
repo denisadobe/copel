@@ -1,0 +1,58 @@
+{
+  "definitions": [
+    {
+      "title": "Serviço incorporado (iframe)",
+      "id": "embed-service",
+      "model": "embed-service",
+      "plugins": {
+        "da": {
+          "unsafeHTML": "<div class=\"embed-service\"><div><div><p><a href=\"https://\">Nome do serviço</a></p></div></div><div><div><p>800px</p></div></div></div>",
+          "fields": [
+            {
+              "name": "url",
+              "selector": "div:nth-child(1)>div a[href]"
+            },
+            {
+              "name": "title",
+              "selector": "div:nth-child(1)>div a"
+            },
+            {
+              "name": "height",
+              "selector": "div:nth-child(2)>div"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "embed-service",
+      "fields": [
+        {
+          "component": "text",
+          "name": "url",
+          "label": "URL do serviço",
+          "valueType": "string",
+          "description": "Endereço https da página incorporada",
+          "required": true
+        },
+        {
+          "component": "text",
+          "name": "title",
+          "label": "Título do iframe",
+          "valueType": "string",
+          "description": "Texto do link; também é o nome acessível do iframe"
+        },
+        {
+          "component": "text",
+          "name": "height",
+          "label": "Altura",
+          "valueType": "string",
+          "description": "Ex.: 850px (padrão 800px)"
+        }
+      ]
+    }
+  ],
+  "filters": []
+}

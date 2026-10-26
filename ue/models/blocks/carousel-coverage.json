@@ -1,0 +1,83 @@
+{
+  "definitions": [
+    {
+      "title": "Carrossel de coberturas",
+      "id": "carousel-coverage",
+      "model": "carousel-coverage",
+      "filter": "carousel-coverage",
+      "plugins": {
+        "da": {
+          "name": "carousel-coverage",
+          "rows": 1,
+          "columns": 2
+        }
+      }
+    },
+    {
+      "title": "Cobertura",
+      "id": "carousel-coverage-item",
+      "model": "carousel-coverage-item",
+      "plugins": {
+        "da": {
+          "rows": 1,
+          "columns": 2,
+          "fields": [
+            {
+              "name": "image",
+              "selector": "div:nth-child(1)>picture>img[src]"
+            },
+            {
+              "name": "imageAlt",
+              "selector": "div:nth-child(1)>picture>img[alt]"
+            },
+            {
+              "name": "text",
+              "selector": "div:nth-child(2)"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "carousel-coverage",
+      "fields": []
+    },
+    {
+      "id": "carousel-coverage-item",
+      "fields": [
+        {
+          "component": "reference",
+          "valueType": "string",
+          "name": "image",
+          "label": "Foto",
+          "multi": false
+        },
+        {
+          "component": "text",
+          "valueType": "string",
+          "name": "imageAlt",
+          "label": "Texto alternativo",
+          "value": ""
+        },
+        {
+          "component": "richtext",
+          "name": "text",
+          "label": "Conteúdo",
+          "valueType": "string",
+          "value": "",
+          "description": "Etiquetas de plano (parágrafo só com links), título (H3) e descrição"
+        }
+      ]
+    }
+  ],
+  "filters": [
+    {
+      "id": "carousel-coverage",
+      "components": [
+        "carousel-coverage-item"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,103 @@
+{
+  "definitions": [
+    {
+      "title": "Colunas: destaque",
+      "id": "columns-feature",
+      "model": "columns-feature",
+      "filter": "columns-feature",
+      "plugins": {
+        "da": {
+          "name": "columns-feature",
+          "rows": 1,
+          "columns": 2,
+          "behaviour": "columns"
+        }
+      }
+    },
+    {
+      "title": "Colunas: destaque: linha",
+      "id": "columns-feature-row",
+      "model": "columns-feature-row",
+      "filter": "columns-feature-row",
+      "plugins": {
+        "da": {
+          "name": "columns-feature-row",
+          "behaviour": "columns-row"
+        }
+      }
+    },
+    {
+      "title": "Colunas: destaque: célula",
+      "id": "columns-feature-cell",
+      "model": "columns-feature-cell",
+      "filter": "columns-feature-cell",
+      "plugins": {
+        "da": {
+          "unsafeHTML": "<div></div>",
+          "behaviour": "columns-cell"
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "columns-feature",
+      "fields": [
+        {
+          "component": "multiselect",
+          "name": "classes",
+          "label": "Opções",
+          "valueType": "string",
+          "options": [
+            {
+              "name": "Painel escuro",
+              "value": "dark"
+            },
+            {
+              "name": "Inverter lado da imagem",
+              "value": "reverse"
+            }
+          ]
+        },
+        {
+          "component": "number",
+          "valueType": "number",
+          "name": "columns",
+          "label": "Número de colunas",
+          "value": 2,
+          "validation": {
+            "numberMin": 1,
+            "numberMax": 6
+          }
+        }
+      ]
+    },
+    {
+      "id": "columns-feature-row",
+      "fields": []
+    },
+    {
+      "id": "columns-feature-cell",
+      "fields": []
+    }
+  ],
+  "filters": [
+    {
+      "id": "columns-feature",
+      "components": [
+        "columns-feature-row"
+      ]
+    },
+    {
+      "id": "columns-feature-row",
+      "components": []
+    },
+    {
+      "id": "columns-feature-cell",
+      "components": [
+        "text",
+        "image"
+      ]
+    }
+  ]
+}

@@ -21,7 +21,13 @@ main .section.highlight .columns-links {
   background-color: transparent;
 }
 
-.columns-links .columns-links-col {
+/* Universal Editor only: the instrumented rows are kept but create no box */
+.columns-links .columns-links-row {
+  display: contents;
+}
+
+.columns-links .columns-links-col,
+.columns-links .columns-links-col > :where(.richtext) {
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -101,7 +107,8 @@ main .section.highlight .columns-links {
   }
 
   /* align titles/dividers across a row: each column spans title + list rows */
-  .columns-links .columns-links-col {
+  .columns-links .columns-links-col,
+  .columns-links .columns-links-col > :where(.richtext) {
     display: grid;
     grid-row: span 2;
     grid-template-rows: subgrid;
