@@ -10,7 +10,13 @@ main > .section > .carousel-hero-wrapper {
   padding: 0;
 }
 
+/*
+ * Hero height is capped in px: a pure vh height grows without end inside editors that size
+ * their iframe to the page (Universal Editor), because each resize raises the vh again.
+ */
 .carousel-hero {
+  --carousel-hero-height: clamp(380px, 62vh, 520px);
+
   position: relative;
   overflow: hidden;
   color: #fff;
@@ -35,7 +41,7 @@ main > .section > .carousel-hero-wrapper {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  min-height: 70vh;
+  min-height: var(--carousel-hero-height);
   visibility: hidden;
   opacity: 0;
   transition: opacity 0.5s ease, visibility 0.5s;
@@ -277,12 +283,16 @@ main .carousel-hero a.button.carousel-hero-cta-secondary:any-link:focus-visible 
   }
 }
 
-/* desktop: left-aligned copy over a 92vh landscape banner */
+/* desktop: left-aligned copy over a landscape banner */
 @media (width >= 900px) {
+  .carousel-hero {
+    --carousel-hero-height: clamp(420px, 60vh, 560px);
+  }
+
   .carousel-hero .carousel-hero-slide {
     align-items: center;
     justify-content: flex-start;
-    min-height: 92vh;
+    min-height: var(--carousel-hero-height);
     padding: 0 100px 0 200px;
     box-sizing: border-box;
   }
@@ -336,7 +346,7 @@ main .carousel-hero a.button.carousel-hero-cta-secondary:any-link:focus-visible 
 
 /* headless source without authored fallback: hold the hero height until banners arrive */
 .carousel-hero .carousel-hero-skeleton {
-  min-height: 70vh;
+  min-height: var(--carousel-hero-height);
   background: linear-gradient(100deg, rgb(255 255 255 / 0%) 30%, rgb(255 255 255 / 6%) 50%, rgb(255 255 255 / 0%) 70%) var(--dark-color);
   background-size: 200% 100%;
   animation: carousel-hero-skeleton 1.4s linear infinite;
@@ -349,12 +359,6 @@ main .carousel-hero a.button.carousel-hero-cta-secondary:any-link:focus-visible 
 
   to {
     background-position: -100% 0;
-  }
-}
-
-@media (width >= 900px) {
-  .carousel-hero .carousel-hero-skeleton {
-    min-height: 92vh;
   }
 }
 
