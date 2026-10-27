@@ -439,17 +439,25 @@ export default function decorate(block) {
   block.setAttribute('role', 'region');
   block.setAttribute('aria-roledescription', 'carousel');
 
-  // authored slides render immediately (LCP); Content Fragments replace them when they arrive
-  let teardown = rows.length ? mount(block, rows.map((row, i) => buildSlide(row, i))) : null;
+  const mountAuthored = () => (rows.length
+    ? mount(block, rows.map((row, i) => buildSlide(row, i)))
+    : null);
 
   if (IS_UE) {
-    if (!teardown) showSkeleton(block);
-    if (source) renderEditorCf(block, source, teardown);
+    const editorTeardown = mountAuthored();
+    if (!editorTeardown) showSkeleton(block);
+    if (source) renderEditorCf(block, source, editorTeardown);
     return;
   }
-  if (!useCf) return;
+  if (!useCf) {
+    mountAuthored();
+    return;
+  }
 
-  if (!teardown) showSkeleton(block);
+  // Content Fragments are the content: hold the hero height with a skeleton until they arrive
+  // (no flash of the authored slides); the authored slides only show if the fetch fails
+  let teardown = null;
+  showSkeleton(block);
   block.setAttribute('aria-busy', 'true');
   import('./carousel-hero-cf.js')
     .then(({ default: loadBannerRows }) => loadBannerRows(source))
@@ -460,14 +468,15 @@ export default function decorate(block) {
         if (path) slide.dataset.cfPath = path;
         return slide;
       });
-      if (teardown) teardown();
       teardown = mount(block, slides);
       block.dataset.source = 'content-fragments';
       block.dataset.publico = result.audience;
       result.onDisplay();
     })
     .catch(() => {
-      // keep the authored fallback; without one, drop the empty hero
+      // AEM unavailable: show the authored fallback; without one, drop the empty hero
+      if (teardown) return;
+      teardown = mountAuthored();
       if (!teardown) {
         block.replaceChildren();
         block.hidden = true;
