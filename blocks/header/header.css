@@ -405,6 +405,72 @@ header .nav-cta:focus-visible {
   color: #fff;
 }
 
+/* account menu (signed-in customer): the Login CTA becomes "Olá, <name>" + a small dropdown.
+   The label is capped to the free space of the bar (it grows with the viewport) */
+header .nav-tools .nav-account {
+  position: relative;
+}
+
+header .nav-cta.nav-account-trigger {
+  max-width: clamp(40px, calc(60px + (100vw - 390px) * 0.64), 120px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+header .nav-cta.nav-account-trigger[aria-expanded='true'] {
+  background-color: var(--header-cta-hover-bg);
+  color: #fff;
+}
+
+header .nav-account-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 30;
+  display: none;
+  min-width: 130px;
+  padding: 0;
+  background-color: #fff;
+  box-shadow: 0 6px 18px rgb(21 28 33 / 12%);
+  white-space: nowrap;
+}
+
+header .nav-account.is-open > .nav-account-menu {
+  display: block;
+}
+
+header .nav-account-menu.nav-account-menu-end {
+  right: 0;
+  left: auto;
+}
+
+header .nav-wrapper .nav-account-link {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 13px 20px 13px 28px;
+  color: var(--header-dropdown-text);
+  font-size: 16px;
+  line-height: 20px;
+  text-align: left;
+}
+
+header .nav-wrapper .nav-account-link:hover,
+header .nav-wrapper .nav-account-link:focus-visible {
+  color: var(--header-dropdown-hover);
+  text-decoration: underline;
+}
+
+header .nav-wrapper .nav-account-menu :focus-visible {
+  outline-color: var(--header-dropdown-hover);
+  outline-offset: -2px;
+}
+
+header .nav-wrapper .nav-account-logout:disabled {
+  cursor: progress;
+  opacity: 0.6;
+}
+
 header .nav-wrapper .nav-search-toggle {
   display: inline-block;
   box-sizing: border-box;
@@ -573,7 +639,8 @@ header .nav-search-field:focus-within {
 }
 
 .contrast header .nav-cta:hover,
-.contrast header .nav-cta:focus-visible {
+.contrast header .nav-cta:focus-visible,
+.contrast header .nav-cta.nav-account-trigger[aria-expanded='true'] {
   background-color: #ff0;
   color: #000;
 }
@@ -793,6 +860,13 @@ header .nav-search-field:focus-within {
     font-size: 15px;
     font-weight: 400;
     line-height: 22.5px;
+  }
+
+  /* the nav has ~15px to spare at 1200px, ~98px at 1440px: slightly tighter side padding
+     near 1200px (back to the CTA's 24px at 1440px) so "Olá, <name>" still fits */
+  header .nav-cta.nav-account-trigger {
+    max-width: clamp(52px, calc(62px + (100vw - 1200px) * 0.3), 160px);
+    padding-inline: clamp(12px, calc(5vw - 48px), 24px);
   }
 
   header .nav-wrapper .nav-search-toggle {

@@ -1,3 +1,8 @@
+import {
+  SESSION_EVENT_KEY, endCustomerSession, getCustomerFirstName, isAuthenticated, sitePath,
+} from '../../scripts/commerce-session.js';
+import { IS_UE } from '../../scripts/ue-utils.js';
+
 // desktop layout (horizontal bars + hover dropdowns) starts at this width
 const isDesktop = window.matchMedia('(width >= 1200px)');
 
@@ -380,6 +385,178 @@ function buildTools(section) {
   return { tools, dialog };
 }
 
+/* ---------- customer session (Login CTA <-> account menu) ---------- */
+
+const LOGIN_PATH = '/loja/entrar';
+const ACCOUNT_PATH = '/loja/conta';
+const ORDERS_ANCHOR = '#pedidos';
+// store pages that need a signed-in customer: signing out there goes to the home page
+const PRIVATE_PAGES = /\/loja\/(conta|checkout)(\/|$)/;
+// sign in / sign up / password pages: the Login CTA keeps their ?redirect= (and ?sku=)
+const AUTH_PAGES = /\/loja\/(entrar|cadastro|esqueci-senha|nova-senha)\/?$/;
+
+/**
+ * The login CTA: the store login page, or the former Copel portal link (avaweb), so the
+ * header works with a nav that was not re-authored yet.
+ * @param {HTMLAnchorElement} a CTA link
+ * @returns {boolean}
+ */
+const isLoginLink = (a) => /\/loja\/entrar\/?$/.test(a.pathname) || /^\/avaweb(\/|$)/.test(a.pathname);
+
+/** Login page that comes back to the current page (path + query + hash) after sign in. */
+function getLoginHref() {
+  const { pathname, search, hash } = window.location;
+  let params = new URLSearchParams({ redirect: pathname + search + hash });
+  if (AUTH_PAGES.test(pathname)) {
+    const current = new URLSearchParams(search);
+    params = new URLSearchParams();
+    ['redirect', 'sku'].forEach((key) => current.get(key) && params.set(key, current.get(key)));
+  }
+  const query = params.toString();
+  return `${sitePath(LOGIN_PATH)}${query ? `?${query}` : ''}`;
+}
+
+/**
+ * Signed in (auth drop-in cookies): the Login CTA becomes "Olá, <first name>", a CTA-styled
+ * trigger of a small menu (account, orders, sign out). Signed out: Login goes to the store
+ * login page and back. The state is checked again when the tab comes back (sign in / out in
+ * another tab). No drop-ins are loaded here.
+ * @param {Element} tools header tools (CTA list)
+ * @param {() => void} onOpen called when the account menu opens (closes the hamburger)
+ * @returns {{close: () => void}|null} account menu controls
+ */
+function decorateSession(tools, onOpen) {
+  const login = [...tools.querySelectorAll('a.nav-cta')].find(isLoginLink);
+  if (!login) return null;
+  const item = login.closest('li') || login.parentElement;
+
+  const trigger = document.createElement('a');
+  trigger.className = 'nav-cta nav-account-trigger';
+  trigger.href = sitePath(ACCOUNT_PATH);
+  trigger.setAttribute('role', 'button');
+  trigger.setAttribute('aria-haspopup', 'true');
+  trigger.setAttribute('aria-expanded', 'false');
+  const label = document.createElement('span');
+  label.className = 'nav-account-label';
+  trigger.append(label);
+
+  const menu = document.createElement('ul');
+  menu.className = 'nav-account-menu';
+  menu.id = nextId('nav-account');
+  trigger.setAttribute('aria-controls', menu.id);
+  [['Minha conta', ACCOUNT_PATH], ['Meus pedidos', `${ACCOUNT_PATH}${ORDERS_ANCHOR}`]]
+    .forEach(([text, path]) => {
+      const li = document.createElement('li');
+      const a = document.createElement('a');
+      a.className = 'nav-account-link';
+      a.href = sitePath(path);
+      a.textContent = text;
+      li.append(a);
+      menu.append(li);
+    });
+  const logoutItem = document.createElement('li');
+  const logout = document.createElement('button');
+  logout.type = 'button';
+  logout.className = 'nav-account-link nav-account-logout';
+  logout.textContent = 'Sair';
+  logoutItem.append(logout);
+  menu.append(logoutItem);
+
+  const isOpen = () => trigger.getAttribute('aria-expanded') === 'true';
+  const setOpen = (open) => {
+    trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
+    item.classList.toggle('is-open', open);
+    if (!open) return;
+    onOpen();
+    // keep the panel inside the viewport: flip to end-alignment if it overflows
+    menu.classList.remove('nav-account-menu-end');
+    if (menu.getBoundingClientRect().right > document.documentElement.clientWidth) {
+      menu.classList.add('nav-account-menu-end');
+    }
+  };
+  const focusables = () => [...menu.querySelectorAll('a, button')];
+
+  trigger.addEventListener('click', (e) => {
+    // modified clicks open the account page in a new tab / window
+    if (e.ctrlKey || e.metaKey || e.shiftKey || e.button > 0) return;
+    e.preventDefault();
+    setOpen(!isOpen());
+  });
+  trigger.addEventListener('keydown', (e) => {
+    if (e.key === ' ' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      setOpen(true);
+      if (e.key === 'ArrowDown') focusables()[0]?.focus();
+    }
+  });
+  menu.addEventListener('keydown', (e) => {
+    const items = focusables();
+    const idx = items.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown' && idx < items.length - 1) {
+      e.preventDefault();
+      items[idx + 1].focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (idx > 0) items[idx - 1].focus(); else trigger.focus();
+    }
+  });
+  item.addEventListener('focusout', (e) => {
+    if (isOpen() && !item.contains(e.relatedTarget)) setOpen(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape' || !isOpen()) return;
+    setOpen(false);
+    trigger.focus();
+  });
+  document.addEventListener('click', (e) => {
+    if (isOpen() && !item.contains(e.target)) setOpen(false);
+  });
+
+  logout.addEventListener('click', async () => {
+    logout.disabled = true;
+    logout.setAttribute('aria-busy', 'true');
+    await endCustomerSession();
+    if (PRIVATE_PAGES.test(window.location.pathname)) window.location.href = sitePath('/');
+    else window.location.reload();
+  });
+
+  const render = () => {
+    if (!isAuthenticated()) {
+      if (trigger.isConnected) {
+        setOpen(false);
+        trigger.replaceWith(login);
+        menu.remove();
+        item.classList.remove('nav-account');
+      }
+      login.href = getLoginHref();
+      return;
+    }
+    const name = getCustomerFirstName().trim();
+    const text = name ? `Olá, ${name}` : 'Minha conta';
+    label.textContent = text;
+    trigger.title = text;
+    if (!trigger.isConnected) {
+      login.replaceWith(trigger);
+      item.append(menu);
+      item.classList.add('nav-account');
+    }
+  };
+  render();
+
+  // the hash / query may change after render: the login link always comes back here
+  login.addEventListener('click', () => { login.href = getLoginHref(); });
+  window.addEventListener('hashchange', render);
+  // sign in / out in another tab, or a page restored from the back-forward cache
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') render();
+  });
+  window.addEventListener('focus', render);
+  window.addEventListener('pageshow', (e) => { if (e.persisted) render(); });
+  window.addEventListener('storage', (e) => { if (e.key === SESSION_EVENT_KEY) render(); });
+
+  return { close: () => { if (isOpen()) setOpen(false); } };
+}
+
 /**
  * Opens/closes the hamburger menu. As on the source the panel drops over the
  * page without locking scroll, and every accordion section is collapsed again
@@ -467,7 +644,17 @@ export default async function decorate(block) {
   hamburger.append(hamburgerButton);
   mainInner.append(hamburger);
   toggleMenu(wrapper, hamburgerButton, false);
-  hamburgerButton.addEventListener('click', () => toggleMenu(wrapper, hamburgerButton));
+
+  // customer session: not in the Universal Editor, where the authored Login link stays editable
+  const account = toolsSection && !IS_UE
+    ? decorateSession(mainInner.querySelector('.nav-tools'), () => {
+      if (wrapper.getAttribute('aria-expanded') === 'true') toggleMenu(wrapper, hamburgerButton, false);
+    })
+    : null;
+  hamburgerButton.addEventListener('click', () => {
+    account?.close();
+    toggleMenu(wrapper, hamburgerButton);
+  });
 
   block.append(wrapper);
   if (dialog) block.append(dialog);

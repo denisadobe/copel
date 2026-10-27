@@ -40,6 +40,7 @@ export default async function decorate(block) {
     return;
   }
   const orders = div('orders');
+  orders.id = 'pedidos'; // "Meus pedidos" in the header account menu: /loja/conta#pedidos
   const details = div('details');
   const logout = document.createElement('button');
   logout.type = 'button';

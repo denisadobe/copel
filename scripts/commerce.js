@@ -9,6 +9,14 @@ import { getHeaders, getConfigValue, initializeConfig } from '@dropins/tools/lib
 import { FetchGraphQL } from '@dropins/tools/fetch-graphql.js';
 import { initializers } from '@dropins/tools/initializer.js';
 import { loadCSS } from './aem.js';
+import {
+  getStorefrontConfig, getUserToken, isAuthenticated, sitePath,
+} from './commerce-session.js';
+
+// customer session + site paths live in a drop-in-free module (also used by the header)
+export {
+  getCustomerFirstName, getUserToken, isAuthenticated, sitePath,
+} from './commerce-session.js';
 
 /** GraphQL client (Core + Catalog Service share one endpoint on the SaaS sandbox). */
 export const CORE_FETCH_GRAPHQL = new FetchGraphQL();
@@ -18,12 +26,6 @@ export const LOCALE = 'pt-BR';
 /* ---------------------------------------------------------------------------------------- */
 /* Store pages                                                                               */
 /* ---------------------------------------------------------------------------------------- */
-
-/**
- * Site path for the current environment: the local preview serves content under /content/
- * (http://localhost:3000/content/loja/entrar), production serves it from the root.
- */
-export const sitePath = (path) => (window.location.pathname.startsWith('/content/') ? `/content${path}` : path);
 
 export const LOGIN_PAGE = sitePath('/loja/entrar');
 export const SIGNUP_PAGE = sitePath('/loja/cadastro');
@@ -73,17 +75,6 @@ export function getLoginLink(back, sku) {
 /* ---------------------------------------------------------------------------------------- */
 /* Customer session                                                                          */
 /* ---------------------------------------------------------------------------------------- */
-
-// Set by the auth drop-in on sign in: auth_dropin_user_token, auth_dropin_firstname and
-// auth_dropin_lastname, all with path=/; Max-Age (token lifetime); SameSite=Lax; Secure.
-const AUTH_COOKIE = 'auth_dropin_user_token';
-const readCookie = (name) => {
-  const value = document.cookie.split('; ').find((c) => c.startsWith(`${name}=`))?.slice(name.length + 1);
-  return value ? decodeURIComponent(value) : undefined;
-};
-export const getUserToken = () => readCookie(AUTH_COOKIE);
-export const isAuthenticated = () => !!getUserToken();
-export const getCustomerFirstName = () => readCookie('auth_dropin_firstname') || '';
 
 /**
  * Commerce rejects customer names with "+" and most symbols: keep letters (any language),
@@ -178,6 +169,56 @@ function localizeForms(response) {
   return response;
 }
 
+/*
+ * Commerce GraphQL error messages (en_US store) shown as-is by the auth / account drop-ins:
+ * the common sign in / sign up / password / session ones in pt-BR. Unknown messages pass
+ * through. Left in English on purpose: "This account isn't confirmed..." (the auth drop-in
+ * matches it and shows its own pt-BR text + resend button) and the change-password responses
+ * (the account drop-in matches "Invalid login or password." / "The account is locked.").
+ */
+const ERROR_MESSAGES = [
+  [/^The account sign-in was incorrect or your account is disabled temporarily\. Please wait and try again(?: later)?\.?$/i,
+    'E-mail ou senha incorretos, ou a conta está temporariamente bloqueada. Confira os dados ou aguarde alguns minutos e tente novamente.'],
+  [/^Invalid login or password\.?$/i, 'E-mail ou senha inválidos.'],
+  [/^The account is locked\.?$/i, 'A sua conta está bloqueada. Tente novamente mais tarde.'],
+  [/^This account is disabled\.?$/i, 'A sua conta está desativada.'],
+  [/^A customer with the same email address already exists in an associated website\.?$/i,
+    'Já existe uma conta com este e-mail. Entre com a sua senha ou use "Esqueceu a senha?".'],
+  [/^There is already an account with this email address\.?/i,
+    'Já existe uma conta com este e-mail. Entre com a sua senha ou use "Esqueceu a senha?".'],
+  [/^"(.+)" is not a valid email address\.?$/i, '"$1" não é um e-mail válido.'],
+  [/^The password needs at least (\d+) characters\. Create a new password and try again\.?$/i,
+    'A senha precisa ter pelo menos $1 caracteres. Crie uma nova senha e tente novamente.'],
+  [/^Minimum of different classes of characters in password is (\d+)\. Classes of characters: Lower Case, Upper Case, Digits, Special Characters\.?$/i,
+    'A senha precisa combinar pelo menos $1 tipos de caracteres: letras minúsculas, letras maiúsculas, números e caracteres especiais.'],
+  [/^The password can't be the same as the email address\. Create a new password and try again\.?$/i,
+    'A senha não pode ser igual ao e-mail. Crie uma nova senha e tente novamente.'],
+  [/^Please enter a password with at most (\d+) characters\.?$/i, 'A senha pode ter no máximo $1 caracteres.'],
+  [/^Your password reset link has expired\.?$/i, 'O link para criar uma nova senha expirou. Solicite um novo link.'],
+  [/^The password token is mismatched\. Reset and try again\.?$/i,
+    'O link para criar uma nova senha é inválido. Solicite um novo link.'],
+  [/^User token has been revoked\.?$/i, 'A sua sessão foi encerrada. Entre novamente.'],
+  [/^The current customer isn't authorized\.?$/i, 'A sua sessão expirou. Entre novamente.'],
+  [/^The request is allowed for logged in customer\.?$/i, 'Entre na sua conta para continuar.'],
+];
+// responses whose English messages a drop-in compares (see above)
+const KEEP_ERRORS_FOR = /\bchangeCustomerPassword\b/;
+
+const translateError = (message) => {
+  const text = `${message}`.trim();
+  const match = ERROR_MESSAGES.find(([pattern]) => pattern.test(text));
+  return match ? text.replace(match[0], match[1]) : message;
+};
+
+function localizeErrors(options, response) {
+  if (!Array.isArray(response?.errors) || !response.errors.length) return response;
+  if (typeof options?.body === 'string' && KEEP_ERRORS_FOR.test(options.body)) return response;
+  response.errors.forEach((error) => {
+    if (typeof error?.message === 'string') error.message = translateError(error.message);
+  });
+  return response;
+}
+
 /** Image used when a product has no image (the store returns the Magento placeholder). */
 export const PRODUCT_FALLBACK_IMAGE = 'https://www.copel.com/site/wp-content/uploads/elementor/thumbs/Protege_Casa-qyxw0cz5qsdhv7z2sdyk37e5x0k09u35a2z0gh6z7c.png';
 const IMAGE_KEYS = /^(thumbnail|small_image|smallImage|image|swatch_image)$/;
@@ -236,23 +277,6 @@ function polishResponse(options, response) {
 /* Initialization                                                                            */
 /* ---------------------------------------------------------------------------------------- */
 
-const CONFIG_KEY = 'commerce-config';
-
-async function getConfig() {
-  try {
-    const cached = JSON.parse(sessionStorage.getItem(CONFIG_KEY));
-    if (cached && cached[':expiry'] > Date.now() / 1000) return cached;
-  } catch (e) {
-    // ignore malformed cache
-  }
-  const resp = await fetch(`${window.location.origin}/config.json`);
-  if (!resp.ok) throw new Error(`Commerce config not found (${resp.status})`);
-  const config = await resp.json();
-  config[':expiry'] = Math.round(Date.now() / 1000) + 7200;
-  sessionStorage.setItem(CONFIG_KEY, JSON.stringify(config));
-  return config;
-}
-
 /** Drop-in design tokens mapped to the Copel brand (only pages that render drop-ins). */
 export const loadCommerceStyles = () => loadCSS(`${window.hlx.codeBasePath}/styles/commerce.css`);
 
@@ -262,7 +286,7 @@ let ready;
 export function initializeCommerce() {
   if (!ready) {
     ready = (async () => {
-      initializeConfig(await getConfig());
+      initializeConfig(await getStorefrontConfig());
       initializers.setGlobalLocale(LOCALE);
       CORE_FETCH_GRAPHQL.setEndpoint(getConfigValue('commerce-core-endpoint') || getConfigValue('commerce-endpoint'));
       CORE_FETCH_GRAPHQL.setFetchGraphQlHeaders((prev) => ({ ...prev, ...getHeaders('all') }));
@@ -270,6 +294,7 @@ export function initializeCommerce() {
       CORE_FETCH_GRAPHQL.addAfterHook((options, response) => rewriteCurrency(response));
       CORE_FETCH_GRAPHQL.addAfterHook((options, response) => localizeForms(response));
       CORE_FETCH_GRAPHQL.addAfterHook(polishResponse);
+      CORE_FETCH_GRAPHQL.addAfterHook(localizeErrors);
 
       // signed-in customer: requests carry the customer token (cart, checkout, orders, account)
       const setAuthHeader = (authenticated) => {

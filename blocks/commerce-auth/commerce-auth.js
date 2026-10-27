@@ -38,6 +38,46 @@ const FORMS = {
   })],
 };
 
+// the drop-in inputs report their value on 'change' (blur), debounced by 200 ms
+const COMMIT_DELAY = 250;
+const TEXT_FIELDS = 'input:not([type="checkbox"], [type="radio"], [type="hidden"], [type="submit"], [type="button"]), textarea, select';
+
+/**
+ * The drop-in forms validate and submit from field state that only updates on 'change'
+ * (blur) + 200 ms: typing the password and pressing Enter, or clicking the button while still
+ * in the field, submitted stale (empty) values and nothing happened. Each submit is held once:
+ * the fields commit their values ('change'), then the form is submitted again once the
+ * drop-in state caught up. The drop-in code is untouched.
+ * @param {Element} container element the drop-in form renders into
+ */
+function commitFieldsOnSubmit(container) {
+  const pending = new WeakSet();
+  const released = new WeakSet();
+  container.addEventListener('submit', (e) => {
+    const form = e.target;
+    if (!(form instanceof HTMLFormElement) || released.has(form)) return;
+    // capture phase on an ancestor: the drop-in's own submit handler does not run now
+    e.preventDefault();
+    e.stopPropagation();
+    if (pending.has(form)) return;
+    pending.add(form);
+    form.querySelectorAll(TEXT_FIELDS).forEach((field) => {
+      field.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    const submitter = e.submitter?.form === form ? e.submitter : null;
+    setTimeout(() => requestAnimationFrame(() => {
+      pending.delete(form);
+      if (!form.isConnected) return;
+      released.add(form);
+      try {
+        if (submitter) form.requestSubmit(submitter); else form.requestSubmit();
+      } finally {
+        released.delete(form);
+      }
+    }), COMMIT_DELAY);
+  }, true);
+}
+
 /** Adds the chosen plan to the page after sign in: /seguro-protege-casa?contratar=sku#planos */
 function withPlan(path, sku) {
   if (!sku) return path;
@@ -61,6 +101,7 @@ export default async function decorate(block) {
 
   const container = document.createElement('div');
   container.className = 'commerce-auth-form';
+  commitFieldsOnSubmit(container);
   if (IS_UE) {
     // editor: keep the (instrumented) key-value rows, hidden, and never redirect
     const source = document.createElement('div');
