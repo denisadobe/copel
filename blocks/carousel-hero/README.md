@@ -25,7 +25,7 @@ Model: `ue/models/blocks/carousel-hero.json` (bundled into the root `component-*
   - `imageMobileAlt` (text): Texto alternativo (mobile) (`div:nth-child(1)>picture:nth-of-type(2)>img[alt]`)
   - `text` (richtext): Conteúdo (`div:nth-child(2)`) — Título (H2), texto opcional e até 2 links: o 1º é o botão principal, o 2º o secundário
 - `fonte` (text): Fonte (Content Fragments) (`div:nth-child(1):not(:has(picture, h1, h2, h3, h4, h5, h6))>div:nth-child(2)`) — site / app / URL da persisted query ou da ponte do app; vazio = slides autorados
-- `publico` (select): Público (`div:nth-child(2):not(:has(picture, h1, h2, h3, h4, h5, h6))>div:nth-child(2)`) — Força o público dos banners; vazio = detectado (visitante ou cliente-protege-casa)
+- `publico` (select): Público (`div:nth-child(2):not(:has(picture, h1, h2, h3, h4, h5, h6))>div:nth-child(2)`) — Público dos banners; vazio = visitante
 - `escopoTarget` (text): Escopo Target (`div:nth-child(3):not(:has(picture, h1, h2, h3, h4, h5, h6))>div:nth-child(2)`) — Decision scope do Adobe Target (opcional)
 - Options (`classes`, select, one of): none (Com autoplay), `no-autoplay` (Sem autoplay)
 
@@ -66,7 +66,7 @@ from the Universal Editor) means authored slides only.
 | Key | Value |
 | --- | --- |
 | `Fonte` / `Source` | Where the banner list comes from (see below). |
-| `Público` / `Audience` | Forces the audience (`publicoAtual`) instead of detecting it, e.g. `cliente-protege-casa` for previews. |
+| `Público` / `Audience` | Audience whose banners are shown (default `visitante`), e.g. `cliente-protege-casa` to preview the upsell. |
 | `Escopo Target` / `Target scope` | Adobe Target decision scope (see Personalization). |
 
 `Fonte` values:
@@ -91,22 +91,17 @@ The list is fetched as `GET` with `credentials: 'omit'`. The response is read fr
 
 ### Audience (`publico`)
 
-The query does not filter by audience; the block does. A banner is kept when its `publico` is
-empty, `todos`, or equal to the current audience:
+There is no per-person logic in the block. The query does not filter by audience; the block keeps a
+banner when its `publico` is empty, `todos`, or equal to the audience in use:
 
-- `visitante` (default).
-- `cliente-protege-casa` when the Commerce session cookie `auth_dropin_user_token` exists and the
-  customer has an order line whose `product_sku` starts with `protege-casa-`. The block checks this
-  itself, without loading the drop-ins. It sends a `POST` to `commerce-core-endpoint` with the store
-  headers from `/config.json` (`headers.all` and `headers.cs`) plus `Authorization: Bearer <token>`,
-  using the query `{ customer { orders(pageSize: 20) { items { items { product_sku } } } } }`, with a
-  2.5 s timeout.
-- The check runs in parallel with the banner fetch. The result is cached in `sessionStorage`
-  (`carousel-hero-publico`) under a fingerprint of the token, never the token itself, so a new login
-  re-checks. On any error or timeout the audience is `visitante`, and that result is not cached.
-- A `Público` config row overrides the detected audience.
+- `visitante` by default, so the Protege Casa banner shows and the `cliente-protege-casa` upsell
+  stays out;
+- or the value of an authored `Público` config row.
 
-The block exposes the audience it used as `data-publico` (alongside `data-source="content-fragments"`).
+Choosing a banner per person (for example the Protege Vida upsell for customers) is meant for Adobe
+Target through the optional `Escopo Target` row; a banner chosen by Target is shown whatever its
+`publico`. The block exposes the audience it used as `data-publico` (alongside
+`data-source="content-fragments"`).
 
 ### `banner` Content Fragment mapping
 

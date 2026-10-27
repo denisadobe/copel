@@ -14,23 +14,19 @@
  *     ("…?canal={canal}"), else <aem-publish-url>/graphql/execute.json/global/banners-por-canal
  *   - path (/graphql/execute.json/…, global/banners-por-canal;canal=site) -> on aem-publish-url
  *
- * Audience (publicoAtual): "visitante"; a signed-in Commerce customer (auth_dropin_user_token)
- * who ordered a protege-casa-* product is "cliente-protege-casa". A "Público" row overrides it.
- * Items are kept when publico is empty, "todos" or publicoAtual.
+ * Audience: no personalization in code. Banners are kept when publico is empty, "todos" or the
+ * default audience ("visitante"); an authored "Público" row changes that audience. Choosing a
+ * banner per person (e.g. the Protege Vida upsell for customers) is left to Adobe Target via the
+ * optional "Escopo Target" row.
  */
 
 const FETCH_TIMEOUT_MS = 4000;
 const ALLOY_TIMEOUT_MS = 1500;
-const COMMERCE_TIMEOUT_MS = 2500;
 const AEM_QUERY_PREFIX = '/graphql/execute.json/global/';
 const LIST_QUERY = 'banners-por-canal';
 const BY_PATH_QUERY = 'banner-por-path';
 const DEFAULT_CHANNEL = 'site';
 const DEFAULT_AUDIENCE = 'visitante';
-const CUSTOMER_AUDIENCE = 'cliente-protege-casa';
-const CUSTOMER_SKU_PREFIX = 'protege-casa-';
-const AUTH_COOKIE = 'auth_dropin_user_token'; // same cookie as scripts/commerce.js
-const AUDIENCE_CACHE_KEY = 'carousel-hero-publico';
 // same cache key/shape as scripts/commerce.js getConfig(), so the page fetches /config.json once
 const CONFIG_CACHE_KEY = 'commerce-config';
 const CONFIG_TTL_S = 7200;
@@ -146,76 +142,8 @@ function withTimeout(promise, ms) {
 }
 
 /* ---------------------------------------------------------------------------------------- */
-/* Audience (publicoAtual)                                                                   */
+/* Audience                                                                                  */
 /* ---------------------------------------------------------------------------------------- */
-
-const readCookie = (name) => {
-  const value = document.cookie.split('; ').find((c) => c.startsWith(`${name}=`))?.slice(name.length + 1);
-  return value ? decodeURIComponent(value) : '';
-};
-
-/** Non-cryptographic fingerprint: keys the cache to the token without storing it. */
-function fingerprint(value) {
-  let hash = 0x811c9dc5;
-  for (let i = 0; i < value.length; i += 1) {
-    hash ^= value.charCodeAt(i); // eslint-disable-line no-bitwise
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return `${value.length}:${(hash >>> 0).toString(36)}`; // eslint-disable-line no-bitwise
-}
-
-const CUSTOMER_ORDERS_QUERY = '{ customer { orders(pageSize: 20) { items { items { product_sku } } } } }';
-
-async function fetchCustomerAudience(token) {
-  const config = await getSiteConfig();
-  const endpoint = toHttpUrl(config['commerce-core-endpoint'] || config['commerce-endpoint']);
-  if (!endpoint) return null;
-  const headers = {
-    ...(config.headers?.all || {}),
-    ...(config.headers?.cs || {}),
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  };
-  const json = await fetchJson(endpoint, COMMERCE_TIMEOUT_MS, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ query: CUSTOMER_ORDERS_QUERY }),
-  });
-  const orders = json?.data?.customer?.orders?.items;
-  if (!Array.isArray(orders)) return null; // errors / expired token: not cached
-  const isCustomer = orders.some((order) => (order?.items || [])
-    .some((line) => typeof line?.product_sku === 'string' && line.product_sku.startsWith(CUSTOMER_SKU_PREFIX)));
-  return isCustomer ? CUSTOMER_AUDIENCE : DEFAULT_AUDIENCE;
-}
-
-/** Current audience; cached in sessionStorage per token. Never rejects. */
-async function getAudience() {
-  const token = readCookie(AUTH_COOKIE);
-  if (!token) {
-    try { sessionStorage.removeItem(AUDIENCE_CACHE_KEY); } catch (e) { /* ignore */ }
-    return DEFAULT_AUDIENCE;
-  }
-  const key = fingerprint(token);
-  try {
-    const cached = JSON.parse(sessionStorage.getItem(AUDIENCE_CACHE_KEY));
-    if (cached?.key === key && typeof cached.publico === 'string') return cached.publico;
-    if (cached) sessionStorage.removeItem(AUDIENCE_CACHE_KEY); // token changed
-  } catch (e) {
-    // ignore malformed cache
-  }
-  try {
-    const publico = await fetchCustomerAudience(token);
-    if (!publico) return DEFAULT_AUDIENCE;
-    try {
-      sessionStorage.setItem(AUDIENCE_CACHE_KEY, JSON.stringify({ key, publico }));
-    } catch (e) {
-      // storage full / disabled
-    }
-    return publico;
-  } catch (e) {
-    return DEFAULT_AUDIENCE;
-  }
-}
 
 function matchesAudience(item, audience) {
   const values = (Array.isArray(item.publico) ? item.publico : [item.publico])
@@ -452,22 +380,20 @@ export default async function loadBannerRows(config) {
   const sourceUrl = await resolveSourceUrl(config.source);
   if (!sourceUrl) return null;
 
-  // banners and audience in parallel; an authored "Público" row overrides the audience
-  const audiencePromise = config.audience ? Promise.resolve(config.audience) : getAudience();
-  const [json, audience] = await Promise.all([
-    fetchJson(sourceUrl, FETCH_TIMEOUT_MS),
-    audiencePromise,
-  ]);
+  // no per-person logic here: the authored "Público" row, else the default audience
+  const audience = config.audience || DEFAULT_AUDIENCE;
+  const json = await fetchJson(sourceUrl, FETCH_TIMEOUT_MS);
 
   const now = new Date();
-  const keep = (item) => isActive(item, now) && matchesAudience(item, audience);
-  const items = byOrder(extractItems(json).filter(keep));
+  const items = byOrder(extractItems(json)
+    .filter((item) => isActive(item, now) && matchesAudience(item, audience)));
   if (!items.length) return null;
 
+  // a banner chosen by Target is shown whatever its publico (Target owns the per-person choice)
   const { items: ordered, proposition } = await personalize(items, {
     scope: config.targetScope,
     sourceUrl,
-    keep,
+    keep: (item) => isActive(item, now),
   });
   const assetOrigin = (await getPublishOrigin()) || sourceUrl.origin;
   const rows = ordered.map((item) => buildRow(item, assetOrigin)).filter(Boolean);
