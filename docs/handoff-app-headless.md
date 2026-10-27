@@ -206,6 +206,29 @@ O app usa a mesma rota ou chama o AEM direto pelo servidor.
 
 **Imagens:** as tags `<img>` carregam direto do Publish (`_publishUrl`), sem precisar de CORS.
 
+### 3.7 Publicação automática do CF ao salvar (configurado e validado)
+
+Sem deploy, só pela interface do AEM Author. Com isso, salvar um banner já publica, tanto no editor de CF quanto no Universal Editor.
+
+**Workflow** (Tools → Workflow → Models): `copel_auto_publish_cf`, com um único passo **Activate Page/Asset**. Depois de editar o modelo, clique em **Sync**.
+
+**Launcher** (Tools → Workflow → Launchers):
+
+| Campo | Valor |
+|---|---|
+| Event Type | Modified |
+| Nodetype | `dam:AssetContent` |
+| Path | `/content/dam/copel/banners/(.*)/jcr:content` |
+| Run Mode | Author |
+| Workflow | `copel_auto_publish_cf` |
+| Activate | ligado |
+| Exclude List | `cq:lastReplicated,cq:lastReplicatedBy,cq:lastReplicationAction,cq:lastReplicated_publish,cq:lastReplicatedBy_publish,cq:lastReplicationAction_publish,cq:lastPublished,cq:lastPublishedBy` |
+
+- **Exclude List:** impede que a própria publicação dispare o launcher de novo (loop).
+- **O que não funciona:** o launcher em `nt:unstructured` no nó `…/jcr:content/data/master` não publica o fragmento.
+- **Atenção:** todo salvamento vai direto ao ar. Para preparar conteúdo sem publicar, desligue o *Activate* do launcher.
+- **Na demo:** depois de salvar, o site e o app mostram a mudança em cerca de 5 s. Eles rebuscam os banners sozinhos, sem cache.
+
 ## 4. Como o site usa o banner (já implementado)
 
 Bloco `carousel-hero` (home). No Document Authoring, a primeira linha da tabela do bloco vira a configuração:
