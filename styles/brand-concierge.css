@@ -1,0 +1,387 @@
+/* Adobe Brand Concierge: floating launcher + drawer / expanded window + Web Client overrides
+   (loaded on demand by scripts/brand-concierge.js, never on page load) */
+/* stylelint-disable-next-line selector-class-pattern -- Web Client class */
+.bc-card__image {
+  background-size: contain !important;
+  background-repeat: no-repeat !important;
+}
+
+#brand-concierge-mount {
+  height: 100%;
+  min-height: 0;
+}
+
+.brand-concierge-icon {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  background-color: currentcolor;
+  mask: var(--icon) center / contain no-repeat;
+}
+
+.brand-concierge-icon-sparkle { --icon: url('../icons/sparkle.svg'); }
+.brand-concierge-icon-close { --icon: url('../icons/close.svg'); }
+.brand-concierge-icon-expand { --icon: url('../icons/expand.svg'); }
+.brand-concierge-icon-collapse { --icon: url('../icons/collapse.svg'); }
+.brand-concierge-icon-open-full { --icon: url('../icons/open-full.svg'); }
+
+/* ---------- floating launcher (below the sticky header's layer: menus cover it) ---------- */
+.brand-concierge-launcher {
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  z-index: 90;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-sizing: border-box;
+  width: 56px;
+  height: 56px;
+  margin: 0;
+  border: 0;
+  border-radius: 999px;
+  padding: 0;
+  background-color: var(--copel-orange-ink);
+  box-shadow: var(--shadow-card-hover);
+  color: #fff;
+  font-family: var(--body-font-family);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 20px;
+  cursor: pointer;
+  transition: background-color var(--transition);
+}
+
+.brand-concierge-launcher .brand-concierge-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.brand-concierge-launcher:hover {
+  background-color: var(--copel-orange-ink-hover);
+}
+
+.brand-concierge-launcher:focus-visible {
+  border-radius: 999px;
+  outline: 2px solid #fff;
+  outline-offset: -4px;
+  box-shadow: var(--focus-ring), var(--shadow-card-hover);
+}
+
+.brand-concierge-launcher[hidden] {
+  display: none;
+}
+
+.brand-concierge-launcher::after,
+.bc-drawer .bc-drawer-title::after {
+  content: attr(data-label);
+}
+
+/* small screens: icon-only round button (named by aria-label) */
+.brand-concierge-launcher::after {
+  display: none;
+}
+
+/* ---------- drawer (native <dialog> in the top layer, above the sticky header) ---------- */
+.bc-drawer {
+  position: fixed;
+  inset: 0 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 420px;
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background-color: #fff;
+  box-shadow: -4px 0 24px rgb(21 28 33 / 18%);
+  color: var(--copel-ink);
+  font-family: var(--body-font-family);
+  opacity: 0;
+  transform: translateX(100%);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.bc-drawer:not([open]) {
+  display: none;
+}
+
+.bc-drawer[open] {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+@starting-style {
+  .bc-drawer[open] {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bc-drawer {
+    transition: none;
+  }
+}
+
+.bc-drawer::backdrop {
+  background: transparent;
+}
+
+/* expanded: large centred window over a dimmed page */
+.bc-drawer.is-expanded {
+  inset: 0;
+  width: min(80vw, 1400px);
+  height: 90dvh;
+  margin: auto;
+  border-radius: var(--radius-m);
+  box-shadow: 0 8px 40px rgb(21 28 33 / 30%);
+  transform: none;
+}
+
+.bc-drawer.is-expanded::backdrop {
+  background: rgb(21 28 33 / 55%);
+}
+
+.bc-drawer .bc-drawer-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 60px;
+  box-sizing: border-box;
+  border-top: 4px solid var(--copel-orange);
+  padding: 0 12px 0 20px;
+  background-color: var(--copel-ink);
+  color: #fff;
+}
+
+.bc-drawer .bc-drawer-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.bc-drawer .bc-drawer-title .brand-concierge-icon {
+  color: var(--copel-orange);
+}
+
+.bc-drawer .bc-drawer-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bc-drawer .bc-drawer-fullpage,
+.bc-drawer .bc-drawer-expand,
+.bc-drawer .bc-drawer-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin: 0;
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+
+.bc-drawer .bc-drawer-fullpage:hover,
+.bc-drawer .bc-drawer-expand:hover,
+.bc-drawer .bc-drawer-close:hover {
+  background-color: rgb(255 255 255 / 15%);
+}
+
+.bc-drawer .bc-drawer-fullpage:focus-visible,
+.bc-drawer .bc-drawer-expand:focus-visible,
+.bc-drawer .bc-drawer-close:focus-visible {
+  border-radius: 50%;
+  outline: 2px solid var(--copel-orange);
+  outline-offset: 0;
+}
+
+.bc-drawer .bc-drawer-body {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* the chat uses the panel's full width (drawer and expanded) instead of a fixed max width,
+   so the expanded window doesn't keep a narrow "mobile" column */
+.bc-drawer #brand-concierge-mount {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+
+  --chat-history-padding: 24px max(24px, 8%);
+  --chat-history-padding-mobile: 16px 20px;
+  --chat-history-padding-tablet: 20px 5%;
+}
+
+.bc-drawer #brand-concierge-mount .brand-concierge-container,
+.bc-drawer #brand-concierge-mount .chat-interface {
+  --content-width-desktop: 100%;
+  --chat-interface-max-width: 100%;
+}
+
+.bc-drawer.is-expanded #brand-concierge-mount {
+  --chat-history-padding: 24px max(40px, 12%);
+}
+
+.brand-concierge-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: var(--copel-ink);
+  text-align: center;
+}
+
+/* ---------- ?concierge=preview: local stand-in for the Web Client ---------- */
+.bc-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+  height: 100%;
+  padding: 24px;
+  color: var(--copel-ink);
+  font-family: var(--body-font-family);
+}
+
+.bc-preview p {
+  margin: 0;
+}
+
+.bc-preview .bc-preview-badge {
+  align-self: flex-start;
+  border-radius: 999px;
+  padding: 2px 10px;
+  background-color: var(--copel-orange-soft);
+  color: var(--copel-orange-ink-hover);
+  font-size: var(--body-font-size-xs);
+  font-weight: 700;
+}
+
+.bc-preview .bc-preview-heading {
+  font-family: var(--heading-font-family);
+  font-size: var(--heading-font-size-m);
+  line-height: 1.25;
+}
+
+.bc-preview .bc-preview-note {
+  color: var(--text-muted-color);
+  font-size: var(--body-font-size-s);
+}
+
+.bc-preview .bc-preview-log {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  margin: 0;
+  overflow-y: auto;
+  padding: 0;
+  list-style: none;
+}
+
+.bc-preview .bc-preview-message {
+  max-width: 85%;
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+
+.bc-preview .bc-preview-user {
+  align-self: flex-end;
+  background-color: var(--copel-orange-ink);
+  color: #fff;
+}
+
+.bc-preview .bc-preview-agent {
+  align-self: flex-start;
+  background-color: var(--copel-gray-light);
+}
+
+.bc-preview .bc-preview-form {
+  display: flex;
+  gap: 8px;
+}
+
+.bc-preview .bc-preview-form input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 48px;
+  box-sizing: border-box;
+  border: 1px solid var(--copel-border);
+  border-radius: 8px;
+  padding: 0 14px;
+  font: inherit;
+}
+
+.bc-preview .bc-preview-form input:focus-visible {
+  outline: 2px solid var(--copel-orange);
+  outline-offset: 0;
+}
+
+.bc-preview .bc-preview-form button {
+  height: 48px;
+  margin: 0;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 18px;
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.bc-preview .bc-preview-form button:hover {
+  background-color: var(--button-bg-hover);
+}
+
+/* larger screens: labelled pill */
+@media (width >= 600px) {
+  .brand-concierge-launcher {
+    right: 24px;
+    bottom: 24px;
+    width: auto;
+    padding: 0 22px 0 18px;
+  }
+
+  .brand-concierge-launcher::after {
+    display: inline;
+  }
+}
+
+/* small screens: the drawer takes the whole screen; no expand needed */
+@media (width < 768px) {
+  .bc-drawer,
+  .bc-drawer.is-expanded {
+    inset: 0;
+    width: 100vw;
+    height: 100dvh;
+    border-radius: 0;
+  }
+
+  .bc-drawer .bc-drawer-expand {
+    display: none;
+  }
+}

@@ -1,0 +1,309 @@
+{
+  "_placeholder": "COPEL: substituir este arquivo pelo styling config exportado do Brand Concierge da Copel (id, name e demais valores). id/name abaixo ainda são os do export do Sebrae (marcados PLACEHOLDER). Aviso de privacidade, aviso legal, fonte e largura do chat são aplicados por STYLE_OVERRIDES em scripts/brand-concierge-config.js.",
+  "id": "PLACEHOLDER-SEBRAE-11248d31-dbbc-4832-afdd-af360194f393",
+  "name": "PLACEHOLDER-SEBRAE_26-10-14_11248d31-dbbc-4832-afdd-af360194f393",
+  "metadata": {
+    "brandName": "COPEL",
+    "version": "1.0.0",
+    "language": "pt-BR",
+    "namespace": "brand-concierge"
+  },
+  "behavior": {
+    "multimodalCarousel": {
+      "cardClickAction": "openLink"
+    },
+    "input": {
+      "enableVoiceInput": false,
+      "continuousVoiceMode": false,
+      "disableMultiline": true,
+      "showAiChatIcon": {
+        "icon": ""
+      }
+    },
+    "chat": {
+      "messageAlignment": "normal",
+      "messageWidth": "100%"
+    },
+    "privacyNotice": {
+      "title": "Privacy Notice",
+      "text": "Your use of this automated chatbot constitutes your consent that the personal information you provide in the chat session can be collected, used, disclosed, and retained by YourBrand and service providers acting on YourBrand's behalf in accordance with the YourBrand {Privacy Policy}. Please do not provide sensitive personal information (such as financial or health information) in the chatbot.",
+      "links": [
+        {
+          "text": "Privacy Policy",
+          "url": "<your-privacy-policy-url>"
+        }
+      ]
+    },
+    "meetingForm": {
+      "fieldsPerRow": 2,
+      "fieldLayoutRules": {
+        "textInputs": {
+          "allowTwoColumns": true,
+          "fieldTypes": [
+            "string",
+            "email",
+            "tel",
+            "number"
+          ],
+          "identifyBy": null
+        },
+        "dropdowns": {
+          "allowTwoColumns": false,
+          "fieldTypes": [
+            "select"
+          ],
+          "identifyBy": "hasOptions"
+        },
+        "checkboxes": {
+          "allowTwoColumns": false,
+          "fieldTypes": [
+            "boolean",
+            "checkbox"
+          ],
+          "identifyBy": null
+        }
+      },
+      "title": {
+        "text": "Fale com a Copel",
+        "alignment": "left"
+      },
+      "subtitle": {
+        "text": "Deixe seus dados e nossa equipe de atendimento entrará em contato.",
+        "alignment": "left"
+      },
+      "buttons": {
+        "submit": {
+          "text": "Enviar solicitação",
+          "alignment": "left"
+        },
+        "cancel": {
+          "text": "Cancelar",
+          "alignment": "left"
+        }
+      }
+    },
+    "calendarWidget": {
+      "title": {
+        "text": "Escolha um horário",
+        "alignment": "left"
+      },
+      "subtitle": {
+        "text": "Selecione um horário para falar com a Copel.",
+        "alignment": "left"
+      },
+      "postTitle": {
+        "text": "Uma vez confirmado, você receberá um convite de calendário com todos os detalhes. O atendente já terá o contexto desta conversa, então não será necessário repetir nada.",
+        "alignment": "left"
+      },
+      "buttons": {
+        "confirm": {
+          "text": "Confirmar horário",
+          "alignment": "left"
+        },
+        "cancel": {
+          "text": "Cancelar",
+          "alignment": "left"
+        }
+      }
+    },
+    "productCard": {
+      "actionButtonSize": "S"
+    },
+    "b2bLiveChat": {
+      "enabled": true
+    }
+  },
+  "disclaimer": {
+    "text": "As respostas do assistente virtual são geradas automaticamente e podem conter imprecisões. Para atendimento oficial, use os canais de atendimento da Copel.",
+    "links": []
+  },
+  "text": {
+    "welcome.heading": "Bem-vindo à Copel",
+    "welcome.subheading": "Tire suas dúvidas sobre conta de luz, serviços, falta de energia e atendimento.",
+    "input.placeholder": "Exemplo: Como emitir a segunda via da conta?",
+    "input.messageInput.aria": "Digite sua mensagem",
+    "input.send.aria": "Enviar mensagem",
+    "input.aiChatIcon.tooltip": "Assistente virtual da Copel",
+    "input.mic.aria": "Ativar entrada de voz",
+    "card.aria.select": "Selecionar esta opção",
+    "carousel.prev.aria": "Anterior",
+    "carousel.next.aria": "Próximo",
+    "scroll.bottom.aria": "Ir para o final do chat",
+    "error.network": "Erro de conexão. Tente novamente.",
+    "loading.message": "Carregando resposta...",
+    "feedback.dialog.title.positive": "Feedback positivo",
+    "feedback.dialog.title.negative": "Feedback negativo",
+    "feedback.dialog.question.positive": "O que você gostou?",
+    "feedback.dialog.question.negative": "O que podemos melhorar?",
+    "feedback.dialog.notes": "Notas adicionais",
+    "feedback.dialog.submit": "Enviar",
+    "feedback.dialog.cancel": "Cancelar",
+    "feedback.dialog.notes.placeholder": "Digite suas observações aqui...",
+    "feedback.toast.success": "Obrigado pelo seu feedback!",
+    "feedback.thumbsUp.aria": "Gostei",
+    "feedback.thumbsDown.aria": "Não gostei",
+    "feedback.title": "Nos envie seu feedback",
+    "feedback.positive.title": "O que você gostou?",
+    "feedback.negative.title": "O que podemos melhorar?",
+    "feedback.submitButton": "Enviar feedback",
+    "feedback.positive.options": "",
+    "feedback.negative.options": ""
+  },
+  "arrays": {
+    "welcome.examples": [
+      {
+        "text": "Como emitir a segunda via da conta?",
+        "systemPrompt": "Explique como emitir a segunda via da conta de luz da Copel.",
+        "backgroundColor": "#c85000",
+        "image": "https://www.copel.com/site/wp-content/uploads/2021/12/para_casa_copel.jpeg"
+      },
+      {
+        "text": "Estou sem energia. O que faço?",
+        "systemPrompt": "Explique como informar falta de energia à Copel e acompanhar o restabelecimento.",
+        "backgroundColor": "#a84300",
+        "image": "https://www.copel.com/site/wp-content/uploads/2024/07/21.03.2024_Copel_Ponta-Grossa_Aerea-Cidade-Iluminada-noturna-49.jpg"
+      },
+      {
+        "text": "Como aderir à fatura digital?",
+        "systemPrompt": "Explique como aderir à fatura digital da Copel.",
+        "backgroundColor": "#373a3c",
+        "image": "https://www.copel.com/site/wp-content/uploads/2021/12/aplicativo_copel_ret-942x1024-1.jpeg"
+      },
+      {
+        "text": "Como pedir uma nova ligação?",
+        "systemPrompt": "Explique como solicitar uma nova ligação de energia à Copel.",
+        "backgroundColor": "#151c21",
+        "image": "https://www.copel.com/site/wp-content/uploads/2021/12/para_empresa_copel.jpeg"
+      }
+    ],
+    "feedback.positive.options": [
+      "Interface intuitiva",
+      "Informações úteis",
+      "Rapidez nas respostas",
+      "Atendimento personalizado",
+      "Outro"
+    ],
+    "feedback.negative.options": [
+      "Dificuldade de navegação",
+      "Informações insuficientes",
+      "Respostas pouco claras",
+      "Problemas técnicos",
+      "Outro"
+    ]
+  },
+  "assets": {
+    "icons": {
+      "company": "https://www.copel.com/site/wp-content/uploads/2021/12/favicon-copel.png"
+    }
+  },
+  "visualProfile": {
+    "sendIconIconColor": "#ffffff",
+    "sendIconBackgroundColor": "#c85000"
+  },
+  "theme": {
+    "--welcome-input-order": "3",
+    "--welcome-cards-order": "2",
+    "--welcome-heading-size-desktop": "2rem",
+    "--welcome-heading-size-mobile": "1.5rem",
+    "--welcome-heading-weight": "700",
+    "--welcome-heading-text-align": "center",
+    "--welcome-subheading-size-desktop": "1.25rem",
+    "--welcome-subheading-size-mobile": "1rem",
+    "--welcome-subheading-text-align": "center",
+    "--welcome-padding": "2rem",
+    "--prompt-suggestion-background": "#a84300",
+    "--prompt-suggestion-background-hover": "#a84300",
+    "--prompt-suggestion-text-color": "#151c21",
+    "--prompt-suggestion-border-color": "#a84300",
+    "--font-family": "'Univers LT 55 Roman', univers-fallback, arial, sans-serif",
+    "--color-primary": "#c85000",
+    "--color-text": "#151c21",
+    "--line-height-body": "1.6",
+    "--main-container-background": "#ffffff",
+    "--input-height": "48px",
+    "--input-height-mobile": "40px",
+    "--input-border-radius": "8px",
+    "--input-border-radius-mobile": "6px",
+    "--input-background": "#ffffff",
+    "--input-outline-color": "#d9d9d9",
+    "--input-outline-width": "1px",
+    "--input-box-shadow": "0 2px 4px rgba(0, 0, 0, 0.1)",
+    "--input-focus-outline-width": "2px",
+    "--input-focus-outline-color": "#f5821e",
+    "--input-font-size": "1rem",
+    "--input-font-weight": "400",
+    "--input-text-color": "#151c21",
+    "--input-button-height": "36px",
+    "--input-button-width": "36px",
+    "--submit-button-fill-color": "#ffffff",
+    "--submit-button-fill-color-disabled": "#CCCCCC",
+    "--color-button-submit": "#c85000",
+    "--color-button-submit-hover": "#a84300",
+    "--input-button-border-radius": "8px",
+    "--button-disabled-background": "#F0F0F0",
+    "--disclaimer-color": "#5f6468",
+    "--disclaimer-font-size": "0.875rem",
+    "--disclaimer-font-weight": "400",
+    "--message-user-background": "#c85000",
+    "--message-user-text": "#ffffff",
+    "--message-border-radius": "8px",
+    "--message-padding": "1rem",
+    "--message-concierge-background": "#f3f3f3",
+    "--message-concierge-text": "#151c21",
+    "--message-max-width": "100%",
+    "--chat-interface-max-width": "768px",
+    "--message-blocker-height": "48px",
+    "--loading-message-background": "#d9d9d9",
+    "--loading-dot-background": "#626262",
+    "--color-text-muted": "#626262",
+    "--citations-text-font-weight": "400",
+    "--citations-desktop-button-font-size": "0.875rem",
+    "--feedback-icon-btn-background": "#fff3e8",
+    "--feedback-icon-btn-hover-background": "#fde3cc",
+    "--feedback-icon-btn-size-desktop": "40px",
+    "--feedback-container-gap": "1rem",
+    "--multimodal-card-box-shadow": "0 2px 4px rgba(0, 0, 0, 0.1)",
+    "--border-radius-card": "8px",
+    "--button-height-s": "36px",
+    "--button-primary-background": "#c85000",
+    "--button-primary-text": "#ffffff",
+    "--button-primary-hover": "#a84300",
+    "--button-secondary-border": "1px solid #c85000",
+    "--button-secondary-text": "#c85000",
+    "--button-secondary-hover": "#a84300",
+    "--color-button-secondary-hover-text": "#ffffff",
+    "--privacy-notice-background": "#fff3e8",
+    "--privacy-notice-padding": "1rem",
+    "--privacy-notice-title-color": "#626262",
+    "--privacy-notice-text-color": "#626262",
+    "--privacy-notice-text-font-size": "0.875rem",
+    "--privacy-notice-title-font-size": "1rem",
+    "--message-concierge-link-decoration": "underline",
+    "--color-secondary": "#c85000",
+    "--prompt-suggestion-button-background": "#d9d9d9",
+    "--prompt-pill-background": "#c85000",
+    "--button-primary-mobile-background": "#a84300",
+    "--button-primary-mobile-hover": "#a84300",
+    "--main-container-mobile-background": "#ffffff",
+    "--message-concierge-border-width": "1px",
+    "--message-concierge-link-color": "#b34700",
+    "--prompt-suggestion-button-border-radius": "8px",
+    "--prompt-suggestion-button-padding": "0.5rem 1rem",
+    "--prompt-suggestions-container-gap": "0.5rem",
+    "--card-background": "#c85000",
+    "--card-text-font-size": "1rem",
+    "--card-text-padding": "1rem",
+    "--chat-container-background": "#ffffff",
+    "--message-blocker-background": "#ffffff",
+    "--card-text-color": "#ffffff",
+    "--prompt-pill-border-color": "#c85000",
+    "--prompt-pill-text-color": "#ffffff",
+    "--prompt-suggestion-button-text-color": "#626262",
+    "--prompt-suggestion-button-background-hover": "#d9d9d9",
+    "--welcome-heading-text-color": "#151c21",
+    "--welcome-subheading-text-color": "#5f6468",
+    "--welcome-header-order": "1",
+    "--prompt-suggestions-flex-direction": "row",
+    "--prompt-suggestions-flex-wrap": "wrap"
+  }
+}

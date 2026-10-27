@@ -1,0 +1,128 @@
+.brand-concierge {
+  scroll-margin-top: calc(var(--nav-height) + 16px);
+}
+
+/* tall enough to use the whole screen below the sticky header, without scrolling the page */
+.brand-concierge .brand-concierge-panel {
+  height: calc(100svh - var(--nav-height) - 48px);
+  min-height: 480px;
+  max-height: 860px;
+  overflow: hidden;
+  border: 1px solid var(--copel-border);
+  border-top: 4px solid var(--copel-orange);
+  border-radius: var(--radius-m);
+  background-color: #fff;
+  box-shadow: var(--shadow-card);
+}
+
+/* not configured yet / in the editor: a short notice instead of the chat */
+.brand-concierge .brand-concierge-panel.brand-concierge-unavailable,
+.brand-concierge .brand-concierge-panel.brand-concierge-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: auto;
+  min-height: 160px;
+  padding: 32px 24px;
+  box-sizing: border-box;
+}
+
+.brand-concierge .brand-concierge-panel.brand-concierge-placeholder {
+  border-style: dashed;
+  border-top-style: solid;
+  background-color: var(--copel-gray-light);
+}
+
+.brand-concierge .brand-concierge-message {
+  margin: 0;
+  color: var(--text-color);
+  font-size: var(--heading-font-size-xs);
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* "assistente" template (metadata template: assistente), once the chat is mounted: the page is
+   a chat window — header, compact title and the chat filling the rest of the screen; only the
+   chat scrolls */
+body.assistente:has(#brand-concierge-mount) {
+  display: flex;
+  flex-direction: column;
+  height: 100svh;
+  overflow: hidden;
+}
+
+body.assistente:has(#brand-concierge-mount) > header {
+  flex: 0 0 auto;
+}
+
+body.assistente:has(#brand-concierge-mount) > main {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+body.assistente:has(#brand-concierge-mount) > footer {
+  display: none;
+}
+
+body.assistente main > .section:has(#brand-concierge-mount) {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  margin: 0;
+  padding: 16px 0;
+}
+
+/* flex items: keep the usual content width (auto margins would shrink them to their content) */
+body.assistente main > .section:has(#brand-concierge-mount) > div {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: calc(var(--content-max-width) + 48px); /* + the section padding (styles.css) */
+  margin: 0 auto;
+}
+
+@media (width >= 900px) {
+  body.assistente main > .section:has(#brand-concierge-mount) > div {
+    max-width: calc(var(--content-max-width) + 64px);
+  }
+}
+
+body.assistente main > .section:has(#brand-concierge-mount) > .default-content-wrapper {
+  flex: 0 0 auto;
+}
+
+body.assistente main > .section:has(#brand-concierge-mount) > .default-content-wrapper h1 {
+  margin: 0;
+  font-size: var(--heading-font-size-l);
+  line-height: 1.25;
+}
+
+body.assistente main > .section:has(#brand-concierge-mount) > .default-content-wrapper p {
+  display: none;
+  margin: 4px 0 0;
+}
+
+@media (width >= 600px) {
+  body.assistente main > .section:has(#brand-concierge-mount) > .default-content-wrapper p {
+    display: block;
+  }
+}
+
+body.assistente main > .section:has(#brand-concierge-mount) > .brand-concierge-wrapper {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+body.assistente .brand-concierge:has(#brand-concierge-mount),
+body.assistente .brand-concierge .brand-concierge-panel:has(#brand-concierge-mount) {
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+}
+
+body.assistente:has(#brand-concierge-mount) main > .section:not(:has(.brand-concierge)) {
+  display: none;
+}

@@ -4,6 +4,7 @@ import {
   decorateIcons,
   decorateBlocks,
   decorateTemplateAndTheme,
+  getMetadata,
   waitForFirstImage,
   loadSection,
   loadSections,
@@ -301,6 +302,23 @@ async function loadLazy(doc) {
 function loadDelayed() {
   import('./consent-check.js');
   // load anything that can be postponed to the latest here
+
+  // Adobe Brand Concierge launcher (opens the assistant drawer, links to /assistente); skipped
+  // in the editor, on pages with the full-page block and with the metadata "brand-concierge: off".
+  // Only the small config module loads here; the launcher code loads once the assistant is
+  // configured (or with ?concierge=preview), and the chat itself only when it is opened.
+  const conciergeOff = IS_UE
+    || getMetadata('brand-concierge').toLowerCase() === 'off'
+    || document.querySelector('.brand-concierge');
+  if (!conciergeOff) {
+    import('./brand-concierge-config.js')
+      .then(({ getConciergeMode }) => (getConciergeMode() ? import('./brand-concierge.js') : null))
+      .then((mod) => mod?.addLauncher())
+      .catch((e) => {
+        // eslint-disable-next-line no-console
+        console.error('brand-concierge', e);
+      });
+  }
 }
 
 async function loadPage() {

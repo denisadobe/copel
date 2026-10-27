@@ -114,6 +114,22 @@
           }
         },
         {
+          "title": "Assistente virtual (Brand Concierge)",
+          "id": "brand-concierge",
+          "model": "brand-concierge",
+          "plugins": {
+            "da": {
+              "unsafeHTML": "<div class=\"brand-concierge\"><div><div>Assistente virtual Copel</div></div></div>",
+              "fields": [
+                {
+                  "name": "label",
+                  "selector": "div>div"
+                }
+              ]
+            }
+          }
+        },
+        {
           "title": "Cards de público",
           "id": "cards-audience",
           "model": "cards-audience",
