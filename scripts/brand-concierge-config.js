@@ -1,13 +1,11 @@
 /*
  * Adobe Brand Concierge: environment + Web Client styling configuration.
  *
- * >>> COPEL: VALUES PENDING <<<
- * The environment values below are EMPTY PLACEHOLDERS. While ALLOY_CONFIG.datastreamId or
- * ALLOY_CONFIG.orgId is empty the integration is INERT: no launcher is rendered, nothing from
- * Adobe is downloaded and the brand-concierge block shows "O assistente virtual estará
+ * Values from the Copel Brand Concierge install script (Deploy > Component install); styling in
+ * brand-concierge-style.json is the Copel styling export. If ALLOY_CONFIG.datastreamId or
+ * ALLOY_CONFIG.orgId is emptied the integration becomes INERT: no launcher is rendered, nothing
+ * from Adobe is downloaded and the brand-concierge block shows "O assistente virtual estará
  * disponível em breve.".
- * To switch it on, copy the values from the install script generated in Brand Concierge
- * (Deploy > Component install) into the keys marked "COPEL: fill in".
  *
  * UI test without real config (local preview / *.aem.page only): add ?concierge=preview to the
  * URL — the launcher, drawer and full-page block render with a local stub, no Adobe scripts.
@@ -21,15 +19,16 @@ export const WEB_CLIENT_SRC = 'https://experience.adobe.net/solutions/experience
 // Web SDK configuration (alloy("configure", {...}) in the install script)
 export const ALLOY_CONFIG = {
   defaultConsent: 'in',
-  edgeDomain: 'edge.adobedc.net', // COPEL: confirm (install script "edgeDomain")
+  edgeDomain: 'edge.adobedc.net',
   edgeBasePath: 'ee',
-  datastreamId: '', // COPEL: fill in (install script "datastreamId")
-  orgId: '', // COPEL: fill in (install script "orgId", ends with @AdobeOrg)
+  // shared with the Sebrae demo datastream (client decision for the demo)
+  datastreamId: 'c34abba2-b513-4c27-8e6b-d477771eade9',
+  orgId: '0E061E2D61F93F260A495FD6@AdobeOrg',
   debugEnabled: false,
   idMigrationEnabled: false,
   thirdPartyCookiesEnabled: false,
   prehidingStyle: '.personalization-container { opacity: 0 !important }',
-  conversation: { region: '' }, // COPEL: fill in (install script "conversation.region", e.g. va7)
+  conversation: { region: 'va7' },
 };
 
 /** True when the environment values needed to load Brand Concierge are present. */
@@ -63,6 +62,12 @@ export const STYLE_OVERRIDES = {
     // keep the conversation when moving from the drawer to the full-page assistant
     chatTranscript: {
       enabled: true, maxSessions: 1, maxMessagesPerSession: 50, cleanupInterval: 24,
+    },
+    // the styling export leaves this icon empty, which the Web Client rejects ("Invalid SVG")
+    input: {
+      showAiChatIcon: {
+        icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="#f5821e" aria-hidden="true"><path d="M12 2l2.2 6.3L20.5 10l-6.3 2.2L12 18.5l-2.2-6.3L3.5 10l6.3-1.7z"/><path d="M19 15l.9 2.1L22 18l-2.1.9L19 21l-.9-2.1L16 18l2.1-.9z"/></svg>',
+      },
     },
     privacyNotice: {
       title: 'Aviso de privacidade',
