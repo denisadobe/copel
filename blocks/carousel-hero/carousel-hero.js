@@ -38,14 +38,21 @@ import {
  * Keys are matched case-, accent-, space- and dash-insensitively, so the Universal Editor
  * field names (fonte, publico, escopoTarget) work as keys too.
  *
- * Universal Editor (IS_UE): the authored slides are always shown (Content Fragments are
- * never fetched, so authors see and edit the fallback), a badge tells that the live site
- * uses Content Fragments, autoplay is off and empty (just added) slides are kept.
+ * Universal Editor (IS_UE): autoplay is off and empty (just added) slides are kept. With a
+ * Fonte, the Content Fragment slides are rendered (same published source as the site) and
+ * instrumented for the AEM connection (urn:aemconnection:<_path>/jcr:content/data/master,
+ * type "reference", filter "cf"; props titulo, resumo, ctaTexto, imagem), so selecting a slide
+ * edits the fragment in the properties panel and saves to AEM author. Each CF slide has an
+ * "Editar no AEM" link to the Content Fragment editor. The authored fallback slides stay in the
+ * DOM, hidden (and shown again when the fetch fails). The DA block instrumentation (urn:ab…,
+ * fields Fonte / Público / Escopo Target) is untouched. Live updates: ue/scripts/ue.js.
  */
 
 const AUTOPLAY_MS = 6000;
 
-const BADGE_TEXT = 'Conteúdo de Content Fragments do AEM (fallback autorado abaixo)';
+const BADGE_CF = 'Banners de Content Fragments do AEM — clique no slide para editar no painel, ou use "Editar no AEM"';
+const BADGE_LOADING = 'Carregando banners de Content Fragments do AEM…';
+const BADGE_FAILED = 'Não foi possível carregar os Content Fragments do AEM: exibindo os slides autorados (fallback)';
 
 // keys after normalizeKey (accents, case, spaces, dashes and a trailing colon removed)
 const CONFIG_KEYS = {
@@ -91,11 +98,11 @@ function extractSourceConfig(rows) {
   return config;
 }
 
-/** Editor-only note on blocks whose live slides come from Content Fragments. */
-function addEditorBadge(block, source) {
-  const badge = document.createElement('p');
+/** Editor-only note on blocks whose slides come from Content Fragments (created or updated). */
+function setEditorBadge(block, text, source) {
+  const badge = block.querySelector(':scope > .carousel-hero-ue-badge') || document.createElement('p');
   badge.className = 'carousel-hero-ue-badge';
-  badge.textContent = BADGE_TEXT;
+  badge.textContent = text;
   badge.title = `Fonte: ${source}`;
   block.append(badge);
 }
@@ -305,6 +312,121 @@ function showSkeleton(block) {
   block.replaceChildren(skeleton);
 }
 
+/* ---------------------------------------------------------------------------------------- */
+/* Universal Editor: in-context editing of the banner Content Fragments (AEM connection)    */
+/* ---------------------------------------------------------------------------------------- */
+
+const cfText = (value) => {
+  if (typeof value === 'string') return value.trim();
+  return typeof value?.plaintext === 'string' ? value.plaintext.trim() : '';
+};
+
+function setProp(el, prop, type) {
+  if (!el) return;
+  el.dataset.aueProp = prop;
+  el.dataset.aueType = type;
+}
+
+/**
+ * Instruments a Content Fragment slide for the AEM connection (meta
+ * urn:adobe:aue:system:aemconnection, added by ue/scripts/ue.js). Props inherit the slide's
+ * data-aue-resource; data-cf-* attributes let ue.js apply related values (link, alt) live.
+ */
+function instrumentCfSlide(slide, { path, item, imageFields }, editorUrl) {
+  const title = cfText(item.titulo);
+  slide.dataset.aueResource = `urn:aemconnection:${path}/jcr:content/data/master`;
+  slide.dataset.aueType = 'reference';
+  slide.dataset.aueFilter = 'cf';
+  slide.dataset.aueLabel = `Banner: ${title || path.split('/').pop()}`;
+
+  setProp(slide.querySelector('.carousel-hero-title'), 'titulo', 'text');
+
+  // resumo: one plain multi-line text element (instead of one <p> per paragraph)
+  const content = slide.querySelector('.carousel-hero-slide-content');
+  const resumo = cfText(item.resumo);
+  if (content && resumo) {
+    const paragraphs = [...content.querySelectorAll(':scope > p')];
+    const p = document.createElement('p');
+    p.className = 'carousel-hero-resumo';
+    p.textContent = resumo;
+    setProp(p, 'resumo', 'text');
+    if (paragraphs.length) {
+      paragraphs[0].before(p);
+      paragraphs.forEach((para) => para.remove());
+    } else {
+      content.querySelector('.carousel-hero-title')?.after(p);
+    }
+  }
+
+  const [cta, ctaSecondary] = slide.querySelectorAll('a.carousel-hero-cta');
+  setProp(cta, 'ctaTexto', 'text');
+  if (cta) cta.dataset.cfLinkProp = 'ctaLink';
+  setProp(ctaSecondary, 'ctaSecundarioTexto', 'text');
+  if (ctaSecondary) ctaSecondary.dataset.cfLinkProp = 'ctaSecundarioLink';
+
+  slide.querySelectorAll('.carousel-hero-slide-image picture > img').forEach((img, i) => {
+    if (!imageFields[i]) return;
+    setProp(img, imageFields[i], 'media');
+    img.dataset.cfAltProp = 'imagemAlt';
+  });
+
+  if (editorUrl) {
+    const edit = document.createElement('a');
+    edit.className = 'carousel-hero-ue-edit';
+    edit.href = editorUrl;
+    edit.target = '_blank';
+    edit.rel = 'noopener noreferrer';
+    edit.textContent = 'Editar no AEM';
+    edit.title = `Abrir ${path} no editor de Content Fragments`;
+    const wrap = document.createElement('p');
+    wrap.className = 'carousel-hero-ue-edit-wrap';
+    wrap.append(edit);
+    (content || slide).append(wrap);
+  }
+}
+
+/**
+ * Editor only: renders the Content Fragment slides (instrumented) in place of the authored
+ * ones, which stay in the DOM, hidden, as the fallback; on failure the authored slides stay.
+ */
+async function renderEditorCf(block, source, teardown) {
+  setEditorBadge(block, BADGE_LOADING, source.source);
+  try {
+    const cf = await import('./carousel-hero-cf.js');
+    const result = await cf.default(source);
+    if (!result) throw new Error('no banners');
+    const editorUrls = await Promise.all(result.rows.map(({ path }) => cf.getCfEditorUrl(path)));
+    const fallback = [...block.querySelectorAll('.carousel-hero-slide')];
+    const slides = result.rows.map((entry, i) => {
+      const slide = buildSlide(entry.row, i, true);
+      if (entry.path) {
+        slide.dataset.cfPath = entry.path;
+        instrumentCfSlide(slide, entry, editorUrls[i]);
+      }
+      return slide;
+    });
+    if (teardown) teardown();
+    mount(block, slides);
+    block.dataset.source = 'content-fragments';
+    if (fallback.length) {
+      const hidden = document.createElement('div');
+      hidden.className = 'carousel-hero-fallback';
+      hidden.hidden = true;
+      const list = document.createElement('ul');
+      fallback.forEach((slide) => {
+        slide.classList.remove('active');
+        if (slide.dataset.aueLabel) slide.dataset.aueLabel = `${slide.dataset.aueLabel} (fallback autorado)`;
+      });
+      list.append(...fallback);
+      hidden.append(list);
+      block.append(hidden);
+    }
+    setEditorBadge(block, BADGE_CF, source.source);
+  } catch (e) {
+    setEditorBadge(block, BADGE_FAILED, source.source);
+  }
+}
+
 export default function decorate(block) {
   if (!claimDecoration(block)) return;
   const rows = [...block.children].filter((row) => !isEmptyRow(row, 'picture, img'));
@@ -322,7 +444,7 @@ export default function decorate(block) {
 
   if (IS_UE) {
     if (!teardown) showSkeleton(block);
-    if (source) addEditorBadge(block, source.source);
+    if (source) renderEditorCf(block, source, teardown);
     return;
   }
   if (!useCf) return;

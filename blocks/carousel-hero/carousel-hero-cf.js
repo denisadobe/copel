@@ -84,6 +84,39 @@ async function getPublishOrigin() {
   return toHttpUrl((await getSiteConfig())['aem-publish-url'])?.origin || null;
 }
 
+/**
+ * AEM author origin (Universal Editor only): config.json `aem-author-url`, else derived from
+ * `aem-publish-url` (publish-pX-eY -> author-pX-eY).
+ */
+export async function getAuthorOrigin() {
+  const config = await getSiteConfig();
+  const author = toHttpUrl(config['aem-author-url'])?.origin;
+  if (author) return author;
+  const publish = toHttpUrl(config['aem-publish-url']);
+  return publish && /^publish-/.test(publish.hostname)
+    ? `${publish.protocol}//${publish.hostname.replace(/^publish-/, 'author-')}`
+    : null;
+}
+
+/** AEM publish origin, for images of Content Fragments edited in the Universal Editor. */
+export const getAssetOrigin = getPublishOrigin;
+
+/**
+ * Content Fragment editor link for a fragment path (Universal Editor only): config.json
+ * `aem-cf-editor-url` template ({author}, {path}), else the new CF editor on the author host
+ * (<author>/ui#/aem/cf/editor/editor<path>, which opens it in the Experience Cloud shell).
+ * The classic editor would be "{author}/editor.html{path}".
+ */
+export async function getCfEditorUrl(path) {
+  const author = await getAuthorOrigin();
+  if (!author || typeof path !== 'string' || !path.startsWith('/content/dam/')) return null;
+  const template = (await getSiteConfig())['aem-cf-editor-url'];
+  const url = typeof template === 'string' && template
+    ? template.replace(/\{author\}/g, author).replace(/\{path\}/g, path)
+    : `${author}/ui#/aem/cf/editor/editor${path}`;
+  return toHttpUrl(url)?.href || null;
+}
+
 const isPersistedQuery = (url) => url.pathname.includes('/graphql/execute.json/');
 
 /** URL to fetch the banner list from (see header comment); null when unresolvable. */
@@ -277,15 +310,15 @@ function linkParagraph(label, href) {
 function buildRow(item, assetOrigin) {
   const title = text(item.titulo);
   const alt = text(item.imagemAlt);
-  const images = [item.imagem, item.imagemMobile]
-    .map((ref) => resolveImage(ref, assetOrigin))
-    .filter(Boolean);
+  const images = [['imagem', item.imagem], ['imagemMobile', item.imagemMobile]]
+    .map(([field, ref]) => ({ field, image: resolveImage(ref, assetOrigin) }))
+    .filter(({ image }) => image);
   if (!title && !images.length) return null;
 
   const row = document.createElement('div');
   if (images.length) {
     const imageCell = document.createElement('div');
-    images.forEach((image) => imageCell.append(buildPicture(image, alt)));
+    images.forEach(({ image }) => imageCell.append(buildPicture(image, alt)));
     row.append(imageCell);
   }
 
@@ -308,7 +341,13 @@ function buildRow(item, assetOrigin) {
   ].filter(Boolean).forEach((p) => content.append(p));
   row.append(content);
 
-  return { row, path: typeof item._path === 'string' ? item._path : '' };
+  return {
+    row,
+    path: typeof item._path === 'string' ? item._path : '',
+    // for the Universal Editor: the fragment and which CF field each picture shows
+    item,
+    imageFields: images.map(({ field }) => field),
+  };
 }
 
 /* ---------------------------------------------------------------------------------------- */
@@ -384,7 +423,8 @@ function recordDisplay(proposition) {
 
 /**
  * @param {{source?: string, audience?: string, targetScope?: string}} config block config rows
- * @returns {Promise<{rows: {row: HTMLElement, path: string}[], audience: string,
+ * @returns {Promise<{rows: {row: HTMLElement, path: string, item: object,
+ *   imageFields: string[]}[], audience: string,
  *   onDisplay: Function}|null>}
  *   null when there is nothing to render (caller keeps the authored fallback)
  */

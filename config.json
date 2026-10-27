@@ -25,6 +25,7 @@
         "website-name": "Main Website"
       },
       "aem-publish-url": "https://publish-p68716-e759339.adobeaemcloud.com",
+      "aem-author-url": "https://author-p68716-e759339.adobeaemcloud.com",
       "aem-banners-url": "https://copel-app-demo.vercel.app/api/banners?canal={canal}"
     }
   }

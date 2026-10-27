@@ -39,9 +39,29 @@ removes them from the page, so only real slides are shown and selectable.
 
 In the editor (`IS_UE`, `scripts/ue-utils.js`):
 
-- Content Fragments are never fetched: the authored (fallback) slides are always rendered so
-  authors can see and edit them. When `Fonte` is set, a small badge "Conteúdo de Content Fragments
-  do AEM (fallback autorado abaixo)" is shown on the block (editor only).
+- With a `Fonte`, the Content Fragment slides are rendered from the same published source as the
+  site and edited **in context in AEM** through a second editor connection:
+  `ue/scripts/ue.js` adds `<meta name="urn:adobe:aue:system:aemconnection"
+  content="aem:<aem-author-url>">` (config.json `aem-author-url`, else derived from
+  `aem-publish-url`) next to the Author Bus connection (`urn:adobe:aue:system:ab`).
+- Each CF slide is `data-aue-resource="urn:aemconnection:<_path>/jcr:content/data/master"`,
+  `data-aue-type="reference"`, `data-aue-filter="cf"`, `data-aue-label="Banner: <titulo>"`, with
+  inline props (inheriting that resource) `titulo` (h2, text), `resumo` (one plain multi-line `p`,
+  text), `ctaTexto` / `ctaSecundarioTexto` (links, text), `imagem` / `imagemMobile` (img, media).
+  Selecting a slide shows the fragment's model fields in the properties panel (saved to AEM author).
+- Each CF slide also has an "Editar no AEM" link (new tab) to the Content Fragment editor:
+  `<author>/ui#/aem/cf/editor/editor<_path>`, or the config.json template `aem-cf-editor-url`
+  (`{author}`, `{path}`; e.g. `{author}/editor.html{path}` for the classic editor).
+- Live updates (`ue/scripts/ue.js`): `aue:content-patch` and `aue:content-update` for
+  `urn:aemconnection:` resources update the slide in place (text, link, alt, image from the DAM
+  path on the publish host) and cancel the default page reload, since the published source does
+  not show unpublished author changes; `aue:content-details` applies the author text values when a
+  fragment is opened in the panel. DA (`urn:ab:`) events keep the default behavior.
+- The authored slides stay in the DOM, hidden (`div.carousel-hero-fallback`, labelled "Slide
+  (fallback autorado)"); when the fetch fails they stay visible and the badge says so. The DA block
+  instrumentation (block fields `Fonte` / `Público` / `Escopo Target`) is unchanged.
+- Badge (editor only): "Banners de Content Fragments do AEM — clique no slide para editar no
+  painel, ou use "Editar no AEM"".
 - Autoplay is off; selecting a slide in the editor shows it (`ue/scripts/ue.js`).
 - A slide just added (still empty) is kept as an empty slide.
 - The height is capped in px (`clamp()`), never a pure `vh`, so it stays stable while the editor

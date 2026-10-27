@@ -389,3 +389,30 @@ main .carousel-hero a.button.carousel-hero-cta-secondary:any-link:focus-visible 
   line-height: 1.4;
   pointer-events: none;
 }
+
+/* Universal Editor only: Content Fragment slides (instrumented for the AEM connection) */
+.carousel-hero .carousel-hero-slide-content .carousel-hero-ue-edit-wrap {
+  margin-top: 12px;
+}
+
+.carousel-hero .carousel-hero-ue-edit {
+  position: relative;
+  z-index: 3;
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background-color: #fff;
+  color: var(--dark-color);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-decoration: none;
+}
+
+.carousel-hero .carousel-hero-ue-edit:hover {
+  text-decoration: underline;
+}
+
+.carousel-hero .carousel-hero-slide-content .carousel-hero-resumo {
+  white-space: pre-line;
+}
