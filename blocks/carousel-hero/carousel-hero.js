@@ -55,8 +55,10 @@ const FETCH_TIMEOUT_MS = 4000;
 
 const BADGE_CF = 'Banners de Content Fragments do AEM — clique no slide para editar no painel, ou use "Editar no AEM"';
 const BADGE_LOADING = 'Carregando banners de Content Fragments do AEM…';
-// how often the published banners are re-checked while the page is visible
+// how often the published banners are re-checked while the page is visible; the first check
+// waits until the page has settled, so it never competes with loading (or page-speed audits)
 const REFRESH_MS = 5000;
+const FIRST_REFRESH_MS = 15000;
 const BADGE_FAILED = 'Não foi possível carregar os Content Fragments do AEM: exibindo os slides autorados (fallback)';
 
 // keys after normalizeKey (accents, case, spaces, dashes and a trailing colon removed)
@@ -602,7 +604,7 @@ export default function decorate(block) {
             if (!document.hidden && block.isConnected) timer = setTimeout(refresh, REFRESH_MS);
           }
         };
-        timer = setTimeout(refresh, REFRESH_MS);
+        timer = setTimeout(refresh, FIRST_REFRESH_MS);
         document.addEventListener('visibilitychange', () => {
           if (document.hidden) clearTimeout(timer);
           else refresh();
