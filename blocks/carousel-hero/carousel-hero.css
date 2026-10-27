@@ -37,6 +37,7 @@ main > .section > .carousel-hero-wrapper {
 /* mobile: centered text anchored to the bottom of a portrait banner */
 .carousel-hero .carousel-hero-slide {
   grid-area: 1 / 1;
+  margin: 0; /* slides and dots are list items: undo the global li + li spacing */
   position: relative;
   display: flex;
   align-items: flex-end;
@@ -228,6 +229,10 @@ main .carousel-hero a.button.carousel-hero-cta-secondary:any-link:focus-visible 
   margin: 0;
   padding: 12px 0;
   list-style: none;
+}
+
+.carousel-hero .carousel-hero-indicators li {
+  margin: 0;
 }
 
 .carousel-hero .carousel-hero-indicators button {

@@ -201,11 +201,12 @@ function resolveImage(ref, assetOrigin) {
   if (!ref) return null;
   const image = typeof ref === 'string' ? { _path: ref } : ref;
   const publishUrl = toHttpUrl(image._publishUrl, assetOrigin);
-  if (publishUrl) return { url: publishUrl, dynamic: false };
   const pathUrl = typeof image._path === 'string' && image._path.startsWith('/') ? toHttpUrl(image._path, assetOrigin) : null;
-  if (pathUrl) return { url: pathUrl, dynamic: false };
+  const plainUrl = publishUrl || pathUrl;
+  // Dynamic Media first (resized/optimized renditions); the plain DAM URL is the fallback
   const dynamicUrl = toHttpUrl(image._dynamicUrl, assetOrigin);
-  return dynamicUrl ? { url: dynamicUrl, dynamic: true } : null;
+  if (dynamicUrl) return { url: dynamicUrl, dynamic: true, fallback: plainUrl };
+  return plainUrl ? { url: plainUrl, dynamic: false } : null;
 }
 
 function dynamicSrc(url, width) {
@@ -221,7 +222,7 @@ function dynamicSrc(url, width) {
   return u.href;
 }
 
-function buildPicture({ url, dynamic }, alt) {
+function buildPicture({ url, dynamic, fallback }, alt) {
   const picture = document.createElement('picture');
   const img = document.createElement('img');
   if (dynamic) {
@@ -235,8 +236,19 @@ function buildPicture({ url, dynamic }, alt) {
   }
   img.alt = alt;
   img.loading = 'lazy';
-  // unpublished/missing asset: show the hero background instead of a broken image + alt text
-  img.addEventListener('error', () => { picture.style.display = 'none'; }, { once: true });
+  // Dynamic Media rendition failed: retry once with the plain DAM URL; still failing
+  // (unpublished/missing asset): show the hero background instead of a broken image + alt text
+  const onError = () => {
+    if (dynamic && fallback && img.dataset.fallback !== 'true') {
+      img.dataset.fallback = 'true';
+      picture.querySelectorAll('source').forEach((source) => source.remove());
+      img.src = fallback.href;
+      return;
+    }
+    img.removeEventListener('error', onError);
+    picture.style.display = 'none';
+  };
+  img.addEventListener('error', onError);
   picture.append(img);
   return picture;
 }
