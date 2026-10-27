@@ -30,8 +30,9 @@
 }
 
 .cards-plans .cards-plans-card.cards-plans-featured {
-  border-color: var(--copel-orange);
-  background-color: var(--copel-orange);
+  /* the AA orange (white text 4.5:1), as the buttons */
+  border-color: var(--copel-orange-ink);
+  background-color: var(--copel-orange-ink);
   color: #fff;
   box-shadow: var(--shadow-card-hover);
 }
@@ -204,11 +205,12 @@ main .cards-plans .cards-plans-cta a.button.secondary:any-link {
 
 .cards-plans .cards-plans-featured .cards-plans-marker {
   background-color: #fff;
-  color: var(--copel-orange);
+  color: var(--copel-orange-ink);
 }
 
+/* not included: muted, still readable (AA) */
 .cards-plans .cards-plans-excluded {
-  color: rgb(224 224 224);
+  color: var(--text-muted-color);
 }
 
 .cards-plans .cards-plans-coverages .cards-plans-excluded .cards-plans-marker {
@@ -296,12 +298,12 @@ main .cards-plans .cards-plans-cta a.button.secondary:any-link {
 }
 
 .cards-plans .cards-plans-featured .cards-plans-details > p:first-child > a:only-child:any-link {
-  background-color: rgb(207 99 5);
+  background-color: var(--copel-orange-ink-hover);
   color: #fff;
 }
 
 .cards-plans .cards-plans-featured .cards-plans-details > p:first-child > a:only-child:any-link:hover {
-  background-color: var(--copel-orange-ink);
+  background-color: var(--copel-dark-red);
 }
 
 /* last link-only paragraph: centered conditions link */

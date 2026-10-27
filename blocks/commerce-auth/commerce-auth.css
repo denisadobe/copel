@@ -13,6 +13,19 @@
   box-shadow: var(--shadow-card);
 }
 
+/* while the drop-in loads: about the rendered height of each form (no shift when it appears) */
+.commerce-auth .commerce-auth-form.commerce-auth-loading {
+  min-height: 312px;
+}
+
+.commerce-auth .commerce-auth-form.commerce-auth-loading[data-form='sign-in'] {
+  min-height: 460px;
+}
+
+.commerce-auth .commerce-auth-form.commerce-auth-loading[data-form='sign-up'] {
+  min-height: 570px;
+}
+
 .commerce-auth .commerce-auth-message {
   margin: 0;
   border-radius: var(--radius-s);
@@ -24,5 +37,17 @@
 @media (width >= 600px) {
   .commerce-auth .commerce-auth-form {
     padding: 32px;
+  }
+
+  .commerce-auth .commerce-auth-form.commerce-auth-loading {
+    min-height: 340px;
+  }
+
+  .commerce-auth .commerce-auth-form.commerce-auth-loading[data-form='sign-in'] {
+    min-height: 444px;
+  }
+
+  .commerce-auth .commerce-auth-form.commerce-auth-loading[data-form='sign-up'] {
+    min-height: 515px;
   }
 }

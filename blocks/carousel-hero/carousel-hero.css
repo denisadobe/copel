@@ -29,15 +29,11 @@ main > .section > .carousel-hero-wrapper {
 
 .carousel-hero .carousel-hero-slides {
   display: grid;
-  margin: 0;
-  padding: 0;
-  list-style: none;
 }
 
 /* mobile: centered text anchored to the bottom of a portrait banner */
 .carousel-hero .carousel-hero-slide {
   grid-area: 1 / 1;
-  margin: 0; /* slides and dots are list items: undo the global li + li spacing */
   position: relative;
   display: flex;
   align-items: flex-end;
@@ -231,6 +227,7 @@ main .carousel-hero a.button.carousel-hero-cta-secondary:any-link:focus-visible 
   list-style: none;
 }
 
+/* dots are list items: undo the global li + li spacing */
 .carousel-hero .carousel-hero-indicators li {
   margin: 0;
 }

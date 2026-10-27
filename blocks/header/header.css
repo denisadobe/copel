@@ -12,6 +12,7 @@ header {
   --header-utility-height: 40px;
   --header-main-bg: var(--copel-orange);
   --header-cta-hover-bg: var(--copel-orange-strong);
+  --header-cta-text: var(--copel-orange-ink); /* orange text on the white CTA pill: AA (4.5:1) */
   --header-search-bg: var(--copel-orange-strong);
   --header-search-hover-bg: var(--copel-orange-ink);
   --header-text: #fff;
@@ -294,7 +295,7 @@ header .nav-menu {
   transition: max-height 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s;
 }
 
-header .nav-wrapper[aria-expanded='true'] .nav-menu {
+header .nav-wrapper[data-menu-open='true'] .nav-menu {
   max-height: calc(100vh - 57.5px);
   overflow-y: auto;
   visibility: visible;
@@ -391,7 +392,7 @@ header .nav-cta:any-link {
   border: 2px solid var(--header-main-bg);
   border-radius: 5px;
   background-color: #fff;
-  color: var(--header-main-bg);
+  color: var(--header-cta-text);
   font-size: 12px;
   font-weight: 800;
   line-height: 18px;
@@ -651,6 +652,13 @@ header .nav-search-field:focus-within {
     top: calc(-1 * var(--header-utility-height));
   }
 
+  /* nav without a utility section: only the main bar (no reserved utility row) */
+  header:has(.nav-no-utility) {
+    top: 0;
+    height: auto;
+    min-height: 0;
+  }
+
   header .nav-utility {
     display: block;
   }
@@ -718,8 +726,10 @@ header .nav-search-field:focus-within {
 
 /* ---------- desktop ---------- */
 @media (width >= 1200px) {
+  /* grows with its content (font scale), never below the height reserved before the nav loads */
   header {
     height: auto;
+    min-height: var(--nav-height);
   }
 
   /* spacing scales from 1200px (tight) to 1440px (source values) */
@@ -743,7 +753,7 @@ header .nav-search-field:focus-within {
   }
 
   header .nav-wrapper .nav-menu,
-  header .nav-wrapper[aria-expanded='true'] .nav-menu {
+  header .nav-wrapper[data-menu-open='true'] .nav-menu {
     position: static;
     z-index: auto;
     display: block;

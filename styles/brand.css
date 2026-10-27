@@ -80,6 +80,8 @@
 
 @media (width >= 1200px) {
   :root {
-    --nav-height: 111px;
+    /* utility bar 40px + main bar 70.5px (10px padding + 50.5px CTA): the space held for the
+       header before it loads, so the page does not shift */
+    --nav-height: 110.5px;
   }
 }

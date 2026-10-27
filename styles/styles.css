@@ -10,19 +10,30 @@
  * governing permissions and limitations under the License.
  */
 
-@import url('brand.css');
+/* brand tokens (styles/brand.css) are loaded by head.html before this file (no serial @import) */
 
-/* fallback fonts, metric-adjusted so text doesn't jump when brand fonts load */
+/*
+ * fallback fonts, metric-adjusted so text doesn't jump when brand fonts load: advance widths
+ * (size-adjust, vs Arial) and vertical metrics of Quenda Medium (ascent 0.71 / descent 0.20 em)
+ * and Univers LT 55 Roman (0.80 / 0.20 em); the overrides are scaled by size-adjust.
+ * Liberation Sans: the metric-compatible Arial of Linux systems.
+ */
 @font-face {
   font-family: quenda-fallback;
   size-adjust: 96%;
-  src: local('Arial');
+  ascent-override: 74%;
+  descent-override: 20.8%;
+  line-gap-override: 0%;
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('LiberationSans');
 }
 
 @font-face {
   font-family: univers-fallback;
   size-adjust: 101%;
-  src: local('Arial');
+  ascent-override: 79.2%;
+  descent-override: 19.8%;
+  line-gap-override: 0%;
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans'), local('LiberationSans');
 }
 
 body {
@@ -300,7 +311,7 @@ main > .section:first-of-type .default-content-wrapper > ul:first-child:has(> li
   margin: 16px 0;
   padding: 8px;
   border-radius: 999px;
-  background: var(--copel-orange);
+  background: var(--button-bg); /* AA orange: white links 4.5:1 */
   list-style: none;
 }
 

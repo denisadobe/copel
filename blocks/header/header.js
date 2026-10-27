@@ -20,19 +20,30 @@ const nextId = (prefix) => {
 };
 
 /**
- * Fetches the nav fragment. Metadata-independent on purpose:
- * /content first (local aem up), then the site root (DA/EDS production).
+ * Fetches the nav fragment. Metadata-independent on purpose: pages under /content (local aem up)
+ * try /content/nav first, every other page the site root first (DA/EDS production, so there is
+ * no 404 in the console); each falls back to the other location.
  * @returns {Promise<HTMLElement|null>} parsed fragment root
  */
 async function fetchNavFragment() {
-  let resp = await fetch('/content/nav.plain.html');
-  if (!resp.ok) resp = await fetch('/nav.plain.html');
+  const paths = ['/content/nav.plain.html', '/nav.plain.html'];
+  if (!window.location.pathname.startsWith('/content/')) paths.reverse();
+  let resp = await fetch(paths[0]);
+  if (!resp.ok) resp = await fetch(paths[1]);
   if (!resp.ok) return null;
   const root = document.createElement('div');
   root.innerHTML = await resp.text();
   // relative media paths are relative to the fragment, not to the current page
   root.querySelectorAll('img[src]').forEach((img) => {
     img.src = new URL(img.getAttribute('src'), resp.url).href;
+  });
+  root.querySelectorAll('source[srcset]').forEach((source) => {
+    source.srcset = source.getAttribute('srcset').split(',')
+      .map((candidate) => {
+        const [url, ...descriptor] = candidate.trim().split(/\s+/);
+        return [new URL(url, resp.url).href, ...descriptor].join(' ');
+      })
+      .join(', ');
   });
   return root;
 }
@@ -561,13 +572,14 @@ function decorateSession(tools, onOpen) {
  * Opens/closes the hamburger menu. As on the source the panel drops over the
  * page without locking scroll, and every accordion section is collapsed again
  * when the menu closes.
- * @param {Element} wrapper nav wrapper
- * @param {HTMLButtonElement} button hamburger button
+ * @param {Element} wrapper nav wrapper (data-menu-open, for CSS)
+ * @param {HTMLButtonElement} button hamburger button (aria-expanded)
  * @param {boolean} [force] true = open, false = close, undefined = toggle
  */
 function toggleMenu(wrapper, button, force) {
-  const expanded = force !== undefined ? !force : wrapper.getAttribute('aria-expanded') === 'true';
-  wrapper.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+  const expanded = force !== undefined ? !force : button.getAttribute('aria-expanded') === 'true';
+  // the state is on the button (aria-expanded); the wrapper carries it for CSS only
+  wrapper.dataset.menuOpen = expanded ? 'false' : 'true';
   button.setAttribute('aria-expanded', expanded ? 'false' : 'true');
   button.setAttribute('aria-label', button.dataset[expanded ? 'labelOpen' : 'labelClose']);
   if (expanded) closeAllDropdowns(wrapper.querySelector('.nav-menu') || wrapper);
@@ -589,9 +601,10 @@ export default async function decorate(block) {
 
   const wrapper = document.createElement('div');
   wrapper.className = 'nav-wrapper';
-  wrapper.setAttribute('aria-expanded', 'false');
+  wrapper.dataset.menuOpen = 'false';
 
   if (utilitySection) wrapper.append(buildUtilityBar(utilitySection, block));
+  else wrapper.classList.add('nav-no-utility');
 
   const mainBar = document.createElement('div');
   mainBar.className = 'nav-main-bar';
@@ -648,7 +661,7 @@ export default async function decorate(block) {
   // customer session: not in the Universal Editor, where the authored Login link stays editable
   const account = toolsSection && !IS_UE
     ? decorateSession(mainInner.querySelector('.nav-tools'), () => {
-      if (wrapper.getAttribute('aria-expanded') === 'true') toggleMenu(wrapper, hamburgerButton, false);
+      if (wrapper.dataset.menuOpen === 'true') toggleMenu(wrapper, hamburgerButton, false);
     })
     : null;
   hamburgerButton.addEventListener('click', () => {
@@ -666,7 +679,7 @@ export default async function decorate(block) {
     if (open) {
       setExpanded(open, false);
       open.querySelector(':scope > .nav-trigger').focus();
-    } else if (!isDesktop.matches && wrapper.getAttribute('aria-expanded') === 'true') {
+    } else if (!isDesktop.matches && wrapper.dataset.menuOpen === 'true') {
       toggleMenu(wrapper, hamburgerButton, false);
       hamburgerButton.focus();
     }
@@ -675,7 +688,7 @@ export default async function decorate(block) {
     if (block.contains(e.target)) return;
     closeAllDropdowns(block);
     // tapping outside the header closes the hamburger menu (as on the source)
-    if (!isDesktop.matches && wrapper.getAttribute('aria-expanded') === 'true') {
+    if (!isDesktop.matches && wrapper.dataset.menuOpen === 'true') {
       toggleMenu(wrapper, hamburgerButton, false);
     }
   });

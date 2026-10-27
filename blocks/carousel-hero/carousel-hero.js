@@ -2,6 +2,7 @@ import { createOptimizedPicture } from '../../scripts/aem.js';
 import {
   IS_UE, claimDecoration, isEmptyRow, moveInstrumentation,
 } from '../../scripts/ue-utils.js';
+import { getStorefrontConfig } from '../../scripts/commerce-session.js';
 
 /*
  * Carousel (hero)
@@ -49,6 +50,8 @@ import {
  */
 
 const AUTOPLAY_MS = 6000;
+// same as carousel-hero-cf.js
+const FETCH_TIMEOUT_MS = 4000;
 
 const BADGE_CF = 'Banners de Content Fragments do AEM — clique no slide para editar no painel, ou use "Editar no AEM"';
 const BADGE_LOADING = 'Carregando banners de Content Fragments do AEM…';
@@ -128,7 +131,7 @@ function getSlideCells(row) {
  *   AEM publish / Dynamic Media host), keep them instead of re-optimizing
  */
 function buildSlide(row, index, prebuilt = false) {
-  const slide = document.createElement('li');
+  const slide = document.createElement('div');
   moveInstrumentation(row, slide);
   slide.className = 'carousel-hero-slide';
   slide.dataset.slideIndex = index;
@@ -145,14 +148,15 @@ function buildSlide(row, index, prebuilt = false) {
     pictures.forEach((pic, i) => {
       const img = pic.querySelector('img');
       if (!img || !img.getAttribute('src')) return;
-      if (prebuilt) img.loading = index === 0 && i === 0 ? 'eager' : 'lazy';
+      // lazy here; prioritizeFirstImage() makes the visible picture of the first slide eager
+      if (prebuilt) img.loading = 'lazy';
       let optimized = pic;
       if (!prebuilt) {
         optimized = createOptimizedPicture(
           img.src,
           img.alt || '',
-          index === 0 && i === 0,
-          [{ media: '(min-width: 600px)', width: '2000' }, { width: '750' }],
+          false,
+          [{ media: '(min-width: 1600px)', width: '2000' }, { media: '(min-width: 600px)', width: '1600' }, { width: '750' }],
         );
         moveInstrumentation(pic, optimized);
         moveInstrumentation(img, optimized.querySelector('img'));
@@ -204,6 +208,69 @@ function buildSlide(row, index, prebuilt = false) {
   return slide;
 }
 
+/* ---------------------------------------------------------------------------------------- */
+/* Image loading: the first slide's image is the page LCP                                    */
+/* ---------------------------------------------------------------------------------------- */
+
+const isDesktopHero = () => window.matchMedia('(width >= 768px)').matches;
+const DEFERRED = ['srcset', 'src'];
+
+/**
+ * The picture of the first slide that this viewport shows (desktop / mobile variant, see the
+ * CSS breakpoint) loads eagerly with high priority; the other variant stays lazy (not fetched
+ * while hidden).
+ * @returns {HTMLImageElement|null} the prioritized image
+ */
+function prioritizeFirstImage(slide) {
+  const pictures = [...slide.querySelectorAll('.carousel-hero-slide-image picture')];
+  const visible = pictures.find((pic) => pic.classList.contains(isDesktopHero() ? 'carousel-hero-desktop' : 'carousel-hero-mobile'))
+    || pictures[0];
+  const img = visible?.querySelector('img');
+  if (!img) return null;
+  img.loading = 'eager';
+  img.fetchPriority = 'high';
+  return img;
+}
+
+/** Holds back the image requests of a slide (srcset/src kept in data-defer-* attributes). */
+function deferImages(slide) {
+  slide.querySelectorAll('.carousel-hero-slide-image picture > source, .carousel-hero-slide-image picture > img')
+    .forEach((el) => DEFERRED.forEach((attr) => {
+      const value = el.getAttribute(attr);
+      if (!value) return;
+      el.setAttribute(`data-defer-${attr}`, value);
+      el.removeAttribute(attr);
+    }));
+}
+
+function restoreImages(slide) {
+  slide.querySelectorAll('[data-defer-src], [data-defer-srcset]')
+    .forEach((el) => DEFERRED.forEach((attr) => {
+      const value = el.getAttribute(`data-defer-${attr}`);
+      if (!value) return;
+      el.setAttribute(attr, value);
+      el.removeAttribute(`data-defer-${attr}`);
+    }));
+}
+
+/**
+ * Site only (the editor loads every image as authored): the hero image first, the images of
+ * the other slides (hidden until their turn) once it is done, so they don't compete with it.
+ */
+function scheduleImages(slides) {
+  if (IS_UE) return;
+  const hero = prioritizeFirstImage(slides[0]);
+  if (slides.length < 2) return;
+  slides.slice(1).forEach(deferImages);
+  const release = () => slides.forEach(restoreImages);
+  if (!hero || hero.complete) {
+    setTimeout(release, 0);
+    return;
+  }
+  hero.addEventListener('load', release, { once: true });
+  hero.addEventListener('error', release, { once: true });
+}
+
 /**
  * Builds the carousel from slides; returns a teardown (timer + listeners) so the
  * slides can be swapped (authored fallback -> Content Fragments).
@@ -212,13 +279,15 @@ function mount(block, slides) {
   // never in the editor: authors must be able to select and edit a slide
   const autoplay = !block.classList.contains('no-autoplay') && !IS_UE;
 
-  const slidesWrapper = document.createElement('ul');
+  // slides are a group of "slide" groups (role/roledescription below), not a list
+  const slidesWrapper = document.createElement('div');
   slidesWrapper.className = 'carousel-hero-slides';
   slidesWrapper.append(...slides);
 
   const container = document.createElement('div');
   container.className = 'carousel-hero-slides-container';
   container.append(slidesWrapper);
+  scheduleImages(slides);
   block.replaceChildren(container);
 
   if (slides.length < 2) {
@@ -255,6 +324,7 @@ function mount(block, slides) {
 
   function show(index) {
     current = (index + slides.length) % slides.length;
+    restoreImages(slides[current]);
     slides.forEach((slide, i) => {
       const active = i === current;
       slide.classList.toggle('active', active);
@@ -303,6 +373,36 @@ function mount(block, slides) {
     stop();
     listeners.abort();
   };
+}
+
+/**
+ * Starts what the banner list needs right away, while carousel-hero-cf.js loads (the hero image,
+ * the page LCP, waits for it): the request itself for an absolute Fonte URL (app proxy, AEM
+ * publish), else the site config (/config.json, session cached) that resolves a channel or path.
+ * @param {string} value Fonte value
+ * @returns {{url?: string, json?: Promise<object>, config?: Promise<object|null>}} handed to
+ *   loadBannerRows()
+ */
+function prefetchBanners(value) {
+  const config = () => ({ config: getStorefrontConfig().catch(() => null) });
+  let url;
+  try {
+    url = new URL((value || '').trim());
+  } catch (e) {
+    return config();
+  }
+  if (!/^https?:$/.test(url.protocol)) return config();
+  if (url.origin === window.location.origin && url.pathname.startsWith('/graphql/')) return config();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  const json = fetch(url.href, { credentials: 'omit', signal: controller.signal })
+    .then((resp) => {
+      if (!resp.ok) throw new Error(`Request failed (${resp.status})`);
+      return resp.json();
+    })
+    .finally(() => clearTimeout(timer));
+  json.catch(() => {}); // failures are handled where the response is used
+  return { url: url.href, json };
 }
 
 function showSkeleton(block) {
@@ -412,7 +512,7 @@ async function renderEditorCf(block, source, teardown) {
       const hidden = document.createElement('div');
       hidden.className = 'carousel-hero-fallback';
       hidden.hidden = true;
-      const list = document.createElement('ul');
+      const list = document.createElement('div');
       fallback.forEach((slide) => {
         slide.classList.remove('active');
         if (slide.dataset.aueLabel) slide.dataset.aueLabel = `${slide.dataset.aueLabel} (fallback autorado)`;
@@ -459,8 +559,9 @@ export default function decorate(block) {
   let teardown = null;
   showSkeleton(block);
   block.setAttribute('aria-busy', 'true');
+  const prefetched = prefetchBanners(source.source);
   import('./carousel-hero-cf.js')
-    .then(({ default: loadBannerRows }) => loadBannerRows(source))
+    .then(({ default: loadBannerRows }) => loadBannerRows(source, prefetched))
     .then((result) => {
       if (!result) throw new Error('no banners');
       const slides = result.rows.map(({ row, path }, i) => {

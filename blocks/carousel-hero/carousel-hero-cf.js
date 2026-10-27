@@ -1,7 +1,8 @@
 /* eslint-disable no-underscore-dangle -- AEM GraphQL fields (_path, _publishUrl, _dynamicUrl) */
 /*
  * carousel-hero: AEM headless source (banner Content Fragments).
- * Loaded on demand by carousel-hero.js only when the block has a "Fonte"/"Source" config row.
+ * Loaded on demand by carousel-hero.js only when the block has a "Fonte"/"Source" config row
+ * (the request of an absolute Fonte URL is already started by carousel-hero.js).
  *
  * Turns each `banner` Content Fragment into a row with exactly the authored structure
  * (cell 1: picture(s), cell 2: h2 + p + p>a), so carousel-hero.js decorates it unchanged.
@@ -41,6 +42,16 @@ function readCachedConfig() {
     // ignore malformed cache
   }
   return null;
+}
+
+/**
+ * Uses a /config.json request already started by carousel-hero.js (scripts/commerce-session.js
+ * getStorefrontConfig, same session cache) as the page's site config.
+ * @param {Promise<object|null>} [request] full config.json
+ */
+function primeSiteConfig(request) {
+  if (configPromise || !request) return;
+  configPromise = request.then((config) => config?.public?.default || {}, () => ({}));
 }
 
 /** Site config (/config.json, public.default), cached per session and per page. */
@@ -242,6 +253,17 @@ function resolveImage(ref, assetOrigin) {
   return plainUrl ? { url: plainUrl, dynamic: false } : null;
 }
 
+/*
+ * Dynamic Media widths per picture (sizes="100vw"): the browser takes the smallest one that
+ * covers the viewport at its pixel density. The mobile variant (CSS: below 768px) stays at
+ * 750px on 1x-2x phones; the desktop variant tops out at 2000px.
+ */
+const DM_WIDTHS = {
+  desktop: [1080, 1600, 2000],
+  mobile: [750, 1080],
+  single: [750, 1080, 1600, 2000],
+};
+
 function dynamicSrc(url, width) {
   const u = new URL(url.href);
   if (u.pathname.includes('/is/image/')) {
@@ -255,15 +277,19 @@ function dynamicSrc(url, width) {
   return u.href;
 }
 
-function buildPicture({ url, dynamic, fallback }, alt) {
+/**
+ * @param {{url: URL, dynamic: boolean, fallback?: URL}} image resolved image
+ * @param {string} alt alt text
+ * @param {'desktop'|'mobile'|'single'} variant which viewports show the picture
+ */
+function buildPicture({ url, dynamic, fallback }, alt, variant = 'single') {
   const picture = document.createElement('picture');
   const img = document.createElement('img');
   if (dynamic) {
-    const source = document.createElement('source');
-    source.media = '(min-width: 600px)';
-    source.srcset = dynamicSrc(url, 2000);
-    picture.append(source);
-    img.src = dynamicSrc(url, 750);
+    const widths = DM_WIDTHS[variant] || DM_WIDTHS.single;
+    img.srcset = widths.map((w) => `${dynamicSrc(url, w)} ${w}w`).join(', ');
+    img.sizes = '100vw';
+    img.src = dynamicSrc(url, widths[0]);
   } else {
     img.src = url.href;
   }
@@ -275,6 +301,8 @@ function buildPicture({ url, dynamic, fallback }, alt) {
     if (dynamic && fallback && img.dataset.fallback !== 'true') {
       img.dataset.fallback = 'true';
       picture.querySelectorAll('source').forEach((source) => source.remove());
+      img.removeAttribute('srcset');
+      img.removeAttribute('sizes');
       img.src = fallback.href;
       return;
     }
@@ -318,7 +346,9 @@ function buildRow(item, assetOrigin) {
   const row = document.createElement('div');
   if (images.length) {
     const imageCell = document.createElement('div');
-    images.forEach(({ image }) => imageCell.append(buildPicture(image, alt)));
+    // two pictures: desktop + mobile variant (carousel-hero.js), one: shown at every width
+    const variants = images.length > 1 ? ['desktop', 'mobile'] : ['single'];
+    images.forEach(({ image }, i) => imageCell.append(buildPicture(image, alt, variants[i])));
     row.append(imageCell);
   }
 
@@ -423,18 +453,26 @@ function recordDisplay(proposition) {
 
 /**
  * @param {{source?: string, audience?: string, targetScope?: string}} config block config rows
+ * @param {{url?: string, json?: Promise<object>, config?: Promise<object|null>}|null} [prefetched]
+ *   requests already started by carousel-hero.js: the banner list (used when it is for the
+ *   resolved source URL) or the site config
  * @returns {Promise<{rows: {row: HTMLElement, path: string, item: object,
  *   imageFields: string[]}[], audience: string,
  *   onDisplay: Function}|null>}
  *   null when there is nothing to render (caller keeps the authored fallback)
  */
-export default async function loadBannerRows(config) {
+export default async function loadBannerRows(config, prefetched = null) {
+  primeSiteConfig(prefetched?.config);
+  // site config (publish origin of the images) in parallel with the banner request, not after it
+  const publishOrigin = getPublishOrigin();
   const sourceUrl = await resolveSourceUrl(config.source);
   if (!sourceUrl) return null;
 
   // no per-person logic here: the authored "Público" row, else the default audience
   const audience = config.audience || DEFAULT_AUDIENCE;
-  const json = await fetchJson(sourceUrl, FETCH_TIMEOUT_MS);
+  const json = prefetched?.json && prefetched.url === sourceUrl.href
+    ? await prefetched.json
+    : await fetchJson(sourceUrl, FETCH_TIMEOUT_MS);
 
   const now = new Date();
   const items = byOrder(extractItems(json)
@@ -447,7 +485,7 @@ export default async function loadBannerRows(config) {
     sourceUrl,
     keep: (item) => isActive(item, now),
   });
-  const assetOrigin = (await getPublishOrigin()) || sourceUrl.origin;
+  const assetOrigin = (await publishOrigin) || sourceUrl.origin;
   const rows = ordered.map((item) => buildRow(item, assetOrigin)).filter(Boolean);
   if (!rows.length) return null;
   return { rows, audience, onDisplay: proposition ? () => recordDisplay(proposition) : () => {} };

@@ -200,12 +200,13 @@
   margin-top: 10px;
 }
 
+/* 24px touch targets (WCAG 2.5.8); the negative block margin keeps the 18px row height */
 .carousel-coverage .carousel-coverage-dot {
   position: relative;
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
   padding: 0;
-  margin: 0;
+  margin: -3px 0;
   border: 0;
   border-radius: 50%;
   background: transparent;
@@ -215,8 +216,8 @@
 .carousel-coverage .carousel-coverage-dot::before {
   content: '';
   position: absolute;
-  top: 6px;
-  left: 6px;
+  top: 9px;
+  left: 9px;
   width: 6px;
   height: 6px;
   border-radius: 50%;

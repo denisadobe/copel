@@ -3,6 +3,9 @@ import {
   claimDecoration, emptyMediaSlot, isEmptyRow, moveInstrumentation, replacePicture,
 } from '../../scripts/ue-utils.js';
 
+// card images are ~600px wide on desktop and the content width on phones
+const IMAGE_BREAKPOINTS = [{ width: '750' }];
+
 /*
  * Cards (audience)
  *
@@ -67,7 +70,7 @@ export default function decorate(block) {
 
   ul.querySelectorAll('picture > img').forEach((img) => {
     if (!img.getAttribute('src')) return;
-    replacePicture(img.closest('picture'), createOptimizedPicture(img.src, img.alt, false, [{ media: '(min-width: 900px)', width: '1200' }, { width: '750' }]));
+    replacePicture(img.closest('picture'), createOptimizedPicture(img.src, img.alt, false, IMAGE_BREAKPOINTS));
   });
 
   block.replaceChildren(ul);

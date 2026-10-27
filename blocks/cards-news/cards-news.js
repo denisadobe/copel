@@ -134,10 +134,18 @@ export default function decorate(block) {
 
   if (featured && ul.firstElementChild) ul.firstElementChild.classList.add('cards-news-featured');
 
+  // a featured card at the top of the page (first two sections, e.g. under a page banner) is
+  // usually the LCP: its image is not lazy
+  const sections = [...(block.closest('main')?.querySelectorAll(':scope > .section') || [])];
+  const nearTop = sections.slice(0, 2).includes(block.closest('main > .section'));
   ul.querySelectorAll('picture > img').forEach((img, i) => {
     if (!img.getAttribute('src')) return;
-    const width = i === 0 && featured ? '1200' : '750';
-    replacePicture(img.closest('picture'), createOptimizedPicture(img.src, img.alt, false, [{ width }]));
+    const lead = i === 0 && featured;
+    // featured card: up to the full content width; the others ~300-380px wide on desktop
+    const breakpoints = lead
+      ? [{ media: '(min-width: 600px)', width: '1200' }, { width: '750' }]
+      : [{ media: '(min-width: 900px)', width: '400' }, { width: '750' }];
+    replacePicture(img.closest('picture'), createOptimizedPicture(img.src, img.alt, lead && nearTop, breakpoints));
   });
 
   block.replaceChildren(ul);

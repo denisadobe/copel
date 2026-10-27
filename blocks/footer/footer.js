@@ -1,17 +1,31 @@
+import { createOptimizedPicture } from '../../scripts/aem.js';
+import { replacePicture } from '../../scripts/ue-utils.js';
+
 /**
- * Fetches the footer fragment. Metadata-independent on purpose:
- * /content first (local aem up), then the site root (DA/EDS production).
+ * Fetches the footer fragment. Metadata-independent on purpose: pages under /content (local
+ * aem up) try /content/footer first, every other page the site root first (DA/EDS production,
+ * so there is no 404 in the console); each falls back to the other location.
  * @returns {Promise<HTMLElement|null>} parsed fragment root
  */
 async function fetchFooterFragment() {
-  let resp = await fetch('/content/footer.plain.html');
-  if (!resp.ok) resp = await fetch('/footer.plain.html');
+  const paths = ['/content/footer.plain.html', '/footer.plain.html'];
+  if (!window.location.pathname.startsWith('/content/')) paths.reverse();
+  let resp = await fetch(paths[0]);
+  if (!resp.ok) resp = await fetch(paths[1]);
   if (!resp.ok) return null;
   const root = document.createElement('div');
   root.innerHTML = await resp.text();
   // relative media paths are relative to the fragment, not to the current page
   root.querySelectorAll('img[src]').forEach((img) => {
     img.src = new URL(img.getAttribute('src'), resp.url).href;
+  });
+  root.querySelectorAll('source[srcset]').forEach((source) => {
+    source.srcset = source.getAttribute('srcset').split(',')
+      .map((candidate) => {
+        const [url, ...descriptor] = candidate.trim().split(/\s+/);
+        return [new URL(url, resp.url).href, ...descriptor].join(' ');
+      })
+      .join(', ');
   });
   return root;
 }
@@ -196,6 +210,13 @@ export default async function decorate(block) {
   sections.forEach((section) => {
     if (isBackToTopSection(section)) decorateBackToTop(section);
     else pending.push(decorateContentSection(section));
+  });
+
+  // logos/badges are ~214px wide: no 2000px desktop rendition (social SVGs are inlined above).
+  // Not lazy: the footer loads last, and on short pages its logo is the largest paint
+  sections.flatMap((section) => [...section.querySelectorAll('picture > img')]).forEach((img) => {
+    if (!img.getAttribute('src') || new URL(img.src).pathname.endsWith('.svg')) return;
+    replacePicture(img.closest('picture'), createOptimizedPicture(img.src, img.alt, true, [{ width: '500' }]));
   });
 
   block.replaceChildren(...sections);

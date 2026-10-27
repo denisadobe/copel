@@ -86,6 +86,32 @@ function withPlan(path, sku) {
   return url.pathname + url.search + url.hash;
 }
 
+/**
+ * Renders the drop-in form (or an error message) into the container.
+ * @param {Element} container form container
+ * @param {string} form FORMS key
+ * @param {{next: string, keep: Function}} routes after sign in / links between the forms
+ */
+async function renderForm(container, form, routes) {
+  try {
+    await initializeAuth();
+    const [name, props] = FORMS[form];
+    const [{ render }, { default: Container }] = await Promise.all([
+      import('@dropins/storefront-auth/render.js'),
+      import(`@dropins/storefront-auth/containers/${name}.js`),
+    ]);
+    await render.render(Container, props(routes))(container);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error('commerce-auth:', error);
+    const p = document.createElement('p');
+    p.className = 'commerce-auth-message';
+    p.setAttribute('role', 'alert');
+    p.textContent = 'Não foi possível carregar o formulário no momento. Tente novamente mais tarde.';
+    container.replaceChildren(p);
+  }
+}
+
 export default async function decorate(block) {
   const config = readBlockConfig(block);
   const form = FORMS[config.form] ? config.form : 'sign-in';
@@ -120,21 +146,11 @@ export default async function decorate(block) {
   }
 
   loadCommerceStyles();
-  try {
-    await initializeAuth();
-    const [name, props] = FORMS[form];
-    const [{ render }, { default: Container }] = await Promise.all([
-      import('@dropins/storefront-auth/render.js'),
-      import(`@dropins/storefront-auth/containers/${name}.js`),
-    ]);
-    await render.render(Container, props({ next, keep }))(container);
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error('commerce-auth:', error);
-    const p = document.createElement('p');
-    p.className = 'commerce-auth-message';
-    p.setAttribute('role', 'alert');
-    p.textContent = 'Não foi possível carregar o formulário no momento. Tente novamente mais tarde.';
-    container.replaceChildren(p);
-  }
+  // the drop-in form renders in the background: the page heading and text around the block
+  // show right away (they are the LCP) instead of waiting for the drop-in; the container holds
+  // about the form's height meanwhile (commerce-auth.css), so nothing shifts when it appears
+  container.dataset.form = form;
+  container.classList.add('commerce-auth-loading');
+  renderForm(container, form, { next, keep })
+    .finally(() => container.classList.remove('commerce-auth-loading'));
 }

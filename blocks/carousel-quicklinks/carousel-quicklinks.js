@@ -113,6 +113,7 @@ export default function decorate(block) {
   prev.addEventListener('click', () => scrollByPage(-1));
   next.addEventListener('click', () => scrollByPage(1));
   track.addEventListener('scroll', update, { passive: true });
+  // first run from the observer, after layout (no forced reflow while the page decorates)
   if (window.ResizeObserver) new ResizeObserver(update).observe(track);
-  update();
+  else update();
 }

@@ -1,6 +1,9 @@
 import { createOptimizedPicture } from '../../scripts/aem.js';
 import { claimDecoration, contentRoot, replacePicture } from '../../scripts/ue-utils.js';
 
+// the image column is ~600px wide on desktop and the content width on phones
+const IMAGE_BREAKPOINTS = [{ width: '750' }];
+
 /*
  * Columns (app)
  *
@@ -48,7 +51,7 @@ export default function decorate(block) {
       if (pic && !col.textContent.trim()) {
         col.classList.add('columns-app-img-col');
         const img = pic.querySelector('img');
-        if (img?.getAttribute('src')) replacePicture(pic, createOptimizedPicture(img.src, img.alt, false, [{ media: '(min-width: 900px)', width: '1200' }, { width: '750' }]));
+        if (img?.getAttribute('src')) replacePicture(pic, createOptimizedPicture(img.src, img.alt, false, IMAGE_BREAKPOINTS));
       } else {
         col.classList.add('columns-app-text-col');
         groupTiles(contentRoot(col));

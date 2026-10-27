@@ -48,14 +48,25 @@ export function moveInstrumentation(from, to) {
 
 /**
  * Replaces a picture with an optimized copy, keeping the instrumentation of the picture
- * (image component) and of its img (media field).
+ * (image component) and of its img (media field), and the intrinsic width/height of the
+ * authored img (createOptimizedPicture drops them), so the browser reserves the image's
+ * aspect ratio before it loads (no layout shift).
  * @param {Element} picture the authored picture
  * @param {Element} optimized the new picture (from createOptimizedPicture)
  * @returns {Element} the new picture
  */
 export function replacePicture(picture, optimized) {
+  const img = picture.querySelector('img');
+  const optimizedImg = optimized.querySelector('img');
   moveInstrumentation(picture, optimized);
-  moveInstrumentation(picture.querySelector('img'), optimized.querySelector('img'));
+  moveInstrumentation(img, optimizedImg);
+  if (img && optimizedImg) {
+    ['width', 'height'].forEach((attr) => {
+      if (img.hasAttribute(attr) && !optimizedImg.hasAttribute(attr)) {
+        optimizedImg.setAttribute(attr, img.getAttribute(attr));
+      }
+    });
+  }
   picture.replaceWith(optimized);
   return optimized;
 }

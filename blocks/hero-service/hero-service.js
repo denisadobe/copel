@@ -22,7 +22,11 @@ const isPictureOnly = (el) => !!el.querySelector('picture, img') && !el.textCont
 function optimize(pic, eager, width) {
   const img = pic.querySelector('img');
   if (!img?.getAttribute('src') || img.src.split('?')[0].endsWith('.svg')) return pic;
-  const opt = createOptimizedPicture(img.src, img.alt, eager, [{ media: '(min-width: 900px)', width: '2000' }, { width }]);
+  const opt = createOptimizedPicture(img.src, img.alt, eager, [
+    { media: '(min-width: 1600px)', width: '2000' },
+    { media: '(min-width: 900px)', width: '1600' },
+    { width },
+  ]);
   return replacePicture(pic, opt);
 }
 

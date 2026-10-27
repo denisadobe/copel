@@ -162,6 +162,7 @@ export default function decorate(block) {
     if (e.key === 'ArrowLeft') { e.preventDefault(); prev.click(); }
     if (e.key === 'ArrowRight') { e.preventDefault(); next.click(); }
   });
+  // first run from the observer, after layout (no forced reflow while the page decorates)
   if (window.ResizeObserver) new ResizeObserver(update).observe(track);
-  update();
+  else update();
 }
