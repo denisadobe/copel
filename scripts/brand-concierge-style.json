@@ -29,7 +29,7 @@
       "links": [
         {
           "text": "Privacy Policy",
-          "url": "<your-privacy-policy-url>"
+          "url": "https://www.adobe.com/privacy/policy.html"
         }
       ]
     },
@@ -113,7 +113,7 @@
     }
   },
   "disclaimer": {
-    "text": "Os serviços fornecidos pela COPEL estão sujeitos aos termos e condições.",
+    "text": "Os serviços fornecidos pela COPEL estão sujeitos aos termos e condições. {Terms}",
     "links": [
       {
         "text": "Terms of Use",
@@ -158,26 +158,34 @@
       {
         "text": "Como solicitar uma nova ligação?",
         "systemPrompt": "Explique como solicitar uma nova ligação de energia com a COPEL.",
-        "backgroundColor": "#f5821e",
-        "image": "https://www.copel.com/site/wp-content/uploads/2026/10/religadores_automaticos_2_1-scaled.jpg"
+        "imageUrl": "https://www.copel.com/site/wp-content/uploads/2026/10/religadores_automaticos_2_1-scaled.jpg",
+        "imageName": "",
+        "image": "https://www.copel.com/site/wp-content/uploads/2026/10/religadores_automaticos_2_1-scaled.jpg",
+        "backgroundColor": "#f5821e"
       },
       {
         "text": "Quais são os serviços disponíveis?",
         "systemPrompt": "Liste os serviços oferecidos pela COPEL.",
-        "backgroundColor": "#f79540",
-        "image": "https://www.copel.com/site/wp-content/uploads/2026/10/PREMIOONS2026_MicheleLekan-EstudioMLekan-4541-2048x1368.jpg"
+        "imageUrl": "https://www.copel.com/site/wp-content/uploads/2021/12/uso-eficiente-energia.jpg",
+        "imageName": "",
+        "image": "https://www.copel.com/site/wp-content/uploads/2021/12/uso-eficiente-energia.jpg",
+        "backgroundColor": "#f79540"
       },
       {
         "text": "Informações sobre tarifas",
         "systemPrompt": "Forneça informações detalhadas sobre tarifas de energia.",
-        "backgroundColor": "#f8a862",
-        "image": "https://www.copel.com/site/wp-content/uploads/2026/10/PREMIOONS2026_MicheleLekan-EstudioMLekan-4541-1536x1026.jpg"
+        "imageUrl": "https://www.copel.com/site/wp-content/uploads/2021/12/simulador-consumo.jpg",
+        "imageName": "",
+        "image": "https://www.copel.com/site/wp-content/uploads/2021/12/simulador-consumo.jpg",
+        "backgroundColor": "#f8a862"
       },
       {
         "text": "Como acessar a fatura digital?",
         "systemPrompt": "Explique como acessar a fatura digital da COPEL.",
-        "backgroundColor": "#faba83",
-        "image": "https://www.copel.com/site/wp-content/uploads/2021/12/img-whats.png"
+        "imageUrl": "https://www.copel.com/site/wp-content/uploads/2021/12/aplicativo_copel_ret-942x1024-1.jpeg",
+        "imageName": "",
+        "image": "https://www.copel.com/site/wp-content/uploads/2021/12/aplicativo_copel_ret-942x1024-1.jpeg",
+        "backgroundColor": "#faba83"
       }
     ],
     "feedback.positive.options": [
@@ -200,19 +208,15 @@
       "company": "https://www.copel.com/site/wp-content/uploads/2021/12/img-whats.png"
     }
   },
-  "visualProfile": {
-    "sendIconIconColor": "#ffffff",
-    "sendIconBackgroundColor": "#522752"
-  },
   "theme": {
     "--welcome-input-order": "3",
     "--welcome-cards-order": "2",
     "--welcome-heading-size-desktop": "32px",
-    "--welcome-heading-size-mobile": "24px",
+    "--welcome-heading-size-mobile": "32px",
     "--welcome-heading-weight": "700",
     "--welcome-heading-text-align": "center",
     "--welcome-subheading-size-desktop": "18px",
-    "--welcome-subheading-size-mobile": "16px",
+    "--welcome-subheading-size-mobile": "18px",
     "--welcome-subheading-text-align": "center",
     "--welcome-padding": "24px",
     "--prompt-suggestion-background": "#522752",
@@ -242,7 +246,7 @@
     "--submit-button-fill-color": "#ffffff",
     "--submit-button-fill-color-disabled": "#CCCCCC",
     "--color-button-submit": "#f5821e",
-    "--color-button-submit-hover": "#522752",
+    "--color-button-submit-hover": "#f5821e",
     "--input-button-border-radius": "8px",
     "--button-disabled-background": "#F0F0F0",
     "--disclaimer-color": "#6a6a6a",
@@ -308,6 +312,10 @@
     "--welcome-subheading-text-color": "#000000",
     "--welcome-header-order": "1",
     "--prompt-suggestions-flex-direction": "row",
-    "--prompt-suggestions-flex-wrap": "wrap"
+    "--prompt-suggestions-flex-wrap": "wrap",
+    "--card-border-radius": "8px",
+    "--card-text-border-radius": "8px",
+    "--chat-container-bottom-background": "#ffffff",
+    "--main-container-bottom-background": "#ffffff"
   }
 }
