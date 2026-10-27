@@ -55,6 +55,8 @@ const FETCH_TIMEOUT_MS = 4000;
 
 const BADGE_CF = 'Banners de Content Fragments do AEM — clique no slide para editar no painel, ou use "Editar no AEM"';
 const BADGE_LOADING = 'Carregando banners de Content Fragments do AEM…';
+// how often the published banners are re-checked while the page is visible
+const REFRESH_MS = 5000;
 const BADGE_FAILED = 'Não foi possível carregar os Content Fragments do AEM: exibindo os slides autorados (fallback)';
 
 // keys after normalizeKey (accents, case, spaces, dashes and a trailing colon removed)
@@ -275,7 +277,7 @@ function scheduleImages(slides) {
  * Builds the carousel from slides; returns a teardown (timer + listeners) so the
  * slides can be swapped (authored fallback -> Content Fragments).
  */
-function mount(block, slides) {
+function mount(block, slides, startIndex = 0) {
   // never in the editor: authors must be able to select and edit a slide
   const autoplay = !block.classList.contains('no-autoplay') && !IS_UE;
 
@@ -366,7 +368,7 @@ function mount(block, slides) {
   // the editor (ue/scripts/ue.js) shows the slide the author selects
   block.addEventListener('carousel-hero:show', (e) => { show(e.detail.index); stop(); }, { signal });
 
-  show(0);
+  show(Math.min(startIndex, slides.length - 1));
   start();
 
   return () => {
@@ -560,20 +562,52 @@ export default function decorate(block) {
   showSkeleton(block);
   block.setAttribute('aria-busy', 'true');
   const prefetched = prefetchBanners(source.source);
+  let signature = '';
+  const render = (result) => {
+    const slides = result.rows.map(({ row, path }, i) => {
+      const slide = buildSlide(row, i, true);
+      if (path) slide.dataset.cfPath = path;
+      return slide;
+    });
+    const active = block.querySelector('.carousel-hero-slide.active');
+    const index = active ? Number(active.dataset.slideIndex) || 0 : 0;
+    if (teardown) teardown();
+    teardown = mount(block, slides, index);
+    signature = result.signature;
+    block.dataset.source = 'content-fragments';
+    block.dataset.publico = result.audience;
+  };
+
   import('./carousel-hero-cf.js')
-    .then(({ default: loadBannerRows }) => loadBannerRows(source, prefetched))
-    .then((result) => {
-      if (!result) throw new Error('no banners');
-      const slides = result.rows.map(({ row, path }, i) => {
-        const slide = buildSlide(row, i, true);
-        if (path) slide.dataset.cfPath = path;
-        return slide;
-      });
-      teardown = mount(block, slides);
-      block.dataset.source = 'content-fragments';
-      block.dataset.publico = result.audience;
-      result.onDisplay();
-    })
+    .then(({ default: loadBannerRows }) => loadBannerRows(source, prefetched)
+      .then((result) => {
+        if (!result) throw new Error('no banners');
+        render(result);
+        result.onDisplay();
+        // published edits in AEM show up without a reload: re-check every few seconds while the
+        // page is visible (one request at a time); slides are only rebuilt when banners changed
+        let timer;
+        let running = false;
+        const refresh = async () => {
+          clearTimeout(timer);
+          if (running || document.hidden || !block.isConnected) return;
+          running = true;
+          try {
+            const next = await loadBannerRows(source, null, { refresh: true });
+            if (next && next.signature !== signature) render(next);
+          } catch (e) {
+            // keep the banners on screen; try again on the next round
+          } finally {
+            running = false;
+            if (!document.hidden && block.isConnected) timer = setTimeout(refresh, REFRESH_MS);
+          }
+        };
+        timer = setTimeout(refresh, REFRESH_MS);
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) clearTimeout(timer);
+          else refresh();
+        });
+      }))
     .catch(() => {
       // AEM unavailable: show the authored fallback; without one, drop the empty hero
       if (teardown) return;

@@ -456,12 +456,15 @@ function recordDisplay(proposition) {
  * @param {{url?: string, json?: Promise<object>, config?: Promise<object|null>}|null} [prefetched]
  *   requests already started by carousel-hero.js: the banner list (used when it is for the
  *   resolved source URL) or the site config
+ * @param {{refresh?: boolean}} [options] refresh: re-check for published changes (no HTTP cache,
+ *   no Target decision / impression)
  * @returns {Promise<{rows: {row: HTMLElement, path: string, item: object,
- *   imageFields: string[]}[], audience: string,
+ *   imageFields: string[]}[], audience: string, signature: string,
  *   onDisplay: Function}|null>}
- *   null when there is nothing to render (caller keeps the authored fallback)
+ *   null when there is nothing to render (caller keeps the authored fallback); signature changes
+ *   only when the rendered banners change
  */
-export default async function loadBannerRows(config, prefetched = null) {
+export default async function loadBannerRows(config, prefetched = null, options = {}) {
   primeSiteConfig(prefetched?.config);
   // site config (publish origin of the images) in parallel with the banner request, not after it
   const publishOrigin = getPublishOrigin();
@@ -472,21 +475,29 @@ export default async function loadBannerRows(config, prefetched = null) {
   const audience = config.audience || DEFAULT_AUDIENCE;
   const json = prefetched?.json && prefetched.url === sourceUrl.href
     ? await prefetched.json
-    : await fetchJson(sourceUrl, FETCH_TIMEOUT_MS);
+    : await fetchJson(sourceUrl, FETCH_TIMEOUT_MS, options.refresh ? { cache: 'no-store' } : {});
 
   const now = new Date();
   const items = byOrder(extractItems(json)
     .filter((item) => isActive(item, now) && matchesAudience(item, audience)));
   if (!items.length) return null;
 
-  // a banner chosen by Target is shown whatever its publico (Target owns the per-person choice)
-  const { items: ordered, proposition } = await personalize(items, {
-    scope: config.targetScope,
-    sourceUrl,
-    keep: (item) => isActive(item, now),
-  });
+  // a banner chosen by Target is shown whatever its publico (Target owns the per-person choice);
+  // refreshes keep the first decision instead of asking Target again every few seconds
+  const { items: ordered, proposition } = options.refresh
+    ? { items, proposition: null }
+    : await personalize(items, {
+      scope: config.targetScope,
+      sourceUrl,
+      keep: (item) => isActive(item, now),
+    });
   const assetOrigin = (await publishOrigin) || sourceUrl.origin;
   const rows = ordered.map((item) => buildRow(item, assetOrigin)).filter(Boolean);
   if (!rows.length) return null;
-  return { rows, audience, onDisplay: proposition ? () => recordDisplay(proposition) : () => {} };
+  return {
+    rows,
+    audience,
+    signature: JSON.stringify(ordered),
+    onDisplay: proposition ? () => recordDisplay(proposition) : () => {},
+  };
 }
