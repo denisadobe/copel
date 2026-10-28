@@ -410,15 +410,24 @@ function prefetchBanners(value) {
   return { url: url.href, json };
 }
 
-/** Runs once the visible hero image has loaded (or failed), at the latest after a few seconds. */
+/**
+ * Runs once the visible hero image has loaded (or failed, at the latest after a few seconds),
+ * the page has loaded and the main thread is idle: the Web SDK it may load does not compete
+ * with the hero image or the rest of the page.
+ */
 function afterHeroImage(block, callback) {
   const img = block.querySelector('.carousel-hero-slide.active img[fetchpriority="high"]')
     || block.querySelector('.carousel-hero-slide.active img');
   let done = false;
+  const idle = () => {
+    if (window.requestIdleCallback) window.requestIdleCallback(callback, { timeout: 3000 });
+    else setTimeout(callback, 200);
+  };
   const run = () => {
     if (done) return;
     done = true;
-    callback();
+    if (document.readyState === 'complete') idle();
+    else window.addEventListener('load', idle, { once: true });
   };
   if (!img || img.complete) {
     setTimeout(run, 0);
