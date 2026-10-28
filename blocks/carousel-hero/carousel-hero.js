@@ -2,7 +2,7 @@ import { createOptimizedPicture } from '../../scripts/aem.js';
 import {
   IS_UE, claimDecoration, isEmptyRow, moveInstrumentation,
 } from '../../scripts/ue-utils.js';
-import { getStorefrontConfig } from '../../scripts/commerce-session.js';
+import { getStorefrontConfig, isAuthenticated } from '../../scripts/commerce-session.js';
 
 /*
  * Carousel (hero)
@@ -410,6 +410,25 @@ function prefetchBanners(value) {
   return { url: url.href, json };
 }
 
+/** Runs once the visible hero image has loaded (or failed), at the latest after a few seconds. */
+function afterHeroImage(block, callback) {
+  const img = block.querySelector('.carousel-hero-slide.active img[fetchpriority="high"]')
+    || block.querySelector('.carousel-hero-slide.active img');
+  let done = false;
+  const run = () => {
+    if (done) return;
+    done = true;
+    callback();
+  };
+  if (!img || img.complete) {
+    setTimeout(run, 0);
+    return;
+  }
+  img.addEventListener('load', run, { once: true });
+  img.addEventListener('error', run, { once: true });
+  setTimeout(run, 4000);
+}
+
 function showSkeleton(block) {
   const skeleton = document.createElement('div');
   skeleton.className = 'carousel-hero-skeleton';
@@ -567,8 +586,12 @@ export default function decorate(block) {
   showSkeleton(block);
   block.setAttribute('aria-busy', 'true');
   const prefetched = prefetchBanners(source.source);
-  // Adobe Target decision (optional "Escopo Target" row) in parallel with the banners
-  if (source.targetScope) {
+  // Adobe Target (optional "Escopo Target" row). Signed in: the decision is requested with the
+  // banners and the hero waits for it (the activity changes banners for customers). Not signed
+  // in: the banners show right away and Target is asked once the hero image has loaded, so the
+  // page LCP never waits for the Web SDK.
+  const waitForTarget = !!source.targetScope && isAuthenticated();
+  if (waitForTarget) {
     prefetched.decision = import('./carousel-hero-cf.js')
       .then(({ requestTargetDecision }) => requestTargetDecision(source.targetScope));
     prefetched.decision.catch(() => {});
@@ -582,14 +605,14 @@ export default function decorate(block) {
       shown.onInteract();
     }
   });
-  const render = (result) => {
+  const render = (result, startIndex) => {
     const slides = result.rows.map(({ row, path }, i) => {
       const slide = buildSlide(row, i, true);
       if (path) slide.dataset.cfPath = path;
       return slide;
     });
     const active = block.querySelector('.carousel-hero-slide.active');
-    const index = active ? Number(active.dataset.slideIndex) || 0 : 0;
+    const index = startIndex ?? (active ? Number(active.dataset.slideIndex) || 0 : 0);
     if (teardown) teardown();
     teardown = mount(block, slides, index);
     signature = result.signature;
@@ -599,11 +622,23 @@ export default function decorate(block) {
   };
 
   import('./carousel-hero-cf.js')
-    .then(({ default: loadBannerRows }) => loadBannerRows(source, prefetched)
+    .then(({ default: loadBannerRows, decideLater }) => loadBannerRows(
+      source,
+      prefetched,
+      { deferTarget: !waitForTarget },
+    )
       .then((result) => {
         if (!result) throw new Error('no banners');
         render(result);
         result.onDisplay();
+        if (source.targetScope && !waitForTarget) {
+          afterHeroImage(block, async () => {
+            if (!(await decideLater(source.targetScope))) return;
+            const next = await loadBannerRows(source, null, { refresh: true });
+            // the banner chosen by Target goes first and is the one shown
+            if (next && next.signature !== signature) render(next, 0);
+          });
+        }
         // published edits in AEM show up without a reload: re-check every few seconds while the
         // page is visible (one request at a time); slides are only rebuilt when banners changed
         let timer;

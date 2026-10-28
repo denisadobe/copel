@@ -474,11 +474,11 @@ export async function requestTargetDecision(scope) {
  * requested by carousel-hero.js while the banners load (prefetched.decision), else here.
  */
 async function personalize(items, all, {
-  scope, sourceUrl, refresh, request,
+  scope, sourceUrl, refresh, request, deferTarget,
 }) {
   if (!scope) return { items };
   try {
-    if (!refresh) {
+    if (!refresh && !deferTarget) {
       const propositions = await withTimeout(
         request || requestTargetDecision(scope),
         ALLOY_TIMEOUT_MS,
@@ -505,13 +505,32 @@ async function notify(proposition, eventType) {
 }
 
 /**
+ * Target decision requested after the banners are on screen (carousel-hero.js: visitors who are
+ * not signed in, so the hero image never waits for Target). The decision is kept for the next
+ * loadBannerRows(…, { refresh: true }), which applies it.
+ * @param {string} scope decision scope
+ * @returns {Promise<boolean>} true when the decision changes the banners
+ */
+export async function decideLater(scope) {
+  try {
+    decision = readDecision(await requestTargetDecision(scope), scope);
+  } catch (e) {
+    return false;
+  }
+  if (!decision) return false;
+  notify(decision.proposition, 'decisioning.propositionDisplay');
+  return !!(decision.bannerPath || decision.hide.length);
+}
+
+/**
  * @param {{source?: string, audience?: string, targetScope?: string}} config block config rows
  * @param {{url?: string, json?: Promise<object>, config?: Promise<object|null>,
  *   decision?: Promise<object[]>}|null} [prefetched] requests already started by
  *   carousel-hero.js: the banner list (used when it is for the resolved source URL), the site
  *   config and the Target decision
- * @param {{refresh?: boolean}} [options] refresh: re-check for published changes (no HTTP cache,
- *   no Target decision / impression)
+ * @param {{refresh?: boolean, deferTarget?: boolean}} [options] refresh: re-check for published
+ *   changes (no HTTP cache, no new Target decision / impression); deferTarget: render without
+ *   waiting for Target (decideLater() asks it afterwards)
  * @returns {Promise<{rows: {row: HTMLElement, path: string, item: object,
  *   imageFields: string[]}[], audience: string, signature: string, decidedPath: string,
  *   onDisplay: Function, onInteract: Function}|null>}
@@ -542,6 +561,7 @@ export default async function loadBannerRows(config, prefetched = null, options 
     scope: config.targetScope,
     sourceUrl,
     refresh: options.refresh,
+    deferTarget: options.deferTarget,
     request: prefetched?.decision,
   });
   const assetOrigin = (await publishOrigin) || sourceUrl.origin;
