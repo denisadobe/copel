@@ -102,16 +102,11 @@
           "description": "Decision scope do Adobe Target (opcional)"
         },
         {
-          "component": "select",
+          "component": "multiselect",
           "name": "classes",
-          "label": "Autoplay",
+          "label": "Opções",
           "valueType": "string",
-          "value": "",
           "options": [
-            {
-              "name": "Com autoplay",
-              "value": ""
-            },
             {
               "name": "Sem autoplay",
               "value": "no-autoplay"

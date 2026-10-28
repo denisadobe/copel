@@ -85,16 +85,11 @@
     "id": "accordion-faq",
     "fields": [
       {
-        "component": "select",
+        "component": "multiselect",
         "name": "classes",
         "label": "Comportamento",
         "valueType": "string",
-        "value": "",
         "options": [
-          {
-            "name": "Várias abertas ao mesmo tempo",
-            "value": ""
-          },
           {
             "name": "Uma aberta por vez",
             "value": "single-open"
@@ -265,16 +260,11 @@
     "id": "cards-services",
     "fields": [
       {
-        "component": "select",
+        "component": "multiselect",
         "name": "classes",
         "label": "Layout",
         "valueType": "string",
-        "value": "",
         "options": [
-          {
-            "name": "Padrão (ícone acima)",
-            "value": ""
-          },
           {
             "name": "Compacto (ícone ao lado do rótulo)",
             "value": "compact"
@@ -414,16 +404,11 @@
         "description": "Decision scope do Adobe Target (opcional)"
       },
       {
-        "component": "select",
+        "component": "multiselect",
         "name": "classes",
-        "label": "Autoplay",
+        "label": "Opções",
         "valueType": "string",
-        "value": "",
         "options": [
-          {
-            "name": "Com autoplay",
-            "value": ""
-          },
           {
             "name": "Sem autoplay",
             "value": "no-autoplay"

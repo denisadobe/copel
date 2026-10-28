@@ -49,6 +49,15 @@ main > .section > .carousel-hero-wrapper {
   opacity: 1;
 }
 
+/*
+ * Universal Editor: stacked slides share one box, so a click in the page selected the last
+ * slide (the editor ignores visibility) and the carousel jumped to it. Hidden slides take no
+ * box there; selecting one in the content tree makes it active (ue/scripts/ue.js).
+ */
+.carousel-hero.carousel-hero-editor .carousel-hero-slide:not(.active) {
+  display: none;
+}
+
 .carousel-hero .carousel-hero-slide-image {
   position: absolute;
   inset: 0;

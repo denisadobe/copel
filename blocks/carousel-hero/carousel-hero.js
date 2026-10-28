@@ -549,6 +549,8 @@ export default function decorate(block) {
     : null);
 
   if (IS_UE) {
+    // the editor picks the slide under the click by its box: only the active one keeps a box
+    block.classList.add('carousel-hero-editor');
     const editorTeardown = mountAuthored();
     if (!editorTeardown) showSkeleton(block);
     if (source) renderEditorCf(block, source, editorTeardown);

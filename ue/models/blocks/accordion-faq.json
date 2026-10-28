@@ -40,16 +40,11 @@
       "id": "accordion-faq",
       "fields": [
         {
-          "component": "select",
+          "component": "multiselect",
           "name": "classes",
           "label": "Comportamento",
           "valueType": "string",
-          "value": "",
           "options": [
-            {
-              "name": "Várias abertas ao mesmo tempo",
-              "value": ""
-            },
             {
               "name": "Uma aberta por vez",
               "value": "single-open"

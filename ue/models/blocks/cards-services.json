@@ -44,16 +44,11 @@
       "id": "cards-services",
       "fields": [
         {
-          "component": "select",
+          "component": "multiselect",
           "name": "classes",
           "label": "Layout",
           "valueType": "string",
-          "value": "",
           "options": [
-            {
-              "name": "Padrão (ícone acima)",
-              "value": ""
-            },
             {
               "name": "Compacto (ícone ao lado do rótulo)",
               "value": "compact"
