@@ -15,10 +15,12 @@
  *     ("…?canal={canal}"), else <aem-publish-url>/graphql/execute.json/global/banners-por-canal
  *   - path (/graphql/execute.json/…, global/banners-por-canal;canal=site) -> on aem-publish-url
  *
- * Audience: no personalization in code. Banners are kept when publico is empty, "todos" or the
- * default audience ("visitante"); an authored "Público" row changes that audience. Choosing a
- * banner per person (e.g. the Protege Vida upsell for customers) is left to Adobe Target via the
- * optional "Escopo Target" row.
+ * Audience: no personalization rules in code. Banners are kept when publico is empty, "todos" or
+ * the default audience ("visitante"); an authored "Público" row changes that audience. Choosing
+ * a banner per person (e.g. the Protege Vida upsell for Protege Casa customers) is left to Adobe
+ * Target via the optional "Escopo Target" row: the visitor's Commerce facts go as mbox
+ * parameters (scripts/target-profile.js) and the JSON offer names the banner shown first
+ * ("bannerPath") and the ones hidden ("ocultar").
  */
 
 const FETCH_TIMEOUT_MS = 4000;
@@ -400,6 +402,11 @@ async function byPathUrl(sourceUrl, bannerPath) {
   return toHttpUrl(`${origin}${prefix}${BY_PATH_QUERY};path=${bannerPath}`);
 }
 
+const BANNER_PATH = /^\/content\/dam\/[\w\-/.]+$/;
+
+// decision of this page view: refreshes re-apply it instead of asking Target every few seconds
+let decision = null;
+
 function readPropositionContent(proposition) {
   let content = proposition?.items?.[0]?.data?.content;
   if (typeof content === 'string') content = JSON.parse(content);
@@ -407,45 +414,91 @@ function readPropositionContent(proposition) {
 }
 
 /**
- * Inert unless a scope is configured and Web SDK is on the page: moves the decided banner
- * first, fetching it by path when it is not in the list.
+ * Target JSON offer: { "bannerPath": "/content/dam/…", "ocultar": ["/content/dam/…"] }
+ * (both optional): the banner shown first and the banners taken out for this visitor. The
+ * default experience (default content, no JSON) changes nothing but is still reported.
  */
-async function personalize(items, { scope, sourceUrl, keep }) {
-  if (!scope || typeof window.alloy !== 'function') return { items };
+function readDecision(propositions, scope) {
+  const proposition = propositions.find((p) => p?.scope === scope && p.items?.length)
+    || propositions.find((p) => p?.items?.length);
+  if (!proposition) return null;
+  let content = null;
   try {
-    const result = await withTimeout(
-      window.alloy('sendEvent', { decisionScopes: [scope], renderDecisions: false }),
-      ALLOY_TIMEOUT_MS,
-    );
-    const propositions = Array.isArray(result?.propositions) ? result.propositions : [];
-    const proposition = propositions.find((p) => p?.scope === scope && p.items?.length)
-      || propositions.find((p) => p?.items?.length);
-    const bannerPath = readPropositionContent(proposition)?.bannerPath;
-    if (typeof bannerPath !== 'string' || !/^\/content\/dam\/[\w\-/.]+$/.test(bannerPath)) return { items };
+    content = readPropositionContent(proposition);
+  } catch (e) {
+    // not JSON (default content): no change
+  }
+  const bannerPath = typeof content?.bannerPath === 'string' && BANNER_PATH.test(content.bannerPath)
+    ? content.bannerPath : '';
+  const hide = (Array.isArray(content?.ocultar) ? content.ocultar : [content?.ocultar])
+    .filter((path) => typeof path === 'string' && BANNER_PATH.test(path));
+  return { bannerPath, hide, proposition };
+}
 
-    const index = items.findIndex((item) => item._path === bannerPath);
-    if (index >= 0) {
-      return { items: [items[index], ...items.filter((_, i) => i !== index)], proposition };
-    }
+/**
+ * Applies a decision: hidden banners out, the chosen one first. The chosen banner may be one
+ * the default audience doesn't see (e.g. publico "cliente-protege-casa"): it is taken from the
+ * whole list, else fetched by path.
+ */
+async function applyDecision(items, all, { bannerPath, hide }, sourceUrl) {
+  let ordered = items.filter((item) => !hide.includes(item._path));
+  if (!bannerPath) return ordered;
+  ordered = ordered.filter((item) => item._path !== bannerPath);
+  let chosen = all.find((item) => item._path === bannerPath);
+  if (!chosen) {
     const url = await byPathUrl(sourceUrl, bannerPath);
-    if (!url) return { items };
-    const [extra] = extractItems(await fetchJson(url, FETCH_TIMEOUT_MS)).filter(keep);
-    if (!extra) return { items };
-    return { items: [extra, ...items], proposition };
+    if (url) {
+      [chosen] = extractItems(await fetchJson(url, FETCH_TIMEOUT_MS))
+        .filter((item) => isActive(item, new Date()));
+    }
+  }
+  return chosen ? [chosen, ...ordered] : ordered;
+}
+
+/**
+ * Target decision for a scope, with the visitor's Commerce facts as mbox parameters
+ * (scripts/target-profile.js). Rejects when the Web SDK is not configured.
+ * @param {string} scope decision scope
+ * @returns {Promise<Object[]>} propositions
+ */
+export async function requestTargetDecision(scope) {
+  const [{ requestDecision }, { getTargetParams }] = await Promise.all([
+    import('../../scripts/web-sdk.js'),
+    import('../../scripts/target-profile.js'),
+  ]);
+  return requestDecision(scope, await getTargetParams());
+}
+
+/**
+ * Inert unless the block has an "Escopo Target" and the Web SDK is configured; the decision is
+ * requested by carousel-hero.js while the banners load (prefetched.decision), else here.
+ */
+async function personalize(items, all, {
+  scope, sourceUrl, refresh, request,
+}) {
+  if (!scope) return { items };
+  try {
+    if (!refresh) {
+      const propositions = await withTimeout(
+        request || requestTargetDecision(scope),
+        ALLOY_TIMEOUT_MS,
+      );
+      decision = readDecision(propositions, scope);
+    }
+    if (!decision) return { items };
+    return {
+      items: await applyDecision(items, all, decision, sourceUrl),
+      proposition: decision.proposition,
+    };
   } catch (e) {
     return { items };
   }
 }
 
-function recordDisplay(proposition) {
+async function notify(proposition, eventType) {
   try {
-    const { id, scope, scopeDetails } = proposition;
-    Promise.resolve(window.alloy('sendEvent', {
-      xdm: {
-        eventType: 'decisioning.propositionDisplay',
-        _experience: { decisioning: { propositions: [{ id, scope, scopeDetails }] } },
-      },
-    })).catch(() => {});
+    const { notifyProposition } = await import('../../scripts/web-sdk.js');
+    notifyProposition(proposition, eventType);
   } catch (e) {
     // ignore
   }
@@ -453,14 +506,15 @@ function recordDisplay(proposition) {
 
 /**
  * @param {{source?: string, audience?: string, targetScope?: string}} config block config rows
- * @param {{url?: string, json?: Promise<object>, config?: Promise<object|null>}|null} [prefetched]
- *   requests already started by carousel-hero.js: the banner list (used when it is for the
- *   resolved source URL) or the site config
+ * @param {{url?: string, json?: Promise<object>, config?: Promise<object|null>,
+ *   decision?: Promise<object[]>}|null} [prefetched] requests already started by
+ *   carousel-hero.js: the banner list (used when it is for the resolved source URL), the site
+ *   config and the Target decision
  * @param {{refresh?: boolean}} [options] refresh: re-check for published changes (no HTTP cache,
  *   no Target decision / impression)
  * @returns {Promise<{rows: {row: HTMLElement, path: string, item: object,
- *   imageFields: string[]}[], audience: string, signature: string,
- *   onDisplay: Function}|null>}
+ *   imageFields: string[]}[], audience: string, signature: string, decidedPath: string,
+ *   onDisplay: Function, onInteract: Function}|null>}
  *   null when there is nothing to render (caller keeps the authored fallback); signature changes
  *   only when the rendered banners change
  */
@@ -478,26 +532,29 @@ export default async function loadBannerRows(config, prefetched = null, options 
     : await fetchJson(sourceUrl, FETCH_TIMEOUT_MS, options.refresh ? { cache: 'no-store' } : {});
 
   const now = new Date();
-  const items = byOrder(extractItems(json)
-    .filter((item) => isActive(item, now) && matchesAudience(item, audience)));
+  const all = extractItems(json).filter((item) => isActive(item, now));
+  const items = byOrder(all.filter((item) => matchesAudience(item, audience)));
   if (!items.length) return null;
 
   // a banner chosen by Target is shown whatever its publico (Target owns the per-person choice);
-  // refreshes keep the first decision instead of asking Target again every few seconds
-  const { items: ordered, proposition } = options.refresh
-    ? { items, proposition: null }
-    : await personalize(items, {
-      scope: config.targetScope,
-      sourceUrl,
-      keep: (item) => isActive(item, now),
-    });
+  // refreshes re-apply the first decision instead of asking Target again every few seconds
+  const { items: ordered, proposition } = await personalize(items, all, {
+    scope: config.targetScope,
+    sourceUrl,
+    refresh: options.refresh,
+    request: prefetched?.decision,
+  });
   const assetOrigin = (await publishOrigin) || sourceUrl.origin;
   const rows = ordered.map((item) => buildRow(item, assetOrigin)).filter(Boolean);
   if (!rows.length) return null;
+  const decidedPath = proposition && decision?.bannerPath ? decision.bannerPath : '';
   return {
     rows,
     audience,
     signature: JSON.stringify(ordered),
-    onDisplay: proposition ? () => recordDisplay(proposition) : () => {},
+    decidedPath,
+    onDisplay: proposition && !options.refresh
+      ? () => notify(proposition, 'decisioning.propositionDisplay') : () => {},
+    onInteract: proposition ? () => notify(proposition, 'decisioning.propositionInteract') : () => {},
   };
 }

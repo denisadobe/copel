@@ -10,8 +10,9 @@
  */
 import { loadCSS, loadScript } from './aem.js';
 import { sitePath } from './commerce-session.js';
+import loadWebSdk from './web-sdk.js';
 import {
-  ALLOY_CONFIG, ALLOY_SRC, STYLE_OVERRIDES, STYLE_URL, WEB_CLIENT_SRC, getConciergeMode,
+  STYLE_OVERRIDES, STYLE_URL, WEB_CLIENT_SRC, getConciergeMode,
 } from './brand-concierge-config.js';
 
 export { getConciergeMode };
@@ -54,18 +55,6 @@ async function loadStyling() {
   return styling;
 }
 
-// Web SDK command queue (same as the "alloy" base code of the install script)
-function installAlloyStub() {
-  if (window.alloy) return;
-  // eslint-disable-next-line no-underscore-dangle
-  (window.__alloyNS = window.__alloyNS || []).push('alloy');
-  const alloy = (...args) => new Promise((resolve, reject) => {
-    alloy.q.push([resolve, reject, args]);
-  });
-  alloy.q = [];
-  window.alloy = alloy;
-}
-
 function whenReady(timeout = 15000) {
   return new Promise((resolve, reject) => {
     const start = Date.now();
@@ -81,10 +70,9 @@ function whenReady(timeout = 15000) {
 function loadRuntime() {
   if (!runtime) {
     runtime = (async () => {
-      installAlloyStub();
-      await loadScript(ALLOY_SRC);
+      // Web SDK shared with Adobe Target (scripts/web-sdk.js): configured once per page
+      await loadWebSdk();
       await loadScript(WEB_CLIENT_SRC);
-      window.alloy('configure', ALLOY_CONFIG);
       window.alloy('sendEvent', {});
       await whenReady();
     })();

@@ -33,7 +33,8 @@ import { getStorefrontConfig } from '../../scripts/commerce-session.js';
  *                            or a persisted-query path on "aem-publish-url";
  *                            empty = authored slides only
  *   Público / Audience       overrides the detected audience (publicoAtual)
- *   Escopo Target / Target scope   Adobe Target decision scope (alloy)
+ *   Escopo Target / Target scope   Adobe Target decision scope (Web SDK, form-based activity;
+ *                            JSON offer { bannerPath, ocultar }, see carousel-hero-cf.js)
  * are removed; with a Fonte, slides then come from banner Content Fragments
  * (carousel-hero-cf.js) and the remaining authored rows are the fallback.
  * Keys are matched case-, accent-, space- and dash-insensitively, so the Universal Editor
@@ -564,7 +565,21 @@ export default function decorate(block) {
   showSkeleton(block);
   block.setAttribute('aria-busy', 'true');
   const prefetched = prefetchBanners(source.source);
+  // Adobe Target decision (optional "Escopo Target" row) in parallel with the banners
+  if (source.targetScope) {
+    prefetched.decision = import('./carousel-hero-cf.js')
+      .then(({ requestTargetDecision }) => requestTargetDecision(source.targetScope));
+    prefetched.decision.catch(() => {});
+  }
   let signature = '';
+  let shown = null;
+  // a click on a link of the banner chosen by Target counts as a conversion of the activity
+  block.addEventListener('click', (e) => {
+    const slide = e.target.closest('.carousel-hero-slide');
+    if (shown?.decidedPath && slide?.dataset.cfPath === shown.decidedPath && e.target.closest('a[href]')) {
+      shown.onInteract();
+    }
+  });
   const render = (result) => {
     const slides = result.rows.map(({ row, path }, i) => {
       const slide = buildSlide(row, i, true);
@@ -576,6 +591,7 @@ export default function decorate(block) {
     if (teardown) teardown();
     teardown = mount(block, slides, index);
     signature = result.signature;
+    shown = result;
     block.dataset.source = 'content-fragments';
     block.dataset.publico = result.audience;
   };

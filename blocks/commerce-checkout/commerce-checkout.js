@@ -15,6 +15,7 @@ import {
   sanitizeName, signOut,
 } from '../../scripts/commerce.js';
 import renderOrder from '../../scripts/commerce-order.js';
+import { markProtegeCasaCustomer } from '../../scripts/target-profile.js';
 import { IS_UE, showEditorPlaceholder } from '../../scripts/ue-utils.js';
 
 /** Offline method whose Admin title is "Cobrança na fatura de energia". */
@@ -238,6 +239,8 @@ export default async function decorate(block) {
 
     // order placed: confirmation in place, URL of the order details (reload-safe)
     events.on('order/placed', async (orderData) => {
+      // Adobe Target: the home now shows the post-sale banner (scripts/target-profile.js)
+      markProtegeCasaCustomer();
       window.history.pushState({}, '', getOrderLink(orderData.number));
       // the page now shows the order: heading + title of a confirmation
       const heading = document.querySelector('main h1');

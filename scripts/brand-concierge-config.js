@@ -31,6 +31,12 @@ export const ALLOY_CONFIG = {
   conversation: { region: 'va7' },
 };
 
+// Adobe Target property token of the Copel workspace (Target > Administration > Properties),
+// sent as a datastream override: activities of the other demo on the shared datastream stay
+// apart. Empty = the datastream's default property. The token must be listed in the datastream
+// (Adobe Target service > Property token overrides).
+export const TARGET_PROPERTY_TOKEN = '';
+
 /** True when the environment values needed to load Brand Concierge are present. */
 export const isConfigured = () => !!(ALLOY_CONFIG.datastreamId && ALLOY_CONFIG.orgId);
 
