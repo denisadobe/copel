@@ -1,3 +1,4 @@
 helix-importer-ui
 *.min.js
 scripts/__dropins__/*
+scripts/at.js
