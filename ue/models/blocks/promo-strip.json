@@ -1,0 +1,21 @@
+{
+  "definitions": [
+    {
+      "title": "Faixa de promoção (Adobe Target)",
+      "id": "promo-strip",
+      "model": "promo-strip",
+      "plugins": {
+        "da": {
+          "unsafeHTML": "<div class=\"promo-strip\"></div>"
+        }
+      }
+    }
+  ],
+  "models": [
+    {
+      "id": "promo-strip",
+      "fields": []
+    }
+  ],
+  "filters": []
+}

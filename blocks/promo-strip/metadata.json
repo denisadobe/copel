@@ -1,0 +1,11 @@
+{
+  "variantName": "promo-strip",
+  "baseBlock": "promo-strip",
+  "canonicalModel": "standalone",
+  "visualCharacteristics": "Low orange strip (one line on desktop: bold title, text, pill button on the right; stacked on mobile). Invisible and takes no space while empty.",
+  "contentPattern": "Header row only. No authored content: Adobe Target (at.js VEC activity) injects div.promo-strip__inner with strong (title), span (text) and a.promo-strip__cta (button) into #promo-strip.",
+  "options": [],
+  "memberVariantIds": ["promo-strip"],
+  "usage": "Home page, below the main banner (same section): journey-based promotion (signed in: APP Copel; bought Protege Casa: Protege Vida).",
+  "reuseGuidance": "One per page. Keep the id #promo-strip (VEC selector). For authored promotions use another block: this one is always emptied."
+}

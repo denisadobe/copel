@@ -5,7 +5,8 @@
  * de energia", offline method checkmo) and confirms. Commerce always requires a billing
  * address (with telephone), so it is filled in automatically: the customer's default billing
  * address or a neutral address with the customer's name.
- * After the order: confirmation in place, the URL moves to the order details page.
+ * After the order: confirmation in place, the URL moves to the order details page, marked
+ * "pedido-confirmado" for Adobe Target (at.js, profile script comprou_seguro).
  * Not signed in: login page and back. Empty cart: message with a link to the plans.
  * No authoring fields.
  */
@@ -32,6 +33,18 @@ const EXPRESS_BILLING_ADDRESS = {
 };
 const DEFAULT_TELEPHONE = '4133310000';
 const CONFIRMED_TITLE = 'Pedido confirmado';
+// in the URL after an order: what the Target profile script "comprou_seguro" looks for
+const CONFIRMED_PARAM = 'pedido-confirmado';
+
+/**
+ * Adobe Target (at.js): the page does not reload after the order, so the confirmation URL is
+ * sent as a page-load request for the profile scripts to see it.
+ */
+function notifyTargetConfirmation() {
+  const target = window.adobe?.target;
+  if (typeof target?.getOffers !== 'function') return;
+  Promise.resolve(target.getOffers({ request: { execute: { pageLoad: {} } } })).catch(() => {});
+}
 
 const el = (name, tag = 'div') => {
   const e = document.createElement(tag);
@@ -241,7 +254,8 @@ export default async function decorate(block) {
     events.on('order/placed', async (orderData) => {
       // Adobe Target: the home now shows the post-sale banner (scripts/target-profile.js)
       markProtegeCasaCustomer();
-      window.history.pushState({}, '', getOrderLink(orderData.number));
+      window.history.pushState({}, '', `${getOrderLink(orderData.number)}&${CONFIRMED_PARAM}=1`);
+      notifyTargetConfirmation();
       // the page now shows the order: heading + title of a confirmation
       const heading = document.querySelector('main h1');
       if (heading) heading.textContent = CONFIRMED_TITLE;

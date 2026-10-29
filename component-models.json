@@ -703,6 +703,10 @@
     ]
   },
   {
+    "id": "promo-strip",
+    "fields": []
+  },
+  {
     "id": "commerce-account",
     "fields": []
   },

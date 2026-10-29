@@ -1,0 +1,81 @@
+/* class names promo-strip__inner / promo-strip__cta come from the Adobe Target offer markup */
+/* stylelint-disable selector-class-pattern */
+
+.promo-strip {
+  margin: 16px 0 0;
+}
+
+/* empty until Adobe Target fills it: no strip, no space */
+.promo-strip:empty {
+  display: none;
+}
+
+.promo-strip .promo-strip__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 16px 20px;
+  border-radius: var(--radius-m);
+  background: var(--copel-orange);
+  color: var(--copel-ink);
+  font-size: var(--body-font-size-s);
+  line-height: 1.4;
+}
+
+.promo-strip .promo-strip__inner strong {
+  font-family: var(--heading-font-family);
+  font-size: var(--heading-font-size-s);
+  font-weight: var(--heading-font-weight);
+  font-synthesis: none;
+}
+
+.promo-strip .promo-strip__cta:any-link {
+  display: inline-block;
+  padding: 8px 20px;
+  border-radius: 999px;
+  background: var(--copel-orange-ink);
+  color: #fff;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.promo-strip .promo-strip__cta:hover {
+  background: var(--copel-orange-ink-hover);
+  color: #fff;
+  text-decoration: none;
+}
+
+.promo-strip .promo-strip__cta:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* one line on desktop: title, text, button on the right */
+@media (width >= 900px) {
+  .promo-strip .promo-strip__inner {
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 24px;
+  }
+
+  .promo-strip .promo-strip__cta:any-link {
+    margin-left: auto;
+  }
+}
+
+/* Universal Editor: placeholder where Target puts the strip */
+.promo-strip.promo-strip-editor {
+  display: block;
+  padding: 12px 16px;
+  border: 2px dashed var(--copel-orange);
+  border-radius: var(--radius-m);
+  color: var(--copel-gray);
+  font-size: var(--body-font-size-xs);
+}
+
+.promo-strip.promo-strip-editor::before {
+  content: 'Faixa de promoção: preenchida pelo Adobe Target (vazia para visitantes anônimos)';
+}
