@@ -41,6 +41,15 @@ if (window.trustedTypes && window.trustedTypes.createPolicy) {
   });
 }
 
+// Adobe Target (at.js, VEC activity on #promo-strip): it sets innerHTML when it starts, so it is
+// loaded right after the default policy above; targetGlobalSettings is in head.html
+if (!IS_UE) {
+  const atjs = document.createElement('script');
+  atjs.src = '/scripts/at.js';
+  atjs.async = true;
+  document.head.append(atjs);
+}
+
 /**
  * load fonts.css and set a session storage flag
  */
