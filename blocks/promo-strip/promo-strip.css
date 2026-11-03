@@ -16,8 +16,9 @@ main > .section > .promo-strip-wrapper {
   display: none;
 }
 
-/* never above the sticky header (z-index 100), even if the offer forces a z-index */
-main > .section > .promo-strip-wrapper > .promo-strip {
+/* never above the sticky header (z-index 100), even if the offer forces a z-index on
+   #promo-strip (an id selector: only an id beats it) */
+main > .section > .promo-strip-wrapper > #promo-strip.promo-strip {
   /* stylelint-disable-next-line declaration-no-important */
   z-index: 1 !important;
 }
