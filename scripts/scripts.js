@@ -41,14 +41,28 @@ if (window.trustedTypes && window.trustedTypes.createPolicy) {
   });
 }
 
-// Adobe Target (at.js, VEC activity on #promo-strip): it sets innerHTML when it starts, so it is
-// loaded right after the default policy above; targetGlobalSettings is in head.html
-if (!IS_UE) {
+/**
+ * Adobe Target (at.js, VEC activity on #promo-strip). It sets innerHTML when it starts, so it is
+ * loaded after the default policy above (targetGlobalSettings is in head.html). Every page view
+ * sends the visitor's Commerce facts as profile parameters (scripts/target-profile.js); a
+ * signed-in customer not checked yet in this session waits for the orders check (max 1.5 s).
+ */
+async function loadAtjs() {
+  const { checkProtegeCasaCustomer, getAtjsProfile } = await import('./target-profile.js');
+  await Promise.race([
+    checkProtegeCasaCustomer().catch(() => {}),
+    new Promise((resolve) => { setTimeout(resolve, 1500); }),
+  ]);
+  window.targetPageParams = () => Object.fromEntries(
+    Object.entries(getAtjsProfile()).map(([name, value]) => [`profile.${name}`, value]),
+  );
   const atjs = document.createElement('script');
   atjs.src = '/scripts/at.js';
   atjs.async = true;
   document.head.append(atjs);
 }
+
+if (!IS_UE) loadAtjs();
 
 /**
  * load fonts.css and set a session storage flag

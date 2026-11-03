@@ -92,3 +92,34 @@ export function markProtegeCasaCustomer() {
   const token = getUserToken();
   if (token) writeCache(token, true);
 }
+
+/* ---------------------------------------------------------------------------------------- */
+/* at.js profile parameters (activity "Copel | Site | Promo por jornada")                    */
+/* ---------------------------------------------------------------------------------------- */
+
+/**
+ * Profile attributes the at.js audiences read ("Copel | Logado": copel_logado, "Copel | Comprou
+ * seguro": copel_comprou_seguro), from Commerce instead of the visited URL:
+ *   copel_logado          "true" / "false": the Commerce sign-in of this page view
+ *   copel_comprou_seguro  "true" / "false" once known for the signed-in customer (Protege Casa
+ *                         order); "false" when signed out; left out while not checked yet
+ * @returns {Object<string, string>} attribute -> value (no "profile." prefix)
+ */
+export function getAtjsProfile() {
+  const token = getUserToken();
+  if (!token) return { copel_logado: 'false', copel_comprou_seguro: 'false' };
+  const cached = readCache(token);
+  return cached
+    ? { copel_logado: 'true', copel_comprou_seguro: String(!!cached.clienteProtegeCasa) }
+    : { copel_logado: 'true' };
+}
+
+/**
+ * Signed-in customer whose orders were not checked in this session yet: checks them (one
+ * Commerce request, cached), so the first page view already carries copel_comprou_seguro.
+ * @returns {Promise<void>}
+ */
+export async function checkProtegeCasaCustomer() {
+  const token = getUserToken();
+  if (token && !readCache(token)) await getTargetParams();
+}

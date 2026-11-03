@@ -5,8 +5,8 @@
  * de energia", offline method checkmo) and confirms. Commerce always requires a billing
  * address (with telephone), so it is filled in automatically: the customer's default billing
  * address or a neutral address with the customer's name.
- * After the order: confirmation in place, the URL moves to the order details page, marked
- * "pedido-confirmado" for Adobe Target (at.js, profile script comprou_seguro).
+ * After the order: confirmation in place, the URL moves to the order details page (marked
+ * "pedido-confirmado") and Adobe Target (at.js) gets the profile copel_comprou_seguro "true".
  * Not signed in: login page and back. Empty cart: message with a link to the plans.
  * No authoring fields.
  */
@@ -16,7 +16,7 @@ import {
   sanitizeName, signOut,
 } from '../../scripts/commerce.js';
 import renderOrder from '../../scripts/commerce-order.js';
-import { markProtegeCasaCustomer } from '../../scripts/target-profile.js';
+import { getAtjsProfile, markProtegeCasaCustomer } from '../../scripts/target-profile.js';
 import { IS_UE, showEditorPlaceholder } from '../../scripts/ue-utils.js';
 
 /** Offline method whose Admin title is "Cobrança na fatura de energia". */
@@ -33,17 +33,20 @@ const EXPRESS_BILLING_ADDRESS = {
 };
 const DEFAULT_TELEPHONE = '4133310000';
 const CONFIRMED_TITLE = 'Pedido confirmado';
-// in the URL after an order: what the Target profile script "comprou_seguro" looks for
+// in the URL after an order (order details page reached right after the purchase)
 const CONFIRMED_PARAM = 'pedido-confirmado';
 
 /**
- * Adobe Target (at.js): the page does not reload after the order, so the confirmation URL is
- * sent as a page-load request for the profile scripts to see it.
+ * Adobe Target (at.js): the page does not reload after the order, so the confirmation is sent
+ * as a page-load request with the profile (copel_comprou_seguro "true" after
+ * markProtegeCasaCustomer) for the audiences of the next page view.
  */
 function notifyTargetConfirmation() {
   const target = window.adobe?.target;
   if (typeof target?.getOffers !== 'function') return;
-  Promise.resolve(target.getOffers({ request: { execute: { pageLoad: {} } } })).catch(() => {});
+  Promise.resolve(target.getOffers({
+    request: { execute: { pageLoad: { profileParameters: getAtjsProfile() } } },
+  })).catch(() => {});
 }
 
 const el = (name, tag = 'div') => {
