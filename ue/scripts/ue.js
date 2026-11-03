@@ -9,7 +9,8 @@
  * (innerHTML of the text/richtext element, src of the image), so a decorated block loses its
  * structure and styles. The edited block (or default-content wrapper) is instead taken again
  * from the page as the editor serves it after the save, decorated and loaded; the event stops
- * at body. Anything else (sections, page) keeps the editor's default (a page reload).
+ * at body. Anything else (block options such as styles, sections, page) keeps the editor's
+ * default (a page reload, which also refreshes its properties panel).
  *
  * Second connection (AEM author): the banner Content Fragments rendered by carousel-hero are
  * instrumented as urn:aemconnection:<fragment>/jcr:content/data/master. This file adds the
@@ -227,11 +228,26 @@ async function renderAgain(part) {
   await decorateEditorContent(el);
 }
 
+const IN_PLACE_TYPES = ['text', 'richtext', 'media'];
+
+/**
+ * Whether the editor would apply this patch in place (as cors.js: the element of the patched
+ * prop is text, richtext or media). Anything else (e.g. "classes", the block options) makes the
+ * editor reload the page, which also refreshes its properties panel: left to the editor, or the
+ * panel keeps the old values and the next change fails ("Failed to apply patch").
+ */
+function patchedInPlace(target, name) {
+  let el = target;
+  if (name && el?.getAttribute?.('data-aue-prop') !== name) el = el?.querySelector?.(`[data-aue-prop="${name}"]`);
+  return IN_PLACE_TYPES.includes(el?.getAttribute('data-aue-type'));
+}
+
 function setupDaContentHandlers() {
   ['aue:content-patch', 'aue:content-update'].forEach((type) => {
     document.body.addEventListener(type, (event) => {
       const resource = event.detail?.request?.target?.resource;
       if (!resource?.startsWith(AB_PREFIX)) return;
+      if (type === 'aue:content-patch' && !patchedInPlace(event.target, event.detail?.patch?.name)) return;
       const part = editedPart(event.target);
       if (!part) return; // section, page metadata…: editor default
       event.stopPropagation();
