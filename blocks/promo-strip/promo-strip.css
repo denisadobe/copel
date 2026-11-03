@@ -1,6 +1,12 @@
 /* class names promo-strip__inner / promo-strip__cta come from the Adobe Target offer markup */
 /* stylelint-disable selector-class-pattern */
 
+/* its own stacking context in the page flow, between the hero and the next section (whose
+   overlap over the hero is off while the strip is filled, see cards-services.css) */
+main > .section > .promo-strip-wrapper {
+  position: relative;
+}
+
 .promo-strip {
   margin: 16px 0 0;
 }
@@ -8,6 +14,12 @@
 /* empty until Adobe Target fills it: no strip, no space */
 .promo-strip:empty {
   display: none;
+}
+
+/* never above the sticky header (z-index 100), even if the offer forces a z-index */
+main > .section > .promo-strip-wrapper > .promo-strip {
+  /* stylelint-disable-next-line declaration-no-important */
+  z-index: 1 !important;
 }
 
 .promo-strip .promo-strip__inner {
