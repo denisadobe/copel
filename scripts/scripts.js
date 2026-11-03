@@ -16,53 +16,59 @@ import {
 } from './aem.js';
 import { IS_UE } from './ue-utils.js';
 
-if (window.trustedTypes && window.trustedTypes.createPolicy) {
-  const innerTT = window.trustedTypes.createPolicy('tt-inner', {
-    createHTML: (s) => s, // avoid stack overflow
-  });
+// The Trusted Types default policy and the at.js start are inline in head.html (before any
+// script that sets innerHTML)
 
-  window.trustedTypes.createPolicy('default', {
-    createHTML: (input, type, sink) => {
-      let processedInput = input;
-      if (/srcdoc\s*=/i.test(processedInput)) {
-        const doc = new DOMParser().parseFromString(innerTT.createHTML(processedInput), 'text/html');
-        doc.querySelectorAll('iframe[srcdoc]').forEach((el) => el.removeAttribute('srcdoc'));
-        processedInput = doc.body.innerHTML;
-      }
-      if (sink.includes('createContextualFragment') || sink.includes('Document write')) {
-        const doc = new DOMParser().parseFromString(innerTT.createHTML(processedInput), 'text/html');
-        doc.querySelectorAll('script').forEach((el) => el.remove());
-        processedInput = doc.body.innerHTML;
-      }
-      return processedInput;
-    },
-    createScriptURL: (input) => input,
-    createScript: (input) => input,
+const ATJS_WAIT_MS = 5000;
+const ORDERS_WAIT_MS = 1500;
+
+/** window.adobe.target once at.js (started in head.html) is ready, else null. */
+function waitForAtjs() {
+  return new Promise((resolve) => {
+    const started = Date.now();
+    const check = () => {
+      if (typeof window.adobe?.target?.getOffers === 'function') resolve(window.adobe.target);
+      else if (Date.now() - started > ATJS_WAIT_MS) resolve(null);
+      else setTimeout(check, 25);
+    };
+    check();
   });
 }
 
 /**
- * Adobe Target (at.js, VEC activity on #promo-strip). It sets innerHTML when it starts, so it is
- * loaded after the default policy above (targetGlobalSettings is in head.html). Every page view
- * sends the visitor's Commerce facts as profile parameters (scripts/target-profile.js); a
- * signed-in customer not checked yet in this session waits for the orders check (max 1.5 s).
+ * Adobe Target profile (scripts/target-profile.js). Usual case: head.html already sent the
+ * stored purchase state, which is only corrected in the background for the next pages. Signed-in
+ * customer with no stored state (head.html turned the automatic page-load request off): one
+ * orders check (max 1.5 s), then the page-load decision is requested and applied here, so the
+ * Target session starts with the right experience.
  */
-async function loadAtjs() {
-  const { checkProtegeCasaCustomer, getAtjsProfile } = await import('./target-profile.js');
+async function syncTargetProfile() {
+  const {
+    checkProtegeCasaCustomer, getAtjsProfile, refreshProtegeCasaCustomer,
+  } = await import('./target-profile.js');
+  if (window.targetGlobalSettings?.pageLoadEnabled !== false) {
+    window.addEventListener('load', () => {
+      setTimeout(() => refreshProtegeCasaCustomer().catch(() => {}), 3000);
+    }, { once: true });
+    return;
+  }
   await Promise.race([
     checkProtegeCasaCustomer().catch(() => {}),
-    new Promise((resolve) => { setTimeout(resolve, 1500); }),
+    new Promise((resolve) => { setTimeout(resolve, ORDERS_WAIT_MS); }),
   ]);
-  window.targetPageParams = () => Object.fromEntries(
-    Object.entries(getAtjsProfile()).map(([name, value]) => [`profile.${name}`, value]),
-  );
-  const atjs = document.createElement('script');
-  atjs.src = '/scripts/at.js';
-  atjs.async = true;
-  document.head.append(atjs);
+  const target = await waitForAtjs();
+  if (!target) return;
+  try {
+    const response = await target.getOffers({
+      request: { execute: { pageLoad: { profileParameters: getAtjsProfile() } } },
+    });
+    await target.applyOffers({ response });
+  } catch (e) {
+    // no decision: the strip stays empty
+  }
 }
 
-if (!IS_UE) loadAtjs();
+if (!IS_UE) syncTargetProfile();
 
 /**
  * load fonts.css and set a session storage flag

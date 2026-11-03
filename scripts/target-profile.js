@@ -5,12 +5,16 @@
  *   logado               "true" / "false"
  *   clienteProtegeCasa   "true" when the signed-in customer has a Seguro Protege Casa order
  *   canal                "site"
- * The order check is one GraphQL request per sign-in, cached for the session (per token) and
- * set right away when an order is placed (markProtegeCasaCustomer, checkout confirmation).
+ * The purchase state is kept in localStorage for the signed-in customer (per token, so every tab
+ * and the next pages use it right away): set when an order is placed (markProtegeCasaCustomer,
+ * checkout confirmation), else from one GraphQL orders request; head.html reads the same entry
+ * for the at.js page-load request and refreshProtegeCasaCustomer() corrects it in the background.
  */
 import { getStorefrontConfig, getUserToken } from './commerce-session.js';
 
+// also read by the inline at.js setup in head.html (same key and shape)
 const CACHE_KEY = 'copel-target-profile';
+const REFRESHED_KEY = 'copel-target-profile-refreshed';
 const ORDERS_TIMEOUT_MS = 3000;
 const PROTEGE_CASA_SKU = /^protege-casa/i;
 const ORDERS_QUERY = 'query COPEL_TARGET_ORDERS { customer { orders(pageSize: 50) { items { items { product_sku } } } } }';
@@ -20,7 +24,7 @@ const tokenKey = (token) => token.slice(-16);
 
 function readCache(token) {
   try {
-    const cached = JSON.parse(sessionStorage.getItem(CACHE_KEY));
+    const cached = JSON.parse(localStorage.getItem(CACHE_KEY));
     return cached?.token === tokenKey(token) ? cached : null;
   } catch (e) {
     return null;
@@ -30,7 +34,7 @@ function readCache(token) {
 function writeCache(token, clienteProtegeCasa) {
   try {
     const entry = { token: tokenKey(token), clienteProtegeCasa };
-    sessionStorage.setItem(CACHE_KEY, JSON.stringify(entry));
+    localStorage.setItem(CACHE_KEY, JSON.stringify(entry));
   } catch (e) {
     // storage unavailable: checked again on the next page
   }
@@ -115,11 +119,32 @@ export function getAtjsProfile() {
 }
 
 /**
- * Signed-in customer whose orders were not checked in this session yet: checks them (one
- * Commerce request, cached), so the first page view already carries copel_comprou_seguro.
+ * Signed-in customer with no stored purchase state yet: checks the orders (one Commerce request,
+ * stored for the next pages).
  * @returns {Promise<void>}
  */
 export async function checkProtegeCasaCustomer() {
   const token = getUserToken();
   if (token && !readCache(token)) await getTargetParams();
+}
+
+/**
+ * Background correction of a stored purchase state (e.g. an order placed in another channel):
+ * once per browser session and sign-in, never before the Target request.
+ * @returns {Promise<void>}
+ */
+export async function refreshProtegeCasaCustomer() {
+  const token = getUserToken();
+  if (!token || !readCache(token)) return;
+  try {
+    if (sessionStorage.getItem(REFRESHED_KEY) === tokenKey(token)) return;
+    sessionStorage.setItem(REFRESHED_KEY, tokenKey(token));
+  } catch (e) {
+    // storage unavailable: refresh anyway
+  }
+  try {
+    writeCache(token, await hasProtegeCasaOrder(token));
+  } catch (e) {
+    // Commerce unavailable: keep the stored state
+  }
 }

@@ -20,20 +20,13 @@ in the editor a dashed placeholder shows where Target puts the strip.
 ## Behaviour
 
 - The block gets `id="promo-strip"`, the selector of the VEC activity. Do not rename it.
-- `.promo-strip:empty { display: none }`: no strip and no space until Target fills it.
-- While at.js waits for Target only the strip is hidden (`targetGlobalSettings.bodyHiddenStyle`
-  in `head.html`), never the page.
-
-Markup injected by Target:
-
-```html
-<div class="promo-strip__inner">
-  <strong>título</strong>
-  <span>texto</span>
-  <a class="promo-strip__cta" href="...">botão</a>
-</div>
-```
-
-One line on desktop (title, text, button on the right), stacked on mobile. Orange background
-`--copel-orange` (#F5821E), text `--copel-ink` (#151C21), button `--copel-orange-ink` (#C85000)
-with white text.
+- `.promo-strip:empty { display: none }`: anonymous visitors get no strip and no space.
+- Signed-in visitors always get a strip (both experiences of the activity have one): the block
+  adds `promo-strip-expected`, which holds a min-height from the first render (no layout shift),
+  and the services cards stop overlapping the hero. Released after 6 s if no offer arrives.
+- The offer fades in (opacity, 250 ms). Its markup (`.promo-strip__inner`, `.promo-strip__cta`)
+  brings its own inline styles; the site CSS does not style the inside of the strip.
+- `z-index` capped at 1 (below the sticky header), even if the offer forces one on `#promo-strip`.
+- at.js starts inline in `head.html` (no body hiding), with the profile parameters
+  `copel_logado` / `copel_comprou_seguro` read synchronously from the sign-in cookie and the
+  stored purchase state (`scripts/target-profile.js`, localStorage).

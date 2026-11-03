@@ -167,9 +167,9 @@
     --cards-services-overlap: 96px;
   }
 
-  /* overlap the bottom of a hero carousel that sits directly above (not while a filled
-     promo strip sits below the hero: it stays visible between the two) */
-  main > .carousel-hero-container:not(:has(.promo-strip:not(:empty)))
+  /* overlap the bottom of a hero carousel that sits directly above (not while a promo strip
+     is filled or expected below the hero: it stays visible between the two) */
+  main > .carousel-hero-container:not(:has(.promo-strip:not(:empty), .promo-strip-expected))
   + .section > .cards-services-wrapper:first-child > .cards-services {
     position: relative;
     z-index: 2;

@@ -5,14 +5,61 @@
 />
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <script nonce="aem">
-  // Adobe Target (at.js, loaded by scripts.js): while it waits for Target only the promo strip
-  // is hidden, never the page. aem.page / aem.live are public suffixes: the mbox cookie goes on
-  // the page host, or the browser drops it and every page is a new Target visitor
-  window.targetGlobalSettings = {
-    bodyHiddenStyle: '#promo-strip { opacity: 0 !important }',
-    cookieDomain: window.location.hostname,
-  };
+  // Trusted Types default policy, before any script that sets innerHTML (at.js below, the blocks)
+  if (window.trustedTypes && window.trustedTypes.createPolicy) {
+    const innerTT = window.trustedTypes.createPolicy('tt-inner', {
+      createHTML: (s) => s, // avoid stack overflow
+    });
+    window.trustedTypes.createPolicy('default', {
+      createHTML: (input, type, sink) => {
+        let processedInput = input;
+        if (/srcdoc\s*=/i.test(processedInput)) {
+          const doc = new DOMParser().parseFromString(innerTT.createHTML(processedInput), 'text/html');
+          doc.querySelectorAll('iframe[srcdoc]').forEach((el) => el.removeAttribute('srcdoc'));
+          processedInput = doc.body.innerHTML;
+        }
+        if (sink.includes('createContextualFragment') || sink.includes('Document write')) {
+          const doc = new DOMParser().parseFromString(innerTT.createHTML(processedInput), 'text/html');
+          doc.querySelectorAll('script').forEach((el) => el.remove());
+          processedInput = doc.body.innerHTML;
+        }
+        return processedInput;
+      },
+      createScriptURL: (input) => input,
+      createScript: (input) => input,
+    });
+  }
+
+  // Adobe Target (at.js, VEC activity on #promo-strip), started here so the page-load request
+  // leaves right away. Profile parameters from the Commerce sign-in cookie and the stored purchase
+  // state (scripts/target-profile.js, same localStorage entry); a signed-in customer whose
+  // purchase state is not known yet gets the decision from scripts.js after one orders check.
+  // No body hiding. aem.page / aem.live are public suffixes: the mbox cookie goes on the host.
+  (() => {
+    const host = window.location.hostname;
+    if (/\.(stage-ue|ue)\.da\.live$/.test(host)) return;
+    const raw = (document.cookie.match(/(?:^|;\s*)auth_dropin_user_token=([^;]+)/) || [])[1];
+    let token = raw;
+    try { token = raw && decodeURIComponent(raw); } catch (e) { /* keep raw */ }
+    let stored = null;
+    try { stored = JSON.parse(localStorage.getItem('copel-target-profile')); } catch (e) { /* none */ }
+    const known = !!token && !!stored && stored.token === token.slice(-16);
+    const profile = { 'profile.copel_logado': String(!!token) };
+    if (!token) profile['profile.copel_comprou_seguro'] = 'false';
+    else if (known) profile['profile.copel_comprou_seguro'] = String(!!stored.clienteProtegeCasa);
+    window.targetPageParams = () => profile;
+    window.targetGlobalSettings = {
+      cookieDomain: host,
+      bodyHidingEnabled: false,
+      pageLoadEnabled: !token || known,
+    };
+    const atjs = document.createElement('script');
+    atjs.src = '/scripts/at.js';
+    atjs.async = true;
+    document.head.append(atjs);
+  })();
 </script>
+<link rel="preconnect" href="https://adobedemoamericas403.tt.omtrdc.net"/>
 <link rel="preconnect" href="https://www.copel.com" crossorigin/>
 <link rel="preconnect" href="https://copel-app-demo.vercel.app" crossorigin/>
 <link rel="preconnect" href="https://publish-p68716-e759339.adobeaemcloud.com"/>
