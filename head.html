@@ -48,6 +48,10 @@
     if (!token) profile['profile.copel_comprou_seguro'] = 'false';
     else if (known) profile['profile.copel_comprou_seguro'] = String(!!stored.clienteProtegeCasa);
     window.targetPageParams = () => profile;
+    // end of the page-load request, for the "no offer yet" retry in scripts.js
+    ['at-request-succeeded', 'at-request-failed'].forEach((type) => document.addEventListener(type, () => {
+      window.copelTargetPageLoad = window.copelTargetPageLoad || type;
+    }, { once: true }));
     window.targetGlobalSettings = {
       cookieDomain: host,
       bodyHidingEnabled: false,

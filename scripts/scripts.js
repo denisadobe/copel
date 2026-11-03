@@ -21,18 +21,52 @@ import { IS_UE } from './ue-utils.js';
 
 const ATJS_WAIT_MS = 5000;
 const ORDERS_WAIT_MS = 1500;
+// "no offer" for a signed-in visitor: decision asked again (Target applies profile changes late)
+const TARGET_RETRIES = 4;
+const TARGET_RETRY_MS = 400;
+
+const sleep = (ms) => new Promise((resolve) => { setTimeout(resolve, ms); });
+
+/** Resolves once check() is true (polled), or after waitMs. */
+async function until(check, waitMs) {
+  const started = Date.now();
+  while (!check() && Date.now() - started < waitMs) {
+    // eslint-disable-next-line no-await-in-loop
+    await sleep(25);
+  }
+}
 
 /** window.adobe.target once at.js (started in head.html) is ready, else null. */
-function waitForAtjs() {
-  return new Promise((resolve) => {
-    const started = Date.now();
-    const check = () => {
-      if (typeof window.adobe?.target?.getOffers === 'function') resolve(window.adobe.target);
-      else if (Date.now() - started > ATJS_WAIT_MS) resolve(null);
-      else setTimeout(check, 25);
-    };
-    check();
-  });
+async function waitForAtjs() {
+  const ready = () => typeof window.adobe?.target?.getOffers === 'function';
+  await until(ready, ATJS_WAIT_MS);
+  return ready() ? window.adobe.target : null;
+}
+
+/** The promo strip slot held for a signed-in visitor (promo-strip block) and still empty. */
+const isPromoStripWaiting = () => {
+  const strip = document.getElementById('promo-strip');
+  return !!strip?.classList.contains('promo-strip-expected') && !strip.childNodes.length;
+};
+
+/**
+ * Page-load decision requested and applied here. Target applies a profile change (e.g. the
+ * purchase, sent on the confirmation page) a few seconds late and answers "no offer" meanwhile:
+ * while the slot held for a signed-in visitor is empty the decision is asked again, a few times.
+ */
+async function applyTargetDecision(target, getProfile, retries = 0) {
+  try {
+    const response = await target.getOffers({
+      request: { execute: { pageLoad: { profileParameters: getProfile() } } },
+    });
+    await target.applyOffers({ response });
+  } catch (e) {
+    // no decision: the strip stays empty
+  }
+  if (retries > 0 && isPromoStripWaiting()) {
+    await sleep(TARGET_RETRY_MS);
+    await applyTargetDecision(target, getProfile, retries - 1);
+  }
 }
 
 /**
@@ -47,6 +81,16 @@ async function syncTargetProfile() {
     checkProtegeCasaCustomer, getAtjsProfile, refreshProtegeCasaCustomer,
   } = await import('./target-profile.js');
   if (window.targetGlobalSettings?.pageLoadEnabled !== false) {
+    // automatic page-load request (head.html): asked again only if it left the held slot empty
+    if (document.querySelector('.promo-strip')) {
+      (async () => {
+        await until(() => window.copelTargetPageLoad && document.getElementById('promo-strip'), ATJS_WAIT_MS);
+        await sleep(100); // the offer is rendered right after the request
+        if (!isPromoStripWaiting()) return;
+        const target = await waitForAtjs();
+        if (target) await applyTargetDecision(target, getAtjsProfile, TARGET_RETRIES);
+      })();
+    }
     window.addEventListener('load', () => {
       setTimeout(() => refreshProtegeCasaCustomer().catch(() => {}), 3000);
     }, { once: true });
@@ -57,15 +101,7 @@ async function syncTargetProfile() {
     new Promise((resolve) => { setTimeout(resolve, ORDERS_WAIT_MS); }),
   ]);
   const target = await waitForAtjs();
-  if (!target) return;
-  try {
-    const response = await target.getOffers({
-      request: { execute: { pageLoad: { profileParameters: getAtjsProfile() } } },
-    });
-    await target.applyOffers({ response });
-  } catch (e) {
-    // no decision: the strip stays empty
-  }
+  if (target) await applyTargetDecision(target, getAtjsProfile, TARGET_RETRIES);
 }
 
 if (!IS_UE) syncTargetProfile();

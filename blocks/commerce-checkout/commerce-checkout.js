@@ -37,9 +37,10 @@ const CONFIRMED_TITLE = 'Pedido confirmado';
 const CONFIRMED_PARAM = 'pedido-confirmado';
 
 /**
- * The Target activity keeps a visitor in the experience of the session's first decision: after
- * the order the session part of the mbox cookie is dropped (the visitor id stays), so the next
- * page view is a new Target session and shows the post-sale experience right away.
+ * Target applies the purchase to the profile a few seconds late; meanwhile the old session keeps
+ * the pre-sale experience ("Acesse o APP"), a new one answers "no offer", which scripts.js asks
+ * again while the strip slot is empty. So after the order the session part of the mbox cookie is
+ * dropped (the visitor id stays): the next page view is a new Target session.
  */
 function startNewTargetSession() {
   const value = document.cookie.split('; ').find((c) => c.startsWith('mbox='))?.slice(5);
