@@ -58,8 +58,6 @@ const AUTOPLAY_MS = 6000;
 // same as carousel-hero-cf.js
 const FETCH_TIMEOUT_MS = 4000;
 
-const BADGE_CF = 'Banners de Content Fragments do AEM — clique no slide para editar no painel';
-const BADGE_LOADING = 'Carregando banners de Content Fragments do AEM…';
 // how often the published banners are re-checked while the page is visible; the first check
 // waits until the page has settled, so it never competes with loading (or page-speed audits)
 const REFRESH_MS = 5000;
@@ -110,7 +108,7 @@ function extractSourceConfig(rows) {
   return config;
 }
 
-/** Editor-only note on blocks whose slides come from Content Fragments (created or updated). */
+/** Editor-only note when the Content Fragments did not load (created or updated). */
 function setEditorBadge(block, text, source) {
   const badge = block.querySelector(':scope > .carousel-hero-ue-badge') || document.createElement('p');
   badge.className = 'carousel-hero-ue-badge';
@@ -513,7 +511,6 @@ function instrumentCfSlide(slide, { path, item, imageFields }) {
  * ones, which stay in the DOM, hidden, as the fallback; on failure the authored slides stay.
  */
 async function renderEditorCf(block, source, teardown) {
-  setEditorBadge(block, BADGE_LOADING, source.source);
   try {
     const cf = await import('./carousel-hero-cf.js');
     const result = await cf.default(source);
@@ -550,8 +547,8 @@ async function renderEditorCf(block, source, teardown) {
       hidden.append(list);
       block.append(hidden);
     }
-    setEditorBadge(block, BADGE_CF, source.source);
   } catch (e) {
+    // the only editor note: the authored copy is shown because the fragments did not load
     setEditorBadge(block, BADGE_FAILED, source.source);
   }
 }

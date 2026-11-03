@@ -65,8 +65,8 @@ In the editor (`IS_UE`, `scripts/ue-utils.js`):
   offer remove / duplicate / move on a fragment slide and fail ("Component not found"). A banner
   leaves the home in AEM (unpublish it, or `ativoAte` in the past), not in the page. When the fetch
   fails the block stays a container (authored slides can be added and removed).
-- Badge (editor only): "Banners de Content Fragments do AEM — clique no slide para editar no
-  painel". The fragment opens in the Content Fragment editor from the editor's own panel.
+- No editor badge while the fragments load or show (the fragment opens in the Content Fragment
+  editor from the editor's own panel); only a failure shows one, over the authored copy.
 - Autoplay is off; selecting a slide in the editor shows it (`ue/scripts/ue.js`).
 - A slide just added (still empty) is kept as an empty slide.
 - The height is capped in px (`clamp()`), never a pure `vh`, so it stays stable while the editor
