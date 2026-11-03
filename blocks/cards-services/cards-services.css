@@ -167,8 +167,10 @@
     --cards-services-overlap: 96px;
   }
 
-  /* overlap the bottom of a hero carousel that sits directly above */
-  main > .carousel-hero-container + .section > .cards-services-wrapper:first-child > .cards-services {
+  /* overlap the bottom of a hero carousel that sits directly above (not while a filled
+     promo strip sits below the hero: it stays visible between the two) */
+  main > .carousel-hero-container:not(:has(.promo-strip:not(:empty)))
+  + .section > .cards-services-wrapper:first-child > .cards-services {
     position: relative;
     z-index: 2;
     margin-top: calc(-1 * (var(--section-spacing) + var(--cards-services-overlap)));
