@@ -44,8 +44,8 @@ import { getStorefrontConfig, isAuthenticated } from '../../scripts/commerce-ses
  * Fonte, the Content Fragment slides are rendered (same published source as the site) and
  * instrumented for the AEM connection (urn:aemconnection:<_path>/jcr:content/data/master,
  * type "reference", filter "cf"; props titulo, resumo, ctaTexto, imagem), so selecting a slide
- * edits the fragment in the properties panel and saves to AEM author. Each CF slide has an
- * "Editar no AEM" link to the Content Fragment editor. The authored fallback slides stay in the
+ * edits the fragment in the properties panel and saves to AEM author (the editor also opens the
+ * fragment in the Content Fragment editor from there). The authored fallback slides stay in the
  * DOM, hidden (and shown again when the fetch fails). The DA block instrumentation (urn:ab…,
  * fields Fonte / Público / Escopo Target) is untouched. Live updates: ue/scripts/ue.js.
  */
@@ -54,7 +54,7 @@ const AUTOPLAY_MS = 6000;
 // same as carousel-hero-cf.js
 const FETCH_TIMEOUT_MS = 4000;
 
-const BADGE_CF = 'Banners de Content Fragments do AEM — clique no slide para editar no painel, ou use "Editar no AEM"';
+const BADGE_CF = 'Banners de Content Fragments do AEM — clique no slide para editar no painel';
 const BADGE_LOADING = 'Carregando banners de Content Fragments do AEM…';
 // how often the published banners are re-checked while the page is visible; the first check
 // waits until the page has settled, so it never competes with loading (or page-speed audits)
@@ -465,7 +465,7 @@ function setProp(el, prop, type) {
  * urn:adobe:aue:system:aemconnection, added by ue/scripts/ue.js). Props inherit the slide's
  * data-aue-resource; data-cf-* attributes let ue.js apply related values (link, alt) live.
  */
-function instrumentCfSlide(slide, { path, item, imageFields }, editorUrl) {
+function instrumentCfSlide(slide, { path, item, imageFields }) {
   const title = cfText(item.titulo);
   slide.dataset.aueResource = `urn:aemconnection:${path}/jcr:content/data/master`;
   slide.dataset.aueType = 'reference';
@@ -502,20 +502,6 @@ function instrumentCfSlide(slide, { path, item, imageFields }, editorUrl) {
     setProp(img, imageFields[i], 'media');
     img.dataset.cfAltProp = 'imagemAlt';
   });
-
-  if (editorUrl) {
-    const edit = document.createElement('a');
-    edit.className = 'carousel-hero-ue-edit';
-    edit.href = editorUrl;
-    edit.target = '_blank';
-    edit.rel = 'noopener noreferrer';
-    edit.textContent = 'Editar no AEM';
-    edit.title = `Abrir ${path} no editor de Content Fragments`;
-    const wrap = document.createElement('p');
-    wrap.className = 'carousel-hero-ue-edit-wrap';
-    wrap.append(edit);
-    (content || slide).append(wrap);
-  }
 }
 
 /**
@@ -528,13 +514,12 @@ async function renderEditorCf(block, source, teardown) {
     const cf = await import('./carousel-hero-cf.js');
     const result = await cf.default(source);
     if (!result) throw new Error('no banners');
-    const editorUrls = await Promise.all(result.rows.map(({ path }) => cf.getCfEditorUrl(path)));
     const fallback = [...block.querySelectorAll('.carousel-hero-slide')];
     const slides = result.rows.map((entry, i) => {
       const slide = buildSlide(entry.row, i, true);
       if (entry.path) {
         slide.dataset.cfPath = entry.path;
-        instrumentCfSlide(slide, entry, editorUrls[i]);
+        instrumentCfSlide(slide, entry);
       }
       return slide;
     });

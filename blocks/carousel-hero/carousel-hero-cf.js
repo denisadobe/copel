@@ -97,38 +97,8 @@ async function getPublishOrigin() {
   return toHttpUrl((await getSiteConfig())['aem-publish-url'])?.origin || null;
 }
 
-/**
- * AEM author origin (Universal Editor only): config.json `aem-author-url`, else derived from
- * `aem-publish-url` (publish-pX-eY -> author-pX-eY).
- */
-export async function getAuthorOrigin() {
-  const config = await getSiteConfig();
-  const author = toHttpUrl(config['aem-author-url'])?.origin;
-  if (author) return author;
-  const publish = toHttpUrl(config['aem-publish-url']);
-  return publish && /^publish-/.test(publish.hostname)
-    ? `${publish.protocol}//${publish.hostname.replace(/^publish-/, 'author-')}`
-    : null;
-}
-
 /** AEM publish origin, for images of Content Fragments edited in the Universal Editor. */
 export const getAssetOrigin = getPublishOrigin;
-
-/**
- * Content Fragment editor link for a fragment path (Universal Editor only): config.json
- * `aem-cf-editor-url` template ({author}, {path}), else the new CF editor on the author host
- * (<author>/ui#/aem/cf/editor/editor<path>, which opens it in the Experience Cloud shell).
- * The classic editor would be "{author}/editor.html{path}".
- */
-export async function getCfEditorUrl(path) {
-  const author = await getAuthorOrigin();
-  if (!author || typeof path !== 'string' || !path.startsWith('/content/dam/')) return null;
-  const template = (await getSiteConfig())['aem-cf-editor-url'];
-  const url = typeof template === 'string' && template
-    ? template.replace(/\{author\}/g, author).replace(/\{path\}/g, path)
-    : `${author}/ui#/aem/cf/editor/editor${path}`;
-  return toHttpUrl(url)?.href || null;
-}
 
 const isPersistedQuery = (url) => url.pathname.includes('/graphql/execute.json/');
 

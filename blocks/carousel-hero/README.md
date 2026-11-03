@@ -49,14 +49,13 @@ In the editor (`IS_UE`, `scripts/ue-utils.js`):
   inline props (inheriting that resource) `titulo` (h2, text), `resumo` (one plain multi-line `p`,
   text), `ctaTexto` / `ctaSecundarioTexto` (links, text), `imagem` / `imagemMobile` (img, media).
   Selecting a slide shows the fragment's model fields in the properties panel (saved to AEM author).
-- Each CF slide also has an "Editar no AEM" link (new tab) to the Content Fragment editor:
-  `<author>/ui#/aem/cf/editor/editor<_path>`, or the config.json template `aem-cf-editor-url`
-  (`{author}`, `{path}`; e.g. `{author}/editor.html{path}` for the classic editor).
 - Live updates (`ue/scripts/ue.js`): `aue:content-patch` and `aue:content-update` for
   `urn:aemconnection:` resources update the slide in place (text, link, alt, image from the DAM
-  path on the publish host) and cancel the default page reload, since the published source does
-  not show unpublished author changes; `aue:content-details` applies the author text values when a
-  fragment is opened in the panel. DA (`urn:ab:`) events keep the default behavior.
+  path on the publish host) and stop the event before the editor's own handler (raw value / DAM
+  path swapped in, or a reload showing the published value again), since the published source
+  does not show unpublished author changes; `aue:content-details` applies the author text values
+  when a fragment is opened in the panel. DA (`urn:ab:`) edits re-render the block from the
+  saved content (`ue/scripts/ue.js`).
 - The authored slides stay in the DOM, hidden (`div.carousel-hero-fallback`, labelled "Slide
   (fallback autorado)"); when the fetch fails they stay visible and the badge says so. The DA block
   fields (`Fonte` / `Público` / `Escopo Target`) stay editable.
@@ -66,7 +65,7 @@ In the editor (`IS_UE`, `scripts/ue-utils.js`):
   leaves the home in AEM (unpublish it, or `ativoAte` in the past), not in the page. When the fetch
   fails the block stays a container (authored slides can be added and removed).
 - Badge (editor only): "Banners de Content Fragments do AEM — clique no slide para editar no
-  painel, ou use "Editar no AEM"".
+  painel". The fragment opens in the Content Fragment editor from the editor's own panel.
 - Autoplay is off; selecting a slide in the editor shows it (`ue/scripts/ue.js`).
 - A slide just added (still empty) is kept as an empty slide.
 - The height is capped in px (`clamp()`), never a pure `vh`, so it stays stable while the editor
