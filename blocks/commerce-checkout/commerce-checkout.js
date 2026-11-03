@@ -37,6 +37,18 @@ const CONFIRMED_TITLE = 'Pedido confirmado';
 const CONFIRMED_PARAM = 'pedido-confirmado';
 
 /**
+ * The Target activity keeps a visitor in the experience of the session's first decision: after
+ * the order the session part of the mbox cookie is dropped (the visitor id stays), so the next
+ * page view is a new Target session and shows the post-sale experience right away.
+ */
+function startNewTargetSession() {
+  const value = document.cookie.split('; ').find((c) => c.startsWith('mbox='))?.slice(5);
+  if (!value) return;
+  const rest = value.split('|').filter((part) => !part.startsWith('session#')).join('|');
+  document.cookie = `mbox=${rest}; path=/; domain=${window.location.hostname}; max-age=63072000; SameSite=Lax`;
+}
+
+/**
  * Adobe Target (at.js): the page does not reload after the order, so the confirmation is sent
  * as a page-load request with the profile (copel_comprou_seguro "true" after
  * markProtegeCasaCustomer) for the audiences of the next page view.
@@ -46,7 +58,7 @@ function notifyTargetConfirmation() {
   if (typeof target?.getOffers !== 'function') return;
   Promise.resolve(target.getOffers({
     request: { execute: { pageLoad: { profileParameters: getAtjsProfile() } } },
-  })).catch(() => {});
+  })).catch(() => {}).finally(startNewTargetSession);
 }
 
 const el = (name, tag = 'div') => {
