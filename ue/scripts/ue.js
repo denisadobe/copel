@@ -24,8 +24,6 @@
  *   carousel-coverage / carousel-quicklinks   the selected item is scrolled into view
  */
 
-import { decorateEditorContent } from '../../scripts/scripts.js';
-
 const AEM_CONNECTION = 'aemconnection';
 const AEM_PREFIX = `urn:${AEM_CONNECTION}:`;
 // same cache key/shape as scripts/commerce.js and carousel-hero-cf.js
@@ -223,6 +221,9 @@ async function renderAgain(part) {
     el.classList.replace('richtext', 'default-content-wrapper');
   }
   part.replaceWith(el);
+  // imported here, not at the top: scripts.js awaits this module before the page decorates,
+  // so a static import of it would never resolve (and the page would stay blank)
+  const { decorateEditorContent } = await import('../../scripts/scripts.js');
   await decorateEditorContent(el);
 }
 
