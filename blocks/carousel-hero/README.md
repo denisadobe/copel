@@ -59,7 +59,12 @@ In the editor (`IS_UE`, `scripts/ue-utils.js`):
   fragment is opened in the panel. DA (`urn:ab:`) events keep the default behavior.
 - The authored slides stay in the DOM, hidden (`div.carousel-hero-fallback`, labelled "Slide
   (fallback autorado)"); when the fetch fails they stay visible and the badge says so. The DA block
-  instrumentation (block fields `Fonte` / `Público` / `Escopo Target`) is unchanged.
+  fields (`Fonte` / `Público` / `Escopo Target`) stay editable.
+- While the CF slides are shown the block is `data-aue-type="component"` (no filter) instead of a
+  container: the editor treats every resource under a container as a page component, so it would
+  offer remove / duplicate / move on a fragment slide and fail ("Component not found"). A banner
+  leaves the home in AEM (unpublish it, or `ativoAte` in the past), not in the page. When the fetch
+  fails the block stays a container (authored slides can be added and removed).
 - Badge (editor only): "Banners de Content Fragments do AEM — clique no slide para editar no
   painel, ou use "Editar no AEM"".
 - Autoplay is off; selecting a slide in the editor shows it (`ue/scripts/ue.js`).

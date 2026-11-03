@@ -541,6 +541,13 @@ async function renderEditorCf(block, source, teardown) {
     if (teardown) teardown();
     mount(block, slides);
     block.dataset.source = 'content-fragments';
+    // the editor treats every resource under a container as a page component (remove, duplicate,
+    // move: "Component not found" for a fragment). With the fragment slides shown the block is a
+    // plain component: its own fields stay editable, the slides are edited in the properties panel
+    if (block.dataset.aueType === 'container') {
+      block.dataset.aueType = 'component';
+      delete block.dataset.aueFilter;
+    }
     if (fallback.length) {
       const hidden = document.createElement('div');
       hidden.className = 'carousel-hero-fallback';
