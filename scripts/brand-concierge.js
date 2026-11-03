@@ -70,7 +70,7 @@ function whenReady(timeout = 15000) {
 function loadRuntime() {
   if (!runtime) {
     runtime = (async () => {
-      // Web SDK shared with Adobe Target (scripts/web-sdk.js): configured once per page
+      // Web SDK (scripts/web-sdk.js): configured once per page
       await loadWebSdk();
       await loadScript(WEB_CLIENT_SRC);
       window.alloy('sendEvent', {});

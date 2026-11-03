@@ -2,7 +2,7 @@ import { createOptimizedPicture } from '../../scripts/aem.js';
 import {
   IS_UE, claimDecoration, isEmptyRow, moveInstrumentation,
 } from '../../scripts/ue-utils.js';
-import { getStorefrontConfig, isAuthenticated } from '../../scripts/commerce-session.js';
+import { getStorefrontConfig } from '../../scripts/commerce-session.js';
 
 /*
  * Carousel (hero)
@@ -32,13 +32,10 @@ import { getStorefrontConfig, isAuthenticated } from '../../scripts/commerce-ses
  *                            channel ("site"/"app", uses config.json "aem-banners-url")
  *                            or a persisted-query path on "aem-publish-url";
  *                            empty = authored slides only
- *   Público / Audience       overrides the detected audience (publicoAtual)
- *   Escopo Target / Target scope   Adobe Target decision scope (Web SDK, form-based activity;
- *                            JSON offer { bannerPath, ocultar }, see carousel-hero-cf.js)
  * are removed; with a Fonte, slides then come from banner Content Fragments
  * (carousel-hero-cf.js) and the remaining authored rows are the fallback.
  * Keys are matched case-, accent-, space- and dash-insensitively, so the Universal Editor
- * field names (fonte, publico, escopoTarget) work as keys too.
+ * field name (fonte) works as a key too.
  * A channel can also be a block option instead of a row: "banners-site" / "banners-app"
  * (Universal Editor field "Banners do AEM"). Unlike config rows, an option is not text in the
  * page, so AI agents reading the HTML only see the slides: the authored slides there are a copy
@@ -51,7 +48,7 @@ import { getStorefrontConfig, isAuthenticated } from '../../scripts/commerce-ses
  * edits the fragment in the properties panel and saves to AEM author (the editor also opens the
  * fragment in the Content Fragment editor from there). The authored fallback slides stay in the
  * DOM, hidden (and shown again when the fetch fails). The DA block instrumentation (urn:ab…,
- * fields Fonte / Público / Escopo Target) is untouched. Live updates: ue/scripts/ue.js.
+ * field Fonte) is untouched. Live updates: ue/scripts/ue.js.
  */
 
 const AUTOPLAY_MS = 6000;
@@ -68,10 +65,6 @@ const BADGE_FAILED = 'Não foi possível carregar os Content Fragments do AEM: e
 const CONFIG_KEYS = {
   fonte: 'source',
   source: 'source',
-  publico: 'audience',
-  audience: 'audience',
-  escopotarget: 'targetScope',
-  targetscope: 'targetScope',
 };
 
 const normalizeKey = (value) => value
@@ -91,7 +84,7 @@ function readConfigRow(row) {
 
 /**
  * Removes the leading config rows (any order; the first row must be one of them).
- * @returns {{source?: string, audience?: string, targetScope?: string}|null} their values,
+ * @returns {{source?: string}|null} their values,
  *   null when the block has no config rows
  */
 function extractSourceConfig(rows) {
@@ -412,34 +405,6 @@ function prefetchBanners(value) {
   return { url: url.href, json };
 }
 
-/**
- * Runs once the visible hero image has loaded (or failed, at the latest after a few seconds),
- * the page has loaded and the main thread is idle: the Web SDK it may load does not compete
- * with the hero image or the rest of the page.
- */
-function afterHeroImage(block, callback) {
-  const img = block.querySelector('.carousel-hero-slide.active img[fetchpriority="high"]')
-    || block.querySelector('.carousel-hero-slide.active img');
-  let done = false;
-  const idle = () => {
-    if (window.requestIdleCallback) window.requestIdleCallback(callback, { timeout: 3000 });
-    else setTimeout(callback, 200);
-  };
-  const run = () => {
-    if (done) return;
-    done = true;
-    if (document.readyState === 'complete') idle();
-    else window.addEventListener('load', idle, { once: true });
-  };
-  if (!img || img.complete) {
-    setTimeout(run, 0);
-    return;
-  }
-  img.addEventListener('load', run, { once: true });
-  img.addEventListener('error', run, { once: true });
-  setTimeout(run, 4000);
-}
-
 function showSkeleton(block) {
   const skeleton = document.createElement('div');
   skeleton.className = 'carousel-hero-skeleton';
@@ -591,25 +556,7 @@ export default function decorate(block) {
   showSkeleton(block);
   block.setAttribute('aria-busy', 'true');
   const prefetched = prefetchBanners(source.source);
-  // Adobe Target (optional "Escopo Target" row). Signed in: the decision is requested with the
-  // banners and the hero waits for it (the activity changes banners for customers). Not signed
-  // in: the banners show right away and Target is asked once the hero image has loaded, so the
-  // page LCP never waits for the Web SDK.
-  const waitForTarget = !!source.targetScope && isAuthenticated();
-  if (waitForTarget) {
-    prefetched.decision = import('./carousel-hero-cf.js')
-      .then(({ requestTargetDecision }) => requestTargetDecision(source.targetScope));
-    prefetched.decision.catch(() => {});
-  }
   let signature = '';
-  let shown = null;
-  // a click on a link of the banner chosen by Target counts as a conversion of the activity
-  block.addEventListener('click', (e) => {
-    const slide = e.target.closest('.carousel-hero-slide');
-    if (shown?.decidedPath && slide?.dataset.cfPath === shown.decidedPath && e.target.closest('a[href]')) {
-      shown.onInteract();
-    }
-  });
   const render = (result, startIndex) => {
     const slides = result.rows.map(({ row, path }, i) => {
       const slide = buildSlide(row, i, true);
@@ -621,29 +568,15 @@ export default function decorate(block) {
     if (teardown) teardown();
     teardown = mount(block, slides, index);
     signature = result.signature;
-    shown = result;
     block.dataset.source = 'content-fragments';
     block.dataset.publico = result.audience;
   };
 
   import('./carousel-hero-cf.js')
-    .then(({ default: loadBannerRows, decideLater }) => loadBannerRows(
-      source,
-      prefetched,
-      { deferTarget: !waitForTarget },
-    )
+    .then(({ default: loadBannerRows }) => loadBannerRows(source, prefetched)
       .then((result) => {
         if (!result) throw new Error('no banners');
         render(result);
-        result.onDisplay();
-        if (source.targetScope && !waitForTarget) {
-          afterHeroImage(block, async () => {
-            if (!(await decideLater(source.targetScope))) return;
-            const next = await loadBannerRows(source, null, { refresh: true });
-            // the banner chosen by Target goes first and is the one shown
-            if (next && next.signature !== signature) render(next, 0);
-          });
-        }
         // published edits in AEM show up without a reload: re-check every few seconds while the
         // page is visible (one request at a time); slides are only rebuilt when banners changed
         let timer;

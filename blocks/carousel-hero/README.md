@@ -33,8 +33,8 @@ of the public banners: `node tools/banners-copy/banners-copy.mjs --write` rewrit
 banner list (anonymous audience, active, by `ordem`; images resized via Dynamic Media and stored
 in DA `/images/banners/`), updates DA and previews the page (not live). Run it again after the
 banners change if the copy should match. On the site and in the editor the Content Fragments
-replace the copy; it only shows when the fetch fails. The config rows (`Fonte`, `Público`,
-`Escopo Target`, below) still work in DA but are no longer editor fields.
+replace the copy; it only shows when the fetch fails. A `Fonte` config row (below) still works in
+DA but is no longer an editor field.
 In the editor's content tree the config rows are listed as item resources by Author Bus; the block
 removes them from the page, so only real slides are shown and selectable.
 
@@ -59,7 +59,7 @@ In the editor (`IS_UE`, `scripts/ue-utils.js`):
   saved content (`ue/scripts/ue.js`).
 - The authored slides stay in the DOM, hidden (`div.carousel-hero-fallback`, labelled "Slide
   (fallback autorado)"); when the fetch fails they stay visible and the badge says so. The DA block
-  fields (`Fonte` / `Público` / `Escopo Target`) stay editable.
+  options stay editable.
 - While the CF slides are shown the block is `data-aue-type="component"` (no filter) instead of a
   container: the editor treats every resource under a container as a page component, so it would
   offer remove / duplicate / move on a fragment slide and fail ("Component not found"). A banner
@@ -82,17 +82,10 @@ One row per slide:
 
 ## Headless source (AEM Content Fragments, optional)
 
-Add 2-cell config rows at the top of the block, in any order (the first row must be one of them).
-Keys are case-, accent-, space- and dash-insensitive (`Escopo Target`, `escopo-target` and the
-editor field name `escopoTarget` are the same key). All config rows are removed before rendering.
-Content Fragments are only used when `Fonte` has a value; an empty `Fonte` (as in a block inserted
-from the Universal Editor) means authored slides only.
-
-| Key | Value |
-| --- | --- |
-| `Fonte` / `Source` | Where the banner list comes from (see below). |
-| `Público` / `Audience` | Audience whose banners are shown (default `visitante`), e.g. `cliente-protege-casa` to preview the upsell. |
-| `Escopo Target` / `Target scope` | Adobe Target decision scope (see Personalization). |
+The block option `banners-site` / `banners-app` (editor: Opções > Banners do AEM) is the usual
+way. A 2-cell config row at the top of the block, `Fonte` / `Source` (case-, accent-, space- and
+dash-insensitive), also works and allows the other values below; it is removed before rendering.
+Without either, the block shows its authored slides only.
 
 `Fonte` values:
 
@@ -112,20 +105,14 @@ fetch fails, times out (4 s), returns no matching banners, or the source cannot 
 fallback rows a hero-height skeleton is shown; if no banners arrive the block is hidden.
 
 The list is fetched as `GET` with `credentials: 'omit'`. The response is read from
-`data.bannerList.items` (or `data.bannerByPath.item`).
+`data.bannerList.items`.
 
 ### Audience (`publico`)
 
-There is no per-person logic in the block. The query does not filter by audience; the block keeps a
-banner when its `publico` is empty, `todos`, or equal to the audience in use:
-
-- `visitante` by default, so the Protege Casa banner shows and the `cliente-protege-casa` upsell
-  stays out;
-- or the value of an authored `Público` config row.
-
-Choosing a banner per person (for example the Protege Vida upsell for customers) is meant for Adobe
-Target through the optional `Escopo Target` row; a banner chosen by Target is shown whatever its
-`publico`. The block exposes the audience it used as `data-publico` (alongside
+No personalization in the block (Adobe Target only fills the promo strip below the hero). The
+query does not filter by audience; the block keeps a banner when its `publico` is empty, `todos`
+or `visitante`, so a banner for another audience (the `cliente-protege-casa` upsell) stays out.
+Without the `publico` field every published banner shows. The block exposes `data-publico` (alongside
 `data-source="content-fragments"`).
 
 ### `banner` Content Fragment mapping
@@ -149,20 +136,3 @@ Each fragment produces the same DOM as an authored slide, so styling and behavio
 
 CF data is written with `textContent` and `createElement` only, never `innerHTML` (the site CSP
 enforces Trusted Types). Links must be `http(s)` or site-relative (`/…`), otherwise they are dropped.
-
-### Personalization (Adobe Target via Web SDK)
-
-This does nothing unless a `Target scope` is set and `window.alloy` exists. The block calls
-`alloy('sendEvent', { decisionScopes: [scope], renderDecisions: false })` with a 1.5 s timeout and
-reads the first proposition item's JSON, `{ "bannerPath": "/content/dam/copel/banners/..." }`. That
-banner moves to the first slide. If it is not in the list, it is fetched and added in front, after the
-same date and audience filters. The fetch goes to:
-
-- `global/banner-por-path;path=<bannerPath>` on the same endpoint as the list query. AEM does not
-  decode `%2F`, so the validated path is sent raw.
-- `aem-publish-url` when the list comes from a proxy.
-- `aem-banner-by-path-url` from `/config.json` (template with `{path}`) when it is set, for example
-  to go through the app proxy.
-
-A `decisioning.propositionDisplay` event then records the impression. On any failure the default
-order is kept.
