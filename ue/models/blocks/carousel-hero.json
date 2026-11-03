@@ -7,21 +7,7 @@
       "filter": "carousel-hero",
       "plugins": {
         "da": {
-          "unsafeHTML": "<div class=\"carousel-hero\"><div><div>Fonte</div><div></div></div><div><div>Público</div><div></div></div><div><div>Escopo Target</div><div></div></div><div><div><picture><img loading=\"lazy\"></picture></div><div><h2>Título do banner</h2><p>Texto de apoio.</p><p><a href=\"/\">Chamada principal</a></p></div></div></div>",
-          "fields": [
-            {
-              "name": "fonte",
-              "selector": "div:nth-child(1):not(:has(picture, h1, h2, h3, h4, h5, h6))>div:nth-child(2)"
-            },
-            {
-              "name": "publico",
-              "selector": "div:nth-child(2):not(:has(picture, h1, h2, h3, h4, h5, h6))>div:nth-child(2)"
-            },
-            {
-              "name": "escopoTarget",
-              "selector": "div:nth-child(3):not(:has(picture, h1, h2, h3, h4, h5, h6))>div:nth-child(2)"
-            }
-          ]
+          "unsafeHTML": "<div class=\"carousel-hero\"><div><div><picture><img loading=\"lazy\"></picture></div><div><h2>Título do banner</h2><p>Texto de apoio.</p><p><a href=\"/\">Chamada principal</a></p></div></div></div>"
         }
       }
     },
@@ -64,49 +50,20 @@
       "id": "carousel-hero",
       "fields": [
         {
-          "component": "text",
-          "name": "fonte",
-          "label": "Fonte (Content Fragments)",
-          "valueType": "string",
-          "value": "",
-          "description": "site / app / URL da persisted query ou da ponte do app; vazio = slides autorados"
-        },
-        {
-          "component": "select",
-          "name": "publico",
-          "label": "Público",
-          "valueType": "string",
-          "value": "",
-          "description": "Força o público dos banners; vazio = detectado (visitante ou cliente-protege-casa)",
-          "options": [
-            {
-              "name": "(vazio) detectar automaticamente",
-              "value": ""
-            },
-            {
-              "name": "Visitante",
-              "value": "visitante"
-            },
-            {
-              "name": "Cliente Protege Casa",
-              "value": "cliente-protege-casa"
-            }
-          ]
-        },
-        {
-          "component": "text",
-          "name": "escopoTarget",
-          "label": "Escopo Target",
-          "valueType": "string",
-          "value": "",
-          "description": "Decision scope do Adobe Target (opcional)"
-        },
-        {
           "component": "multiselect",
           "name": "classes",
           "label": "Opções",
           "valueType": "string",
+          "description": "Banners do AEM: os slides vêm dos Content Fragments (os slides autorados ficam como cópia para agentes de IA e reserva)",
           "options": [
+            {
+              "name": "Banners do AEM (canal site)",
+              "value": "banners-site"
+            },
+            {
+              "name": "Banners do AEM (canal app)",
+              "value": "banners-app"
+            },
             {
               "name": "Sem autoplay",
               "value": "no-autoplay"

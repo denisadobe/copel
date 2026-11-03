@@ -24,16 +24,17 @@ Model: `ue/models/blocks/carousel-hero.json` (bundled into the root `component-*
   - `imageMobile` (reference): Imagem mobile (opcional) (`div:nth-child(1)>picture:nth-of-type(2)>img[src]`)
   - `imageMobileAlt` (text): Texto alternativo (mobile) (`div:nth-child(1)>picture:nth-of-type(2)>img[alt]`)
   - `text` (richtext): Conteúdo (`div:nth-child(2)`) — Título (H2), texto opcional e até 2 links: o 1º é o botão principal, o 2º o secundário
-- `fonte` (text): Fonte (Content Fragments) (`div:nth-child(1):not(:has(picture, h1, h2, h3, h4, h5, h6))>div:nth-child(2)`) — site / app / URL da persisted query ou da ponte do app; vazio = slides autorados
-- `publico` (select): Público (`div:nth-child(2):not(:has(picture, h1, h2, h3, h4, h5, h6))>div:nth-child(2)`) — Público dos banners; vazio = visitante
-- `escopoTarget` (text): Escopo Target (`div:nth-child(3):not(:has(picture, h1, h2, h3, h4, h5, h6))>div:nth-child(2)`) — Decision scope do Adobe Target (opcional)
-- Options (`classes`, select, one of): none (Com autoplay), `no-autoplay` (Sem autoplay)
+- Options (`classes`, multiselect): `banners-site` / `banners-app` (Banners do AEM, canal site /
+  app: the slides come from the banner Content Fragments), `no-autoplay` (Sem autoplay)
 
-The block fields `fonte`, `publico` and `escopoTarget` are the value cells of the config rows
-`Fonte`, `Público` and `Escopo Target` (rows 1-3). A block inserted from the editor already has the
-three rows (empty values) plus one slide. Selectors only match a config row (no picture or heading),
-so they never touch a slide: on a block that has only the `Fonte` row (e.g. the home page), add the
-`Público` and `Escopo Target` rows once in the document editor to edit them in the properties panel.
+The banner source is a block option, not a config row, so the page HTML (what AI agents read)
+holds no "Fonte / site" text, only slides. With `banners-<channel>` the authored slides are a copy
+of the public banners: `node tools/banners-copy/banners-copy.mjs --write` rewrites them from the
+banner list (anonymous audience, active, by `ordem`; images resized via Dynamic Media and stored
+in DA `/images/banners/`), updates DA and previews the page (not live). Run it again after the
+banners change if the copy should match. On the site and in the editor the Content Fragments
+replace the copy; it only shows when the fetch fails. The config rows (`Fonte`, `Público`,
+`Escopo Target`, below) still work in DA but are no longer editor fields.
 In the editor's content tree the config rows are listed as item resources by Author Bus; the block
 removes them from the page, so only real slides are shown and selectable.
 

@@ -39,6 +39,10 @@ import { getStorefrontConfig, isAuthenticated } from '../../scripts/commerce-ses
  * (carousel-hero-cf.js) and the remaining authored rows are the fallback.
  * Keys are matched case-, accent-, space- and dash-insensitively, so the Universal Editor
  * field names (fonte, publico, escopoTarget) work as keys too.
+ * A channel can also be a block option instead of a row: "banners-site" / "banners-app"
+ * (Universal Editor field "Banners do AEM"). Unlike config rows, an option is not text in the
+ * page, so AI agents reading the HTML only see the slides: the authored slides there are a copy
+ * of the public banners (tools/banners-copy), shown on the site only if the fetch fails.
  *
  * Universal Editor (IS_UE): autoplay is off and empty (just added) slides are kept. With a
  * Fonte, the Content Fragment slides are rendered (same published source as the site) and
@@ -555,9 +559,12 @@ async function renderEditorCf(block, source, teardown) {
 export default function decorate(block) {
   if (!claimDecoration(block)) return;
   const rows = [...block.children].filter((row) => !isEmptyRow(row, 'picture, img'));
-  const config = extractSourceConfig(rows);
+  const config = extractSourceConfig(rows) || {};
+  // block option "banners-<channel>": the Fonte without a config row
+  const channel = [...block.classList].map((c) => /^banners-(.+)$/.exec(c)?.[1]).find(Boolean);
+  if (!config.source && channel) config.source = channel;
   // Content Fragments only with a non-empty Fonte; in the editor the authored slides stay
-  const source = config?.source ? config : null;
+  const source = config.source ? config : null;
   const useCf = source && !IS_UE;
   if (!rows.length && !useCf && !IS_UE) return;
 

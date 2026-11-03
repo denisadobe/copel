@@ -10,3 +10,4 @@ docs/*
 tools/dropins/
 tools/importer/*
 ue/models/*
+tools/banners-copy/*
