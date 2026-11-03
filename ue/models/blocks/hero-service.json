@@ -1,12 +1,12 @@
 {
   "definitions": [
     {
-      "title": "Hero de serviço",
+      "title": "Hero banner",
       "id": "hero-service",
       "model": "hero-service",
       "plugins": {
         "da": {
-          "unsafeHTML": "<div class=\"hero-service\"><div><div><picture><img loading=\"lazy\"></picture></div></div><div><div><h1>Título do serviço</h1><p>Chamada de apoio</p><p><a href=\"#planos\">Contratar</a></p></div></div><div><div><picture><img loading=\"lazy\"></picture><picture><img loading=\"lazy\"></picture></div></div></div>",
+          "unsafeHTML": "<div class=\"hero-service\"><div><div><picture><img loading=\"lazy\"></picture></div></div><div><div><h1>Título do banner</h1><p>Chamada de apoio</p><p><a href=\"#planos\">Contratar</a></p></div></div><div><div><picture><img loading=\"lazy\"></picture><picture><img loading=\"lazy\"></picture></div></div></div>",
           "fields": [
             {
               "name": "image",
@@ -45,6 +45,31 @@
     {
       "id": "hero-service",
       "fields": [
+        {
+          "component": "multiselect",
+          "name": "classes",
+          "label": "Estilo",
+          "valueType": "string",
+          "description": "Combine à vontade (ex.: Compacto + Centralizado)",
+          "options": [
+            {
+              "name": "Centralizado",
+              "value": "centered"
+            },
+            {
+              "name": "Dividido (imagem ao lado do texto)",
+              "value": "split"
+            },
+            {
+              "name": "Compacto (faixa mais baixa)",
+              "value": "compact"
+            },
+            {
+              "name": "Destaque laranja (cor da marca sobre a imagem)",
+              "value": "brand"
+            }
+          ]
+        },
         {
           "component": "reference",
           "valueType": "string",

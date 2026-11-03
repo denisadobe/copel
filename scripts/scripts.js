@@ -2,7 +2,9 @@ import {
   loadHeader,
   loadFooter,
   decorateIcons,
+  decorateBlock,
   decorateBlocks,
+  loadBlock,
   decorateTemplateAndTheme,
   getMetadata,
   waitForFirstImage,
@@ -313,10 +315,27 @@ function unwrapEditorCells(main) {
 }
 
 /**
+ * Universal Editor: decorates one part of the page put back undecorated after an edit (a block
+ * or a default-content wrapper, see ue/scripts/ue.js), the way decorateMain does for the page.
+ * @param {Element} el The block or default-content wrapper, already in the page
+ * @returns {Promise} resolves once a block is loaded
+ */
+export async function decorateEditorContent(el) {
+  decorateIcons(el);
+  if (el.classList.contains('default-content-wrapper')) {
+    decorateButtons(el);
+    return;
+  }
+  decorateBlock(el);
+  unwrapEditorCells(el.parentElement);
+  decorateButtons(el);
+  await loadBlock(el);
+}
+
+/**
  * Decorates the main element.
  * @param {Element} main The main element
  */
-// eslint-disable-next-line import/prefer-default-export
 export function decorateMain(main) {
   // editor: *.ue.da.live keeps the page metadata table (hidden) in the content; it is edited
   // as page properties, so it must not be loaded as a block

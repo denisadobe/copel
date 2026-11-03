@@ -651,6 +651,31 @@
     "id": "hero-service",
     "fields": [
       {
+        "component": "multiselect",
+        "name": "classes",
+        "label": "Estilo",
+        "valueType": "string",
+        "description": "Combine à vontade (ex.: Compacto + Centralizado)",
+        "options": [
+          {
+            "name": "Centralizado",
+            "value": "centered"
+          },
+          {
+            "name": "Dividido (imagem ao lado do texto)",
+            "value": "split"
+          },
+          {
+            "name": "Compacto (faixa mais baixa)",
+            "value": "compact"
+          },
+          {
+            "name": "Destaque laranja (cor da marca sobre a imagem)",
+            "value": "brand"
+          }
+        ]
+      },
+      {
         "component": "reference",
         "valueType": "string",
         "name": "image",

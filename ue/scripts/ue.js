@@ -2,9 +2,14 @@
  * Universal Editor (Author Bus) behaviors. Loaded by scripts/scripts.js only in the editor
  * (*.ue.da.live, see IS_UE in scripts/ue-utils.js), before the page decorates.
  * Blocks keep their own instrumentation (moveInstrumentation in scripts/ue-utils.js); this file
- * makes interactive blocks react to what the author selects in the editor. After an edit of
- * DA content (urn:ab:…) the editor reloads the page, so every block decorates once from fresh
- * content.
+ * makes interactive blocks react to what the author selects in the editor.
+ *
+ * Edits of DA content (urn:ab:…): after a properties-panel or inline edit, the editor script
+ * (universal-editor-service cors.js, listening on document) only swaps the raw value in
+ * (innerHTML of the text/richtext element, src of the image), so a decorated block loses its
+ * structure and styles. The edited block (or default-content wrapper) is instead taken again
+ * from the page as the editor serves it after the save, decorated and loaded; the event stops
+ * at body. Anything else (sections, page) keeps the editor's default (a page reload).
  *
  * Second connection (AEM author): the banner Content Fragments rendered by carousel-hero are
  * instrumented as urn:aemconnection:<fragment>/jcr:content/data/master. This file adds the
@@ -18,6 +23,8 @@
  *   accordion-faq        <details> items are opened directly
  *   carousel-coverage / carousel-quicklinks   the selected item is scrolled into view
  */
+
+import { decorateEditorContent } from '../../scripts/scripts.js';
 
 const AEM_CONNECTION = 'aemconnection';
 const AEM_PREFIX = `urn:${AEM_CONNECTION}:`;
@@ -152,14 +159,15 @@ const aemResource = (detail) => {
 };
 
 function setupAemConnectionHandlers() {
-  // properties panel edit: { patch: { name, value } }. The default (page reload) would show the
-  // published value again, so the slide is updated in place instead.
+  // properties panel edit: { patch: { name, value } }. The editor default (raw value swapped in,
+  // DAM path as image src, or a page reload showing the published value again) is stopped:
+  // the slide is updated in place instead.
   document.body.addEventListener('aue:content-patch', (event) => {
     const resource = aemResource(event.detail);
     if (!resource) return;
     const { name, value } = event.detail.patch || {};
     applyCfValue(resource, name, value);
-    event.preventDefault();
+    event.stopPropagation();
   });
 
   // in-context (inline) edit: { value }, the prop is in request.target.prop
@@ -167,7 +175,7 @@ function setupAemConnectionHandlers() {
     const resource = aemResource(event.detail);
     if (!resource) return;
     const prop = event.detail.request?.target?.prop;
-    if (applyCfValue(resource, prop, event.detail.value)) event.preventDefault();
+    if (applyCfValue(resource, prop, event.detail.value)) event.stopPropagation();
   });
 
   // fragment loaded in the properties panel: its author values (possibly unpublished) replace
@@ -178,6 +186,56 @@ function setupAemConnectionHandlers() {
     if (!resource || !content || typeof content !== 'object') return;
     Object.entries(content).forEach(([prop, value]) => {
       applyCfValue(resource, prop, value, { images: false });
+    });
+  });
+}
+
+/* ---------------------------------------------------------------------------------------- */
+/* Edits of DA content: the edited block / text is rendered again, decorated                 */
+/* ---------------------------------------------------------------------------------------- */
+
+const AB_PREFIX = 'urn:ab:';
+// a block's own resource (columns blocks are instrumented as …/columns-N)
+const BLOCK_RESOURCE = /^urn:ab:section-\d+\/(?:block|columns)-\d+$/;
+
+/** The decorated part of the page an edit belongs to: its block, or its default-content text. */
+function editedPart(target) {
+  const block = target?.closest?.('.block[data-aue-resource]');
+  if (block) return BLOCK_RESOURCE.test(block.dataset.aueResource) ? block : null;
+  return target?.closest?.('.default-content-wrapper[data-aue-resource]') || null;
+}
+
+/** The page as the editor serves it now (instrumented, after the save). */
+async function fetchEditorPage() {
+  const resp = await fetch(window.location.href, { cache: 'no-store' });
+  if (!resp.ok) throw new Error(`page ${resp.status}`);
+  return new DOMParser().parseFromString(await resp.text(), 'text/html');
+}
+
+/** Replaces a block / text with its saved markup, then decorates and loads it. */
+async function renderAgain(part) {
+  const resource = part.dataset.aueResource;
+  const fresh = (await fetchEditorPage()).querySelector(`[data-aue-resource="${resource}"]`);
+  if (!fresh) throw new Error(`${resource} not in the page`);
+  const el = document.adoptNode(fresh);
+  if (el.classList.contains('richtext')) {
+    // default content: the wrapper decorateSections makes of an instrumented div.richtext
+    el.classList.replace('richtext', 'default-content-wrapper');
+  }
+  part.replaceWith(el);
+  await decorateEditorContent(el);
+}
+
+function setupDaContentHandlers() {
+  ['aue:content-patch', 'aue:content-update'].forEach((type) => {
+    document.body.addEventListener(type, (event) => {
+      const resource = event.detail?.request?.target?.resource;
+      if (!resource?.startsWith(AB_PREFIX)) return;
+      const part = editedPart(event.target);
+      if (!part) return; // section, page metadata…: editor default
+      event.stopPropagation();
+      // the saved content could not be read: a reload shows it (the editor's own fallback)
+      renderAgain(part).catch(() => window.location.reload());
     });
   });
 }
@@ -225,6 +283,7 @@ export default async () => {
   // handlers first (no await), then the AEM connection once config.json is read
   setupUEEventHandlers();
   setupAemConnectionHandlers();
+  setupDaContentHandlers();
   siteConfig = await loadSiteConfig();
   addAemConnection();
 };

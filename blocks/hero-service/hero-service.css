@@ -137,6 +137,98 @@ main .hero-service .hero-service-cta a:any-link:focus-visible {
   height: auto;
 }
 
+/* style "centered": copy centered over an even scrim */
+.hero-service.centered .hero-service-inner {
+  align-items: center;
+  text-align: center;
+}
+
+.hero-service.centered:not(.hero-service-no-image)::after {
+  background: rgb(0 0 0 / 45%);
+}
+
+/* style "compact": a low banner strip */
+.hero-service.compact {
+  min-height: 320px;
+}
+
+.hero-service.compact .hero-service-content > p:not(.hero-service-cta, .hero-service-tagline) {
+  margin-top: 16px;
+}
+
+.hero-service.compact .hero-service-content .hero-service-cta {
+  margin-top: 20px;
+}
+
+.hero-service.compact .hero-service-aside {
+  display: none;
+}
+
+/* style "brand": Copel orange over the photo (white copy, white button) */
+.hero-service.brand {
+  background-color: var(--copel-orange-ink);
+}
+
+.hero-service.brand:not(.hero-service-no-image)::after {
+  background: linear-gradient(180deg, rgb(200 80 0 / 70%) 0%, rgb(168 67 0 / 92%) 100%);
+}
+
+.hero-service.brand .hero-service-content h1,
+.hero-service.brand .hero-service-content > p:not(.hero-service-cta),
+.hero-service.brand .hero-service-content > p.hero-service-tagline,
+.hero-service.brand .hero-service-content .hero-service-highlight {
+  color: #fff;
+  text-shadow: none;
+}
+
+.hero-service.brand .hero-service-content .hero-service-highlight {
+  text-decoration: underline var(--copel-yellow) 3px;
+  text-underline-offset: 6px;
+}
+
+main .hero-service.brand .hero-service-cta a:any-link {
+  background-color: #fff;
+  color: var(--copel-orange-ink);
+}
+
+main .hero-service.brand .hero-service-cta a:any-link:hover,
+main .hero-service.brand .hero-service-cta a:any-link:focus-visible {
+  background-color: var(--copel-orange-soft);
+  color: var(--copel-orange-ink-hover);
+}
+
+/* style "split": the photo beside the copy (on top on mobile), copy on the brand graphite */
+.hero-service.split {
+  flex-direction: column;
+  align-items: stretch;
+  min-height: 0;
+  background-color: var(--copel-graphite);
+}
+
+.hero-service.split .hero-service-background {
+  position: relative;
+  inset: auto;
+  z-index: 0;
+  height: 240px;
+}
+
+.hero-service.split::after {
+  content: none;
+}
+
+.hero-service.split .hero-service-inner {
+  padding: 32px 20px 40px;
+}
+
+.hero-service.split .hero-service-content h1,
+.hero-service.split .hero-service-content > p:not(.hero-service-cta) {
+  text-shadow: none;
+}
+
+.hero-service.split.brand {
+  background-color: var(--copel-orange-ink);
+}
+
 @media (width >= 900px) {
   .hero-service {
     min-height: 754px;
@@ -187,5 +279,45 @@ main .hero-service .hero-service-cta a:any-link:focus-visible {
 
   .hero-service .hero-service-aside-item + .hero-service-aside-item {
     margin: 0;
+  }
+}
+
+/* styles on desktop (after the base rules above) */
+@media (width >= 900px) {
+  .hero-service.compact {
+    min-height: 420px;
+  }
+
+  .hero-service.centered .hero-service-inner {
+    justify-content: center;
+  }
+
+  .hero-service.centered .hero-service-content {
+    flex: 0 1 760px;
+  }
+
+  .hero-service.brand:not(.hero-service-no-image)::after {
+    background: linear-gradient(90deg, rgb(168 67 0 / 95%) 0%, rgb(200 80 0 / 80%) 45%, rgb(200 80 0 / 25%) 100%);
+  }
+
+  .hero-service.split {
+    flex-direction: row-reverse;
+    min-height: 480px;
+  }
+
+  .hero-service.split .hero-service-background {
+    flex: 0 0 50%;
+    height: auto;
+  }
+
+  .hero-service.split .hero-service-inner {
+    flex: 1 1 50%;
+    max-width: 640px;
+    margin: 0 0 0 auto;
+    padding: 48px 56px;
+  }
+
+  .hero-service.split .hero-service-aside {
+    display: none;
   }
 }
