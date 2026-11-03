@@ -372,7 +372,7 @@
           "filter": "carousel-hero",
           "plugins": {
             "da": {
-              "unsafeHTML": "<div class=\"carousel-hero\"><div><div><picture><img loading=\"lazy\"></picture></div><div><h2>Título do banner</h2><p>Texto de apoio.</p><p><a href=\"/\">Chamada principal</a></p></div></div></div>"
+              "unsafeHTML": "<div class=\"carousel-hero padrao\"><div><div><picture><img loading=\"lazy\"></picture></div><div><h2>Título do banner</h2><p>Texto de apoio.</p><p><a href=\"/\">Chamada principal</a></p></div></div></div>"
             }
           }
         },
@@ -649,7 +649,7 @@
           "model": "hero-service",
           "plugins": {
             "da": {
-              "unsafeHTML": "<div class=\"hero-service\"><div><div><picture><img loading=\"lazy\"></picture></div></div><div><div><h1>Título do banner</h1><p>Chamada de apoio</p><p><a href=\"#planos\">Contratar</a></p></div></div><div><div><picture><img loading=\"lazy\"></picture><picture><img loading=\"lazy\"></picture></div></div></div>",
+              "unsafeHTML": "<div class=\"hero-service padrao\"><div><div><picture><img loading=\"lazy\"></picture></div></div><div><div><h1>Título do banner</h1><p>Chamada de apoio</p><p><a href=\"#planos\">Contratar</a></p></div></div><div><div><picture><img loading=\"lazy\"></picture><picture><img loading=\"lazy\"></picture></div></div></div>",
               "fields": [
                 {
                   "name": "image",

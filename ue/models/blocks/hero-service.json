@@ -6,7 +6,7 @@
       "model": "hero-service",
       "plugins": {
         "da": {
-          "unsafeHTML": "<div class=\"hero-service\"><div><div><picture><img loading=\"lazy\"></picture></div></div><div><div><h1>Título do banner</h1><p>Chamada de apoio</p><p><a href=\"#planos\">Contratar</a></p></div></div><div><div><picture><img loading=\"lazy\"></picture><picture><img loading=\"lazy\"></picture></div></div></div>",
+          "unsafeHTML": "<div class=\"hero-service padrao\"><div><div><picture><img loading=\"lazy\"></picture></div></div><div><div><h1>Título do banner</h1><p>Chamada de apoio</p><p><a href=\"#planos\">Contratar</a></p></div></div><div><div><picture><img loading=\"lazy\"></picture><picture><img loading=\"lazy\"></picture></div></div></div>",
           "fields": [
             {
               "name": "image",
@@ -46,12 +46,17 @@
       "id": "hero-service",
       "fields": [
         {
-          "component": "multiselect",
+          "component": "select",
           "name": "classes",
           "label": "Estilo",
           "valueType": "string",
-          "description": "Combine à vontade (ex.: Compacto + Centralizado)",
+          "value": "padrao",
+          "description": "Escolha única. \"Padrão\" também é uma opção (o bloco sempre fica com um valor; sem isso o editor não consegue aplicar o próximo estilo).",
           "options": [
+            {
+              "name": "Padrão",
+              "value": "padrao"
+            },
             {
               "name": "Centralizado",
               "value": "centered"
@@ -67,6 +72,22 @@
             {
               "name": "Destaque laranja (cor da marca sobre a imagem)",
               "value": "brand"
+            },
+            {
+              "name": "Compacto + centralizado",
+              "value": "compact centered"
+            },
+            {
+              "name": "Compacto + destaque laranja",
+              "value": "compact brand"
+            },
+            {
+              "name": "Centralizado + destaque laranja",
+              "value": "centered brand"
+            },
+            {
+              "name": "Dividido + destaque laranja",
+              "value": "split brand"
             }
           ]
         },

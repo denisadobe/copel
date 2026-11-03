@@ -11,7 +11,7 @@ Single block table. Content: one row, one cell of content.
 
 ## Supported variations
 
-Block classes (DA: `hero-service (centered, compact)`; editor: field **Estilo**, combinable):
+Block classes (DA: `hero-service (centered, compact)`; editor: field **Estilo**, one option, some are pairs):
 
 - `centered`: Centralizado — copy centered over an even dark scrim
 - `split`: Dividido — photo beside the copy (on top on mobile), copy on the brand graphite; no aside images
@@ -22,7 +22,8 @@ Block classes (DA: `hero-service (centered, compact)`; editor: field **Estilo**,
 
 Model: `ue/models/blocks/hero-service.json` (bundled into the root `component-*.json` by `npm run build:json`). Universal Editor on Author Bus (`*.ue.da.live`); the content stays the same DA table.
 
-- `classes` (multiselect): Estilo — the variations above
+- `classes` (select): Estilo — `padrao` or the variations above, alone or as the listed pairs
+  (single select with a real "padrao" (Padrão) value, combinations as their own options: a block with no class at all makes the editor fail on the next style change)
 - `image` (reference): Imagem de fundo (`div:nth-child(1)>div>picture>img[src]`)
 - `imageAlt` (text): Texto alternativo (`div:nth-child(1)>div>picture>img[alt]`)
 - `text` (richtext): Conteúdo (`div:nth-child(2)>div`) — Título (H1), linhas de texto e link de chamada

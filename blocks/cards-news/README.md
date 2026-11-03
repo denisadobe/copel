@@ -23,4 +23,4 @@ Model: `ue/models/blocks/cards-news.json` (bundled into the root `component-*.js
   - `image` (reference): Imagem (`div:nth-child(1)>picture>img[src]`)
   - `imageAlt` (text): Texto alternativo (`div:nth-child(1)>picture>img[alt]`)
   - `text` (richtext): Conteúdo (`div:nth-child(2)`) — Categoria (parágrafo antes do título), título H3 com link, data dd/mm/aaaa, resumo e link "Leia mais"
-- Options (`classes`, multiselect, any of): `no-featured` (Sem destaque (todos iguais)), `stacked` (Destaque empilhado (imagem acima do texto))
+- Options (`classes`, single select with a real "padrao" (Padrão) value, combinations as their own options: a block with no class at all makes the editor fail on the next style change): `padrao` (Padrão), `no-featured` (Sem destaque (todos iguais)), `stacked` (Destaque empilhado (imagem acima do texto))

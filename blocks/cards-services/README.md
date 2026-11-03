@@ -22,4 +22,4 @@ Model: `ue/models/blocks/cards-services.json` (bundled into the root `component-
   - `image` (reference): Ícone (SVG ou imagem) (`div:nth-child(1)>picture>img[src]`)
   - `imageAlt` (text): Texto alternativo do ícone (`div:nth-child(1)>picture>img[alt]`)
   - `text` (richtext): Rótulo (`div:nth-child(2)`) — Rótulo com link e, opcionalmente, um segundo link "Veja mais"
-- Options (`classes`, select, one of): none (Padrão (ícone acima)), `compact` (Compacto (ícone ao lado do rótulo))
+- Options (`classes`, select, one of): `padrao` (Padrão (ícone acima); a real value, an empty class makes the editor fail on the next change), `compact` (Compacto (ícone ao lado do rótulo))

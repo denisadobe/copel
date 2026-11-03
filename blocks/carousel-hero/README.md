@@ -24,8 +24,9 @@ Model: `ue/models/blocks/carousel-hero.json` (bundled into the root `component-*
   - `imageMobile` (reference): Imagem mobile (opcional) (`div:nth-child(1)>picture:nth-of-type(2)>img[src]`)
   - `imageMobileAlt` (text): Texto alternativo (mobile) (`div:nth-child(1)>picture:nth-of-type(2)>img[alt]`)
   - `text` (richtext): Conteúdo (`div:nth-child(2)`) — Título (H2), texto opcional e até 2 links: o 1º é o botão principal, o 2º o secundário
-- Options (`classes`, multiselect): `banners-site` / `banners-app` (Banners do AEM, canal site /
-  app: the slides come from the banner Content Fragments), `no-autoplay` (Sem autoplay)
+- Origem dos slides (`classes`, single select with a real "padrao" (Padrão) value, combinations as their own options: a block with no class at all makes the editor fail on the next style change): `padrao` (Slides autorados), `banners-site` /
+  `banners-app` (Banners do AEM, canal site / app: the slides come from the banner Content
+  Fragments), each also with `no-autoplay` (Sem autoplay)
 
 The banner source is a block option, not a config row, so the page HTML (what AI agents read)
 holds no "Fonte / site" text, only slides. With `banners-<channel>` the authored slides are a copy

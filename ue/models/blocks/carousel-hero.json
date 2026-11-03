@@ -7,7 +7,7 @@
       "filter": "carousel-hero",
       "plugins": {
         "da": {
-          "unsafeHTML": "<div class=\"carousel-hero\"><div><div><picture><img loading=\"lazy\"></picture></div><div><h2>Título do banner</h2><p>Texto de apoio.</p><p><a href=\"/\">Chamada principal</a></p></div></div></div>"
+          "unsafeHTML": "<div class=\"carousel-hero padrao\"><div><div><picture><img loading=\"lazy\"></picture></div><div><h2>Título do banner</h2><p>Texto de apoio.</p><p><a href=\"/\">Chamada principal</a></p></div></div></div>"
         }
       }
     },
@@ -50,12 +50,17 @@
       "id": "carousel-hero",
       "fields": [
         {
-          "component": "multiselect",
+          "component": "select",
           "name": "classes",
-          "label": "Opções",
+          "label": "Origem dos slides",
           "valueType": "string",
+          "value": "padrao",
           "description": "Banners do AEM: os slides vêm dos Content Fragments (os slides autorados ficam como cópia para agentes de IA e reserva)",
           "options": [
+            {
+              "name": "Slides autorados",
+              "value": "padrao"
+            },
             {
               "name": "Banners do AEM (canal site)",
               "value": "banners-site"
@@ -65,8 +70,16 @@
               "value": "banners-app"
             },
             {
-              "name": "Sem autoplay",
+              "name": "Slides autorados, sem autoplay",
               "value": "no-autoplay"
+            },
+            {
+              "name": "Banners do AEM (canal site), sem autoplay",
+              "value": "banners-site no-autoplay"
+            },
+            {
+              "name": "Banners do AEM (canal app), sem autoplay",
+              "value": "banners-app no-autoplay"
             }
           ]
         }

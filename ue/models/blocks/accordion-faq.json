@@ -40,11 +40,17 @@
       "id": "accordion-faq",
       "fields": [
         {
-          "component": "multiselect",
+          "component": "select",
           "name": "classes",
           "label": "Comportamento",
           "valueType": "string",
+          "value": "padrao",
+          "description": "Escolha única. \"Padrão\" também é uma opção (o bloco sempre fica com um valor; sem isso o editor não consegue aplicar o próximo estilo).",
           "options": [
+            {
+              "name": "Padrão (várias abertas)",
+              "value": "padrao"
+            },
             {
               "name": "Uma aberta por vez",
               "value": "single-open"

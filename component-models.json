@@ -85,11 +85,17 @@
     "id": "accordion-faq",
     "fields": [
       {
-        "component": "multiselect",
+        "component": "select",
         "name": "classes",
         "label": "Comportamento",
         "valueType": "string",
+        "value": "padrao",
+        "description": "Escolha única. \"Padrão\" também é uma opção (o bloco sempre fica com um valor; sem isso o editor não consegue aplicar o próximo estilo).",
         "options": [
+          {
+            "name": "Padrão (várias abertas)",
+            "value": "padrao"
+          },
           {
             "name": "Uma aberta por vez",
             "value": "single-open"
@@ -165,11 +171,17 @@
     "id": "cards-news",
     "fields": [
       {
-        "component": "multiselect",
+        "component": "select",
         "name": "classes",
         "label": "Opções",
         "valueType": "string",
+        "value": "padrao",
+        "description": "Escolha única. \"Padrão\" também é uma opção (o bloco sempre fica com um valor; sem isso o editor não consegue aplicar o próximo estilo).",
         "options": [
+          {
+            "name": "Padrão (primeira em destaque)",
+            "value": "padrao"
+          },
           {
             "name": "Sem destaque (todos iguais)",
             "value": "no-featured"
@@ -260,11 +272,17 @@
     "id": "cards-services",
     "fields": [
       {
-        "component": "multiselect",
+        "component": "select",
         "name": "classes",
         "label": "Layout",
         "valueType": "string",
+        "value": "padrao",
+        "description": "Escolha única. \"Padrão\" também é uma opção (o bloco sempre fica com um valor; sem isso o editor não consegue aplicar o próximo estilo).",
         "options": [
+          {
+            "name": "Padrão",
+            "value": "padrao"
+          },
           {
             "name": "Compacto (ícone ao lado do rótulo)",
             "value": "compact"
@@ -366,12 +384,17 @@
     "id": "carousel-hero",
     "fields": [
       {
-        "component": "multiselect",
+        "component": "select",
         "name": "classes",
-        "label": "Opções",
+        "label": "Origem dos slides",
         "valueType": "string",
+        "value": "padrao",
         "description": "Banners do AEM: os slides vêm dos Content Fragments (os slides autorados ficam como cópia para agentes de IA e reserva)",
         "options": [
+          {
+            "name": "Slides autorados",
+            "value": "padrao"
+          },
           {
             "name": "Banners do AEM (canal site)",
             "value": "banners-site"
@@ -381,8 +404,16 @@
             "value": "banners-app"
           },
           {
-            "name": "Sem autoplay",
+            "name": "Slides autorados, sem autoplay",
             "value": "no-autoplay"
+          },
+          {
+            "name": "Banners do AEM (canal site), sem autoplay",
+            "value": "banners-site no-autoplay"
+          },
+          {
+            "name": "Banners do AEM (canal app), sem autoplay",
+            "value": "banners-app no-autoplay"
           }
         ]
       }
@@ -488,11 +519,17 @@
     "id": "columns-feature",
     "fields": [
       {
-        "component": "multiselect",
+        "component": "select",
         "name": "classes",
         "label": "Opções",
         "valueType": "string",
+        "value": "padrao",
+        "description": "Escolha única. \"Padrão\" também é uma opção (o bloco sempre fica com um valor; sem isso o editor não consegue aplicar o próximo estilo).",
         "options": [
+          {
+            "name": "Padrão",
+            "value": "padrao"
+          },
           {
             "name": "Painel escuro",
             "value": "dark"
@@ -500,6 +537,10 @@
           {
             "name": "Inverter lado da imagem",
             "value": "reverse"
+          },
+          {
+            "name": "Painel escuro + inverter lado da imagem",
+            "value": "dark reverse"
           }
         ]
       },
@@ -622,12 +663,17 @@
     "id": "hero-service",
     "fields": [
       {
-        "component": "multiselect",
+        "component": "select",
         "name": "classes",
         "label": "Estilo",
         "valueType": "string",
-        "description": "Combine à vontade (ex.: Compacto + Centralizado)",
+        "value": "padrao",
+        "description": "Escolha única. \"Padrão\" também é uma opção (o bloco sempre fica com um valor; sem isso o editor não consegue aplicar o próximo estilo).",
         "options": [
+          {
+            "name": "Padrão",
+            "value": "padrao"
+          },
           {
             "name": "Centralizado",
             "value": "centered"
@@ -643,6 +689,22 @@
           {
             "name": "Destaque laranja (cor da marca sobre a imagem)",
             "value": "brand"
+          },
+          {
+            "name": "Compacto + centralizado",
+            "value": "compact centered"
+          },
+          {
+            "name": "Compacto + destaque laranja",
+            "value": "compact brand"
+          },
+          {
+            "name": "Centralizado + destaque laranja",
+            "value": "centered brand"
+          },
+          {
+            "name": "Dividido + destaque laranja",
+            "value": "split brand"
           }
         ]
       },

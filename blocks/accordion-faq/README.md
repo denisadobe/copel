@@ -21,4 +21,4 @@ Model: `ue/models/blocks/accordion-faq.json` (bundled into the root `component-*
 - Container "Perguntas frequentes (FAQ)"; each row is an item "Pergunta" (`accordion-faq-item`):
   - `question` (text): Pergunta (`div:nth-child(1)`)
   - `answer` (richtext): Resposta (`div:nth-child(2)`)
-- Options (`classes`, select, one of): none (Várias abertas ao mesmo tempo), `single-open` (Uma aberta por vez)
+- Options (`classes`, select, one of): `padrao` (Várias abertas ao mesmo tempo; a real value, an empty class makes the editor fail on the next change), `single-open` (Uma aberta por vez)

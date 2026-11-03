@@ -44,11 +44,17 @@
       "id": "cards-news",
       "fields": [
         {
-          "component": "multiselect",
+          "component": "select",
           "name": "classes",
           "label": "Opções",
           "valueType": "string",
+          "value": "padrao",
+          "description": "Escolha única. \"Padrão\" também é uma opção (o bloco sempre fica com um valor; sem isso o editor não consegue aplicar o próximo estilo).",
           "options": [
+            {
+              "name": "Padrão (primeira em destaque)",
+              "value": "padrao"
+            },
             {
               "name": "Sem destaque (todos iguais)",
               "value": "no-featured"
