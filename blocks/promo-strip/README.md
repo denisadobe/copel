@@ -30,3 +30,7 @@ in the editor a dashed placeholder shows where Target puts the strip.
 - at.js starts inline in `head.html` (no body hiding), with the profile parameters
   `copel_logado` / `copel_comprou_seguro` read synchronously from the sign-in cookie and the
   stored purchase state (`scripts/target-profile.js`, localStorage).
+- Target applies a profile change (the purchase) a few seconds late and answers "no offer"
+  meanwhile: while the held slot of a signed-in visitor is empty, `scripts/scripts.js` asks the
+  decision again (up to 4 times, 400 ms apart). After the order the checkout drops the session
+  part of the `mbox` cookie, so the next page view is a new Target session.
