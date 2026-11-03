@@ -173,6 +173,28 @@ function buildAutoBlocks(main) {
 }
 
 /**
+ * The Universal Editor rich text saves a formatted link as <a><strong>…</strong></a>; Document
+ * Authoring as <strong><a>…</a></strong>. The formatting is moved outside the link, so both
+ * read the same (button styles below).
+ * @param {HTMLAnchorElement} a The link
+ */
+function liftLinkFormatting(a) {
+  let inner = a;
+  const tags = [];
+  while (inner.childNodes.length === 1 && ['STRONG', 'EM'].includes(inner.firstElementChild?.tagName)) {
+    inner = inner.firstElementChild;
+    tags.push(inner.tagName.toLowerCase());
+  }
+  if (!tags.length) return;
+  a.replaceChildren(...inner.childNodes);
+  tags.forEach((tag) => {
+    const wrapper = document.createElement(tag);
+    a.replaceWith(wrapper);
+    wrapper.append(a);
+  });
+}
+
+/**
  * Decorates formatted links to style them as buttons.
  * @param {HTMLElement} main The main container element
  */
@@ -184,6 +206,7 @@ function decorateButtons(main) {
 
     // quick structural checks
     if (a.querySelector('img') || p.textContent.trim() !== text) return;
+    liftLinkFormatting(a);
 
     // skip URL display links
     try {
