@@ -1,127 +1,62 @@
-# Adobe Target: banner de pós-venda (cliente Protege Casa → Protege Vida)
+# Adobe Target: faixa de promoção por jornada (site e app)
 
-Cenário da demo: quem **já contratou o Seguro Protege Casa** não vê mais o banner de venda dele na
-home. Em primeiro lugar aparece o banner do **Protege Vida** ("Sua casa está protegida. E a sua
-família?"). O mesmo vale para o app, com a mesma conta.
+Validado em 04/11/2026 com uma conta nova, do anônimo à compra, no site e no app.
 
-O que torna o cenário simples:
+## Jornada
 
-- **Quem é cliente** vem do Commerce (pedidos da conta logada), não do perfil do Target. Por isso
-  não há configuração de identidade nem perfil compartilhado.
-- **O Target só decide.** Site e app mandam parâmetros simples e recebem uma oferta JSON dizendo
-  qual banner vai primeiro e qual sai.
-- **Os banners continuam no AEM.** O Content Fragment `protege-vida-upsell` já existe (público
-  `cliente-protege-casa`, fora da rotação normal).
-
-## 1. O que o site envia (já implementado)
-
-Local (decision scope): **`copel-banner-home`**. É a linha "Escopo Target" do banner da home no
-Document Authoring.
-
-Parâmetros de mbox (`data.__adobe.target`), sempre como texto:
-
-| Parâmetro | Valores | Origem |
+| Momento | Site (home) | App (home) |
 |---|---|---|
-| `clienteProtegeCasa` | `true` / `false` | Pedidos da conta logada no Commerce (SKU `protege-casa-*`), marcado na hora ao confirmar o pedido |
-| `logado` | `true` / `false` | Login do Commerce |
-| `canal` | `site` (o app manda `app`) | Fixo |
+| Visitante anônimo | sem faixa | sem faixa |
+| Logado, sem pedido | faixa "Acesse o APP da Copel" | sem faixa |
+| Comprou o Protege Casa | faixa "Protege Vida" ("Sua casa está protegida. E a sua família?") | faixa "Protege Vida" |
 
-O site também envia a impressão (`decisioning.propositionDisplay`) e o clique em um link do banner
-escolhido (`decisioning.propositionInteract`).
+O banner principal da home (Content Fragments do AEM) não muda: a faixa fica entre o banner e os
+cards de serviço.
 
-Código: `scripts/web-sdk.js`, `scripts/target-profile.js`, `blocks/carousel-hero/carousel-hero-cf.js`.
+## Quem decide o quê
 
-## 2. Data Collection: ativar o Target no datastream
+- **"Comprou" vem do Commerce**, pelos pedidos da conta logada (SKU `protege-casa-*`, em qualquer
+  status). Site e app consultam os pedidos e mandam o resultado ao Target a cada visita. Por isso o
+  resultado é o mesmo em qualquer canal, navegador ou dispositivo logado com a mesma conta.
+- **O Target só escolhe a oferta.** Site e app são visitantes diferentes para o Target (perfis e
+  relatórios separados).
 
-1. Abra Experience Platform Data Collection → **Datastreams** → o datastream
-   `c34abba2-b513-4c27-8e6b-d477771eade9`, o mesmo do Brand Concierge, compartilhado com o Sebrae.
-2. **Add Service** → **Adobe Target** → Enabled. Deixe *Property Token* e *Target Third Party ID
-   Namespace* em branco. Salve.
-   - Se o Target já estiver ativo nesse datastream (por causa do Sebrae), não mude nada.
-   - Se o Sebrae usar um *property token*, crie a atividade da Copel na mesma property. Outra
-     opção: crie uma property da Copel, inclua o token dela em *Property Token Overrides* e
-     preencha `TARGET_PROPERTY_TOKEN` em `scripts/brand-concierge-config.js`.
+## Site
 
-## 3. Target: oferta, audiência e atividade
+- `at.js` 2.11.9 (`scripts/at.js`), iniciado no `head.html`, sem body hiding. Client
+  `adobedemoamericas403`.
+- Atividade **`Copel | Site | Promo por jornada (VEC XT)`** (VEC, seletor `#promo-strip`, bloco
+  `promo-strip` da home).
+- Parâmetros de perfil enviados pelo site (`scripts/target-profile.js`):
+  `profile.copel_logado` e `profile.copel_comprou_seguro` (`true` / `false`).
+- O estado da compra fica guardado no navegador desde a confirmação do pedido; num navegador novo
+  o site consulta os pedidos uma vez. Depois da compra a sessão do Target recomeça, e se o Target
+  responder "sem oferta" (ele aplica o perfil novo com alguns segundos de atraso) o site pergunta
+  de novo, sem pular o layout (o espaço da faixa fica reservado para quem está logado).
+- Tempos medidos (sem cache, rede 4G): faixa visível em ~0,55 s depois da compra; ~0,75 s na
+  primeira visita logada de uma conta nova; CLS ≤ 0,013.
 
-**Antes:** abra a home publicada uma vez, logado com uma conta que já tem pedido. Assim o Target
-"conhece" o parâmetro `clienteProtegeCasa` e ele aparece na lista ao criar a audiência.
+## App
 
-1. **Offers → Code offers → Create → JSON Offer**
-   - Nome: `Copel – Banner Protege Vida (cliente Protege Casa)`
-   - JSON:
-     ```json
-     {
-       "bannerPath": "/content/dam/copel/banners/protege-vida-upsell",
-       "ocultar": ["/content/dam/copel/banners/protege-casa"]
-     }
-     ```
-2. **Audiences → Create Audience**
-   - Nome: `Copel – Cliente Protege Casa`
-   - Regra: **Custom** → `clienteProtegeCasa` → *equals (case sensitive)* → `true`
-3. **Activities → Create Activity → Experience Targeting → Web → Form-based Experience Composer**
-   - **Experiência 1:** audiência `Copel – Cliente Protege Casa`. Local `copel-banner-home` →
-     *Change JSON Offer* → a oferta do passo 1.
-   - **Experiência 2:** audiência `All Visitors`. Local `copel-banner-home` → *Default Content*.
-   - A experiência 1 precisa ficar **acima** da 2 (a ordem define a prioridade).
-   - **Goals & Settings:** Reporting source Adobe Target. Primary goal: *Conversion → Clicked on
-     an mbox → `copel-banner-home`*.
-   - Nome: `Copel – Banner home: pós-venda Protege Casa` → **Save & Close** → **Activate**.
+- O servidor do app chama a **Target Delivery API** (sem at.js e sem Web SDK), só para cliente
+  com Protege Casa: mbox `copel-app-promo`, parâmetro `protegeCasa=true`.
+- Atividade **`Copel | App | Promo pós-compra (XT)`**, audiência `Copel | App | Tem Protege Casa`.
+  Oferta JSON `{ exibir, titulo, texto, ctaTexto, ctaLink }`; o app só mostra a faixa com
+  `exibir: true`.
+- O corpo da chamada não aceita `imsOrganizationId` (a API responde 400): veja o corpo certo em
+  `context` + `id.thirdPartyId` + `execute.mboxes`.
 
-Como a audiência só pega quem já é cliente, ativar direto não afeta os outros visitantes.
+## Roteiro da demo
 
-## 4. Roteiro da demo
+1. Abra a home do site e a do app sem login: nenhuma faixa.
+2. No site, crie uma conta em `/loja/cadastro` (ou entre com uma conta sem pedido) e volte à home:
+   faixa "Acesse o APP da Copel". No app, entre com a mesma conta: sem faixa.
+3. No site, contrate o Seguro Protege Casa até "Pedido confirmado".
+4. Volte à home do site: faixa "Protege Vida".
+5. No app, com a mesma conta: faixa "Protege Vida".
+6. Opcional: entre com a mesma conta em outro navegador ou no celular: faixa "Protege Vida".
+7. No Target, mostre as duas atividades, as audiências e os relatórios.
 
-1. Entre com uma conta **sem pedido** (crie uma em `/loja/cadastro`). A home mostra o banner do
-   Protege Casa.
-2. Contrate um plano do Protege Casa e confirme o pedido.
-3. Volte para a home. O Protege Vida aparece em primeiro e o banner do Protege Casa sai.
-4. No app, entre com a mesma conta: o mesmo banner.
-5. No Target, mostre a atividade, a audiência e o relatório (impressões e cliques).
-
-As contas usadas nos testes de pedido já têm pedidos, então já entram como clientes. Para
-"recomeçar" a demo, use outra conta sem pedido.
-
-## 5. App (instruções para a IA do app)
-
-> Personalização do banner da home com Adobe Target (mesma atividade do site):
->
-> 1. **Web SDK (alloy 2.35.1)** com a mesma configuração do Brand Concierge: datastream
->    `c34abba2-b513-4c27-8e6b-d477771eade9`, orgId `0E061E2D61F93F260A495FD6@AdobeOrg`,
->    `edgeDomain: edge.adobedc.net`, `defaultConsent: 'in'`. Uma instância só (`alloy`),
->    compartilhada com o Brand Concierge.
-> 2. **Login com a mesma conta do Commerce do site:** mutation `generateCustomerToken(email,
->    password)` no endpoint GraphQL do Commerce (o mesmo do `config.json` do site, header
->    `Store: default`).
-> 3. **Logado:** consulte os pedidos com `Authorization: Bearer <token>`:
->    `query { customer { orders(pageSize: 50) { items { items { product_sku } } } } }`.
->    `clienteProtegeCasa` é `"true"` se algum `product_sku` começa com `protege-casa`. Guarde o
->    resultado na sessão e marque `"true"` logo depois de um pedido.
-> 4. **Ao montar a home,** em paralelo com a lista de banners, chame:
->    ```js
->    alloy('sendEvent', {
->      decisionScopes: ['copel-banner-home'],
->      renderDecisions: false,
->      data: { __adobe: { target: { clienteProtegeCasa, logado, canal: 'app' } } },
->    })
->    ```
->    Espere no máximo cerca de 1,5 s. Sem resposta, mostre a ordem normal.
-> 5. **Leia** `propositions[0].items[0].data.content` (JSON: `{ bannerPath, ocultar }`):
->    - remova da lista os banners cujo `_path` está em `ocultar`;
->    - coloque o banner `bannerPath` em primeiro. Se ele não estiver na lista do canal app, busque
->      pelo path na rota do app, com a persisted query `banner-por-path`.
->
->    Sem conteúdo JSON (experiência padrão): ordem normal.
-> 6. **Relatórios:** depois de exibir, envie a impressão:
->    ```js
->    alloy('sendEvent', {
->      xdm: {
->        eventType: 'decisioning.propositionDisplay',
->        _experience: { decisioning: { propositions: [{ id, scope, scopeDetails }] } },
->      },
->    })
->    ```
->    No clique do banner escolhido, faça o mesmo com
->    `eventType: 'decisioning.propositionInteract'`.
-> 7. **Mantenha a decisão** nas atualizações periódicas da lista de banners (não chame o Target de
->    novo a cada atualização).
+Cada conta só serve uma vez para mostrar a mudança (depois da compra ela já é cliente). Para
+recomeçar, use uma conta nova. Contas de teste usadas: `copel.teste.<data><letra>@example.com`,
+senha `CopelDemo#2026`.
